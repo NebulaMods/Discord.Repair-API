@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using RestoreCord.Database;
 using RestoreCord.Records.Responses;
 
-namespace RestoreCord.Endpoints;
+namespace RestoreCord.Endpoints.Guild;
 
 /// <summary>
 /// 
@@ -14,14 +14,16 @@ namespace RestoreCord.Endpoints;
 public class Restore : ControllerBase
 {
     private readonly DiscordShardedClient _client;
+    private readonly Migrations.Restore _restore;
 
     /// <summary>
     /// 
     /// </summary>
     /// <param name="client"></param>
-    public Restore(DiscordShardedClient client)
+    public Restore(DiscordShardedClient client, Migrations.Restore restore)
     {
         _client = client;
+        _restore = restore;
     }
 
     /// <summary>
@@ -42,6 +44,7 @@ public class Restore : ControllerBase
                     details = "invalid guild id"
                 });
             }
+            _ = Task.Run(async () => await RestoreGuildAsync(guildId));
             return Ok();
         }
         catch (Exception ex)
@@ -53,5 +56,11 @@ public class Restore : ControllerBase
                 details = "internal server error"
             });
         }
+    }
+
+    private async Task RestoreGuildAsync(ulong guildId)
+    {
+        var client = _client;
+        var restore = _restore;
     }
 }

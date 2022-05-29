@@ -1,11 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using RestoreCord.Database.Models;
 
-namespace RestoreCord.Database.Models;
+namespace RestoreCord.Records.Requests;
 
-public class Member
+public record LinkUser
 {
-    [Key]
-    public int id { get; set; }
     public ulong userid { get; set; }
     public ulong server { get; set; }
     public string? access_token { get; set; }
@@ -14,11 +12,6 @@ public class Member
     public string? avatar { get; set; }
     public string? username { get; set; }
     public ulong? creationDate { get; set; }
-    public virtual MemberTokenType tokenType { get; set; } = MemberTokenType.RESTORECORD;
+    public MemberTokenType tokenType { get; set; } = MemberTokenType.RESTORECORD;
 }
 
-public enum MemberTokenType
-{
-    CUSTOM,
-    RESTORECORD
-}

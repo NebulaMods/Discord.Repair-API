@@ -14,6 +14,7 @@ public class Backup
     public virtual ICollection<TextChannel> textChannels { get; set; } = new HashSet<TextChannel>();
     public virtual ICollection<GuildUser> users { get; set; } = new HashSet<GuildUser>();
     public virtual ICollection<Emoji> emojis { get; set; } = new HashSet<Emoji>();
+    public DateTime creationDate { get; set; }
 
     #region Not Important
     public string? vanityUrl { get; set; }

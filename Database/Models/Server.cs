@@ -20,9 +20,14 @@ public class Server
     public bool autoKickUnVerified { get; set; }
     public int autoKickUnVerifiedTime { get; set; } = 10;
     public virtual Backup? backup { get; set; }
+    public virtual ICollection<Backup> backups { get; set; } = new HashSet<Backup>();
     public bool autoJoin { get; set; }
     public string? verifyDescription { get; set; }
     public int redirectTime { get; set; }
     public string? vanityUrl { get; set; }
     public int webhookLogType { get; set; }
+    public bool dmOnAutoKick { get; set; }
+    public bool customBotEnabled { get; set; } = false;
+    public bool autoBlacklist { get; set; }
+    public virtual CustomBot? customBot { get; set; }
 }

@@ -10,53 +10,53 @@ internal static class DiscordExtensions
 {
     internal static async Task ReplyWithEmbedAsync(this IInteractionContext context, string title, string description, string url = "", string imageUrl = "", List<EmbedFieldBuilder>? embeds = null, int? deleteTimer = null, bool invisible = false)
     {
-        if (context is not ShardedInteractionContext shardedContext)
-        {
-            throw new ArgumentNullException(nameof(shardedContext), "Failed to convert context to a sharded context.");
-        }
-
-        Embed? embed = new EmbedBuilder()
-        {
-            Title = title,
-            Color = Miscallenous.RandomDiscordColour(),
-            Author = new EmbedAuthorBuilder
-            {
-                Url = "https://restorecord.com",
-                Name = "RestoreCord",
-                IconUrl = "https://i.imgur.com/Nfy4OoG.png"
-            },
-            Footer = new EmbedFooterBuilder
-            {
-                Text = $"Issued by: {context.User.Username} | {context.User.Id}",
-                IconUrl = context.User.GetAvatarUrl()
-            },
-            Description = description,
-            Url = url,
-            ThumbnailUrl = imageUrl,
-        }.WithCurrentTimestamp().Build();
-        if (embeds is not null)
-        {
-            embed = embed.ToEmbedBuilder().WithFields(embeds).Build();
-        }
-
-        if (shardedContext.Interaction.HasResponded)
-        {
-            await context.Interaction.ModifyOriginalResponseAsync(x => x.Embed = embed);
-        }
-        else
-        {
-            await context.Interaction.RespondAsync(embed: embed, ephemeral: invisible);
-        }
-
         try
         {
+            if (context is not ShardedInteractionContext shardedContext)
+            {
+                throw new ArgumentNullException(nameof(shardedContext), "Failed to convert context to a sharded context.");
+            }
+
+            Embed? embed = new EmbedBuilder()
+            {
+                Title = title,
+                Color = Miscallenous.RandomDiscordColour(),
+                Author = new EmbedAuthorBuilder
+                {
+                    Url = "https://restorecord.com",
+                    Name = "RestoreCord",
+                    IconUrl = "https://i.imgur.com/Nfy4OoG.png"
+                },
+                Footer = new EmbedFooterBuilder
+                {
+                    Text = $"Issued by: {context.User.Username} | {context.User.Id}",
+                    IconUrl = context.User.GetAvatarUrl()
+                },
+                Description = description,
+                Url = url,
+                ThumbnailUrl = imageUrl,
+            }.WithCurrentTimestamp().Build();
+            if (embeds is not null)
+            {
+                embed = embed.ToEmbedBuilder().WithFields(embeds).Build();
+            }
+
+            if (shardedContext.Interaction.HasResponded)
+            {
+                await context.Interaction.ModifyOriginalResponseAsync(x => x.Embed = embed);
+            }
+            else
+            {
+                await context.Interaction.RespondAsync(embed: embed, ephemeral: invisible);
+            }
+
             if (deleteTimer is not null && invisible is false)
             {
-                _ = Task.Run(() =>
+                _ = Task.Run(async () =>
                 {
-                    Thread.Sleep(TimeSpan.FromSeconds((int)deleteTimer));
-                    IUserMessage? msg = context.Interaction.GetOriginalResponseAsync().Result;
-                    msg?.DeleteAsync();
+                    await Task.Delay(TimeSpan.FromSeconds((int)deleteTimer));
+                    IUserMessage? msg = await context.Interaction.GetOriginalResponseAsync();
+                    await msg.DeleteAsync();
                 });
             }
         }
@@ -91,10 +91,10 @@ internal static class DiscordExtensions
         {
             if (deleteTimer is not null && msg is not null)
             {
-                _ = Task.Run(() =>
+                _ = Task.Run(async () =>
                 {
-                    Thread.Sleep(TimeSpan.FromSeconds((int)deleteTimer));
-                    msg.DeleteAsync();
+                    await Task.Delay(TimeSpan.FromSeconds((int)deleteTimer));
+                    await msg.DeleteAsync();
                 });
             }
         }
@@ -103,7 +103,7 @@ internal static class DiscordExtensions
 
     internal static async ValueTask<bool> CheckBusinessMembership(DatabaseContext database, ShardedInteractionContext context, bool sendEmbed = true)
     {
-        if (context.User.Id != 771095495271383040)
+        if (context.User.Id != 970752861933797376)
         {
             User? user = await database.users.FirstOrDefaultAsync(x => x.userId == context.User.Id);
             if (user is null)
@@ -129,7 +129,7 @@ internal static class DiscordExtensions
     }
     internal static async ValueTask<bool> CheckPremiumMembership(DatabaseContext database, ShardedInteractionContext context, bool sendEmbed = true)
     {
-        if (context.User.Id != 771095495271383040)
+        if (context.User.Id != 970752861933797376)
         {
             User? user = await database.users.FirstOrDefaultAsync(x => x.userId == context.User.Id);
             if (user is null)
@@ -155,13 +155,12 @@ internal static class DiscordExtensions
         return true;
     }
     
-    internal static async ValueTask<bool> IsGuildBusy(this OldMigration migration, ulong guildId)
+    internal static async ValueTask<bool> IsGuildBusy(ulong guildId)
     {
         try
         {
-            return migration.ActiveGuildMigrations.ContainsKey(guildId)
-                ? true
-                : migration.ActiveMemberMigrations.ContainsKey(guildId);
+            await using var database = new DatabaseContext();
+            return await database.statistics.OrderByDescending(x => x.active).FirstOrDefaultAsync(x => x.guildId == guildId && x.active) is not null;
         }
         catch (Exception ex)
         {

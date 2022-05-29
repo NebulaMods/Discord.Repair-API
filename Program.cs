@@ -1,7 +1,8 @@
+using RestoreCord.Events;
 using RestoreCord.Services;
 
 IHostBuilder? builder = Host.CreateDefaultBuilder(args);
-await builder.ConfigureWebHostDefaults(x =>
+var app = builder.ConfigureWebHostDefaults(x =>
 {
     x.ConfigureKestrel(options =>
     {
@@ -10,4 +11,6 @@ await builder.ConfigureWebHostDefaults(x =>
     x.UseStartup<Startup>();
     x.SuppressStatusMessages(true);
 
-}).Build().RunAsync();
+}).Build();
+await app.Services.GetRequiredService<InteractionEventHandler>().InitializeAsync();
+await app.RunAsync();

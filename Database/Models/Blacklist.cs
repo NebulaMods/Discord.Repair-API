@@ -24,4 +24,8 @@ public class Blacklist
     /// 
     /// </summary>
     public ulong? server { get; set; }
+    /// <summary>
+    /// 
+    /// </summary>
+    public string? reason { get; set; }
 }

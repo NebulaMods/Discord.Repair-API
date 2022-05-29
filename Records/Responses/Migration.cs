@@ -6,6 +6,6 @@
 public record Migration
 {
     public Enums response { get; set; }
-    public Utilities.OldMigration.GuildStatisitics? guildStats { get; set; }
-    public Utilities.OldMigration.MemberStatisitics? memberStats { get; set; }
+    public Database.Models.Statistics.GuildMigration? guildStats { get; set; }
+    public Database.Models.Statistics.MemberMigration? memberStats { get; set; }
 }

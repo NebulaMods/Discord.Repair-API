@@ -1,12 +1,15 @@
-﻿using System.Reflection;
-using Discord.WebSocket;
+﻿using System.Diagnostics;
+using System.Reflection;
 using Discord;
+using Discord.Interactions;
+using Discord.WebSocket;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json.Converters;
 using RestoreCord.Database;
+using RestoreCord.Events;
 
 namespace RestoreCord.Services;
 
@@ -16,12 +19,13 @@ namespace RestoreCord.Services;
 public class Startup
 {
     private DiscordShardedClient _client;
-
     /// <summary>
     /// 
     /// </summary>
     public Startup()
     {
+        //var proxy = new Utilities.ProxyGenerator();
+        //_ = proxy.LoadProxyListAsync("");
         _client = new DiscordShardedClient(new DiscordSocketConfig
         {
             LogLevel = LogSeverity.Debug,
@@ -31,7 +35,9 @@ public class Startup
             MessageCacheSize = 0,
             UseInteractionSnowflakeDate = true,
             LogGatewayIntentWarnings = false,
-            DefaultRetryMode = RetryMode.AlwaysFail,
+            DefaultRetryMode = RetryMode.RetryTimeouts,
+            //RestClientProvider = DefaultRestClientProvider.Create(useProxy: true),
+            //WebSocketProvider = DefaultWebSocketProvider.Create(proxy)
         });
     }
 
@@ -43,12 +49,21 @@ public class Startup
     public void ConfigureServices(IServiceCollection services)
     {
         using (var context = new DatabaseContext()) context.Database.Migrate();
-        services.AddSingleton(_client);
-        services.AddSingleton<Utilities.OldMigration>();
-        services.AddSingleton<Endpoints.Migrate>();
+        services.AddSingleton(_client)
+            .AddSingleton<InteractionEventHandler>()
+            .AddSingleton<Endpoints.Guild.User.Blacklist>()
+            .AddSingleton<Commands.Blacklist>()
+            .AddSingleton<Commands.Restore>()
+            .AddSingleton<Migrations.Restore>()
+            .AddSingleton<Migrations.Backup>()
+            .AddSingleton<Migrations.Configuration>()
+            .AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordShardedClient>(), new InteractionServiceConfig
+            {
+                DefaultRunMode = RunMode.Async,
+                LogLevel = LogSeverity.Info,
+            }));
         //add other endpoints
         DiscordBot(new CancellationToken()).ConfigureAwait(false);
-        //services.AddHostedService<Bot>();
         //configure cookie policy
         services.Configure<CookiePolicyOptions>(options =>
         {
@@ -57,7 +72,6 @@ public class Startup
             // requires using Microsoft.AspNetCore.Http;
             options.MinimumSameSitePolicy = SameSiteMode.None;
         });
-
         #region Swagger
         //configure json options for swagger
         services.AddControllers().AddNewtonsoftJson(jsonOptions =>
@@ -105,7 +119,10 @@ public class Startup
 
     private async Task DiscordBot(CancellationToken cancellationToken)
     {
-        await _client.LoginAsync(TokenType.Bot, Properties.Resources.TestToken);
+        if (Debugger.IsAttached)
+            await _client.LoginAsync(TokenType.Bot, Properties.Resources.TestToken);
+        else
+            await _client.LoginAsync(TokenType.Bot, Properties.Resources.Token);
         await _client.StartAsync();
     }
 

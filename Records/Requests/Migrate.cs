@@ -3,7 +3,7 @@
 /// <summary>
 /// 
 /// </summary>
-public record Migration
+public record Migrate
 {
     public ulong? userId { get; set; }
 }

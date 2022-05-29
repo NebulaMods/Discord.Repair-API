@@ -14,4 +14,5 @@ public class DatabaseContext : DbContext
     public DbSet<Server> servers { get; set; }
     public DbSet<Blacklist> blacklist { get; set; }
     public DbSet<User> users { get; set; }
+    public DbSet<Statistics> statistics { get; set; }
 }

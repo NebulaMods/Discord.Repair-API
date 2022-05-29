@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using RestoreCord.Database;
 using RestoreCord.Records.Responses;
 
-namespace RestoreCord.Endpoints;
+namespace RestoreCord.Endpoints.Guild;
 
 /// <summary>
 /// 
@@ -30,7 +30,7 @@ public class Backup : ControllerBase
     /// <param name="guildId"></param>
     /// <returns></returns>
     [HttpPost("{guildId}/backup")]
-    public async Task<ActionResult> BackupGuildAsync(ulong guildId)
+    public async Task<ActionResult> BackupAsync(ulong guildId)
     {
         try
         {
@@ -43,6 +43,8 @@ public class Backup : ControllerBase
                 });
             }
 
+
+            _ = Task.Run(async () => await BackupGuildAsync(guildId));
             return Ok();
         }
         catch (Exception ex)
@@ -54,5 +56,10 @@ public class Backup : ControllerBase
                 details = "internal server error"
             });
         }
+    }
+    
+    private async Task BackupGuildAsync(ulong guildId)
+    {
+
     }
 }

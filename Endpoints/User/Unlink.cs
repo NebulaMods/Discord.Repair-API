@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using RestoreCord.Database;
 using RestoreCord.Records.Responses;
 
-namespace RestoreCord.Endpoints;
+namespace RestoreCord.Endpoints.User;
 
 /// <summary>
 /// 
@@ -11,35 +11,45 @@ namespace RestoreCord.Endpoints;
 [ApiController]
 [Route("/user/")]
 [ApiExplorerSettings(GroupName = "Account Endpoints")]
-public class LinkedGuilds : ControllerBase
+public class UnlinkAccount : ControllerBase
 {
+
     /// <summary>
     /// 
     /// </summary>
     /// <param name="userId"></param>
+    /// <param name="guildId"></param>
     /// <returns></returns>
-    [HttpGet("{userId}/guilds")]
-    public async Task<ActionResult> GetGuildsAsync(ulong userId)
+    [HttpPost("{userId}/unlink/{guildId}")]
+    public async Task<ActionResult> UnlinkAccountAsync(ulong userId, ulong guildId)
     {
         try
         {
-            if (userId is 0)
+            if (guildId is 0 || userId is 0)
             {
                 return BadRequest(new GenericResponse()
                 {
                     success = false,
-                    details = "invalid user id"
+                    details = "invalid user/guild id"
                 });
             }
             await using var database = new DatabaseContext();
-            List<Database.Models.Member>? userEntries = await database.members.Where(x => x.userid == userId).ToListAsync();
-            return userEntries is null
-                ? NotFound(new GenericResponse()
+            Database.Models.Member? userEntry = await database.members.FirstOrDefaultAsync(x => x.userid == userId && x.server == guildId);
+            if (userEntry is null)
+            {
+                return NotFound(new GenericResponse()
                 {
                     success = false,
                     details = "user does not exist in database"
-                })
-                : Ok(userEntries);
+                });
+            }
+            database.Remove(userEntry);
+            await database.ApplyChangesAsync();
+            return Ok(new GenericResponse()
+            {
+                success = true,
+                details = $"Successfully unlinked {userId} from {guildId}"
+            });
         }
         catch (Exception ex)
         {

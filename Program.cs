@@ -2,7 +2,7 @@ using RestoreCord.Events;
 using RestoreCord.Services;
 
 IHostBuilder? builder = Host.CreateDefaultBuilder(args);
-var app = builder.ConfigureWebHostDefaults(x =>
+IHost? app = builder.ConfigureWebHostDefaults(x =>
 {
     x.ConfigureKestrel(options =>
     {

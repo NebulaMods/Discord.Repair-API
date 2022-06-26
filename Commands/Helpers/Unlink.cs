@@ -26,7 +26,7 @@ public class Unlink : InteractionModuleBase<ShardedInteractionContext>
             return;
         }
 
-        Member? userEntry = await database.members.FirstOrDefaultAsync(x => x.userid == Context.User.Id && x.server == (guildID != 0 ? guildID : Context.Guild.Id));
+        Member? userEntry = await database.members.FirstOrDefaultAsync(x => x.discordId == Context.User.Id && x.guildId == (guildID != 0 ? guildID : Context.Guild.Id));
         if (userEntry is null)
         {
             await Context.ReplyWithEmbedAsync("Unlink Status", "Account is not linked to the specified guild.", deleteTimer: 60);
@@ -40,11 +40,11 @@ public class Unlink : InteractionModuleBase<ShardedInteractionContext>
             Discord.Rest.RestGuildUser? guildUser = await Context.Client.Rest.GetGuildUserAsync(guildID != 0 ? guildID : Context.Guild.Id, Context.User.Id);
             if (guildUser is not null)
             {
-                Server? serverEntry = await database.servers.FirstOrDefaultAsync(x => x.guildid == (guildID != 0 ? guildID : Context.Guild.Id));
+                Server? serverEntry = await database.servers.FirstOrDefaultAsync(x => x.guildId == (guildID != 0 ? guildID : Context.Guild.Id));
                 if (serverEntry is null)
                     return;
-                if (serverEntry.roleid is not null)
-                await guildUser.RemoveRoleAsync((ulong)serverEntry.roleid);
+                if (serverEntry.roleId is not null)
+                await guildUser.RemoveRoleAsync((ulong)serverEntry.roleId);
             }
         }
         catch { }

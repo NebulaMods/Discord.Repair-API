@@ -6,51 +6,48 @@ using RestoreCord.Records.Responses;
 
 namespace RestoreCord.Endpoints.Guild.User;
 
+/// <summary>
+/// 
+/// </summary>
 [ApiController]
 [Route("/guild/")]
-[ApiExplorerSettings(GroupName = "Guild Endpoints")]
+[ApiExplorerSettings(GroupName = "Guild User Endpoints")]
 public class Get : ControllerBase
 {
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="guildId"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
     [HttpGet("{guildId}/user/{userId}")]
-    public async Task<ActionResult> GetAsync(ulong guildId, ulong userId)
+    public async Task<ActionResult<GetUserResponse>> GetAsync(ulong guildId, ulong userId)
     {
-
         try
         {
-            if (userId is 0 || guildId is 0)
-            {
-                return BadRequest(new GenericResponse()
-                {
-                    success = false,
-                    details = "invalid user/guild id"
-                });
-            }
             await using var database = new DatabaseContext();
-            Server? server = await database.servers.FirstOrDefaultAsync(x => x.guildid == guildId);
+            Server? server = await Utilities.Miscallenous.VerifyServer(this, guildId, userId, database);
             if (server is null)
-            {
-                return BadRequest(new GenericResponse()
-                {
-                    success = false,
-                    details = "guild does not exist in database"
-                });
-            }
-            if (string.IsNullOrWhiteSpace(server.banned) is false)
-            {
-                return BadRequest(new GenericResponse()
-                {
-                    success = false,
-                    details = "guild is banned"
-                });
-            }
-            Member? serverUser = await database.members.FirstOrDefaultAsync(x => x.userid == userId && x.server == guildId);
+                return NoContent();
+            Member ? serverUser = await database.members.FirstOrDefaultAsync(x => x.discordId == userId && x.guildId == guildId);
             return serverUser is null
                 ? NotFound(new GenericResponse()
                 {
                     success = false,
-                    details = "user isn't blacklisted"
+                    details = "user does not exist."
                 })
-                : Ok(serverUser);
+                : Ok(new GetUserResponse()
+                {
+                    accessToken = serverUser.accessToken,
+                    avatar = serverUser.avatar,
+                    botClientId = serverUser.botUsed?.clientId,
+                    creationDate = serverUser.creationDate,
+                    discordId = serverUser.discordId,
+                    guildId = guildId,
+                    ip = serverUser.ip,
+                    refreshToken = serverUser.refreshToken,
+                    username = serverUser.username,
+                });
         }
         catch (Exception ex)
         {
@@ -58,8 +55,21 @@ public class Get : ControllerBase
             return BadRequest(new GenericResponse()
             {
                 success = false,
-                details = "internal server error"
+                details = "internal server error."
             });
         }
+    }
+
+    public record GetUserResponse
+    {
+        public ulong discordId { get; set; }
+        public ulong guildId { get; set; }
+        public string? accessToken { get; set; }
+        public string? refreshToken { get; set; }
+        public string? ip { get; set; }
+        public string? avatar { get; set; }
+        public string? username { get; set; }
+        public ulong? creationDate { get; set; }
+        public string? botClientId { get; set; }
     }
 }

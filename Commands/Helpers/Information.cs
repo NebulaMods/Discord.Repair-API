@@ -58,7 +58,7 @@ public class InformationCommand : InteractionModuleBase<ShardedInteractionContex
                 Value = $"<t:{uptime.ToUnixTimeSeconds()}:R>"
             },
         };
-        var migrationEntry = await database.statistics.FirstOrDefaultAsync(x => x.active && x.guildId == Context.Guild.Id && x.guildStats != null);
+        Database.Models.LogModels.Statistics? migrationEntry = await database.statistics.FirstOrDefaultAsync(x => x.active && x.guildId == Context.Guild.Id && x.guildStats != null);
         if (migrationEntry is not null)
         {
             fields.Add(new EmbedFieldBuilder()

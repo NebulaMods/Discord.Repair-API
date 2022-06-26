@@ -53,7 +53,7 @@ public class Backup : ControllerBase
             return BadRequest(new GenericResponse()
             {
                 success = false,
-                details = "internal server error"
+                details = "internal server error."
             });
         }
     }

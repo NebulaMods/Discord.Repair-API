@@ -16,10 +16,10 @@ public class RequireStaffAttribute : PreconditionAttribute
                     return PreconditionResult.FromSuccess();
                 await using (var database = new DatabaseContext())
                 {
-                    Database.Models.User? user = await database.users.FirstOrDefaultAsync(x => x.userId == context.User.Id);
+                    Database.Models.User? user = await database.users.FirstOrDefaultAsync(x => x.discordId == context.User.Id);
                     if (user is not null)
                     {
-                        if (user.admin)
+                        if (user.role == "admin")
                             return PreconditionResult.FromSuccess();
                     }
                 }

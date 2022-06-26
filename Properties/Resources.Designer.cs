@@ -115,7 +115,7 @@ namespace RestoreCord.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to OTcwNzU3MTY3MDEzNTg5MDMz.GUhQ5m.x6auY52ObOJibb8peYuTZiTO33h2xUF-vTHEOo.
         /// </summary>
         internal static string TestToken {
             get {

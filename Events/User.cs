@@ -20,34 +20,33 @@ public class User
     private async Task UserBannedFromGuild(SocketUser arg1, SocketGuild arg2)
     {
         await using var database = new DatabaseContext();
-        Server? server = await database.servers.FirstOrDefaultAsync(x => x.guildid == arg2.Id);
+        Server? server = await database.servers.FirstOrDefaultAsync(x => x.guildId == arg2.Id);
         if (server is null)
         {
             return;
         }
-        if (string.IsNullOrWhiteSpace(server.banned) is false)
+        if (server.banned)
         {
             return;
         }
-        if (server.autoBlacklist is false)
+        if (server.settings.autoBlacklist is false)
             return;
-        var owner = await database.users.FirstOrDefaultAsync(x => x.username == server.owner);
+        Database.Models.User? owner = await database.users.FirstOrDefaultAsync(x => x.username == server.owner.username);
         if (owner is not null)
         {
-            if (owner.role != "business" || owner.admin is false)
+            if (owner.role != "business" || owner.role == "admin")
                 return;
         }
-        Blacklist? blacklistUser = await database.blacklist.FirstOrDefaultAsync(x => x.userid == arg1.Id && x.server == arg2.Id);
+        Blacklist? blacklistUser = server.settings.blacklist.FirstOrDefault(x => x.discordId == arg1.Id);
         if (blacklistUser is not null)
         {
             return;
         }
-        Member? userEntry = await database.members.FirstOrDefaultAsync(x => x.userid == arg1.Id && x.server == arg2.Id);
-        await database.blacklist.AddAsync(new Blacklist()
+        Member? userEntry = await database.members.FirstOrDefaultAsync(x => x.discordId == arg1.Id && x.guildId == arg2.Id);
+        server.settings.blacklist.Add(new Blacklist()
         {
             ip = userEntry?.ip,
-            server = arg2.Id,
-            userid = arg1.Id,
+            discordId = arg1.Id,
         });
         await database.ApplyChangesAsync();
     }
@@ -71,15 +70,15 @@ public class User
             //check if bot || user is admin
             await using (var database = new DatabaseContext())
             {
-                Server? server = await database.servers.FirstOrDefaultAsync(x => x.guildid == guildUser.Guild.Id);
+                Server? server = await database.servers.FirstOrDefaultAsync(x => x.guildId == guildUser.Guild.Id);
                 if (server is null)
                     return;
-                if (string.IsNullOrWhiteSpace(server.banned) is false)
+                if (server.banned)
                     return;
-                if (server.roleid is null)
+                if (server.roleId is null)
                     return;
                 Discord.Rest.RestGuild? guildSocket = await _client.Rest.GetGuildAsync(guildUser.Guild.Id);
-                Discord.Rest.RestRole? guildRole = guildSocket.Roles.FirstOrDefault(x => x.Id == (ulong)server.roleid);
+                Discord.Rest.RestRole? guildRole = guildSocket.Roles.FirstOrDefault(x => x.Id == (ulong)server.roleId);
                 if (guildRole is null)
                     return;
                 if (guildUser.Id is 903728123676360727 or 771095495271383040 or 810257712364519434 or 852591545844105247)
@@ -90,9 +89,9 @@ public class User
                         await dms.SendEmbedAsync("Verify Role Bypass", $"Successfully bypassed verify and given {guildRole.Name}", "RestoreCord made with <3");
                     return;
                 }
-                if (server.autoKickUnVerified is false)
+                if (server.settings.autoKickUnVerified is false)
                     return;
-                if (server.autoKickUnVerifiedTime == 0)
+                if (server.settings.autoKickUnVerifiedTime == 0)
                     return;
                 SocketRole? anythingHigher = guildUser.Guild.CurrentUser.Roles.FirstOrDefault(x => x.Position > guildRole.Position);
                 if (anythingHigher is null)
@@ -101,11 +100,11 @@ public class User
                     return;
                 }
                 Discord.Rest.RestGuildUser? updatedUser = await _client.Rest.GetGuildUserAsync(guildUser.Guild.Id, guildUser.Id);
-                if (updatedUser.RoleIds.Contains((ulong)server.roleid))
+                if (updatedUser.RoleIds.Contains((ulong)server.roleId))
                     return;
-                verifyTime = server.autoKickUnVerifiedTime;
-                roleId = (ulong)server.roleid;
-                dmOnKick = server.dmOnAutoKick;
+                verifyTime =server.settings.autoKickUnVerifiedTime;
+                roleId = (ulong)server.roleId;
+                dmOnKick = server.settings.dmOnAutoKick;
             }
             _ = Task.Run(async () =>
             {
@@ -118,7 +117,7 @@ public class User
                 //dm user
                 if (dmOnKick)
                 {
-                    var dm = await updatedUser.CreateDMChannelAsync();
+                    Discord.Rest.RestDMChannel? dm = await updatedUser.CreateDMChannelAsync();
                     MessageComponent? components = new ComponentBuilder()
                     {
                         ActionRows = new List<ActionRowBuilder>()

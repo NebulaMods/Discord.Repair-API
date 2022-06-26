@@ -1,6 +1,14 @@
-﻿namespace RestoreCord.Endpoints.API;
+﻿using Microsoft.AspNetCore.Mvc;
 
-public class Statistics
+namespace RestoreCord.Endpoints.API;
+
+/// <summary>
+/// 
+/// </summary>
+[ApiController]
+[Route("/api/")]
+[ApiExplorerSettings(GroupName = "API Endpoints")]
+public class Statistics : ControllerBase
 {
 
 }

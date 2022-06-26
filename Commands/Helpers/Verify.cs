@@ -22,13 +22,13 @@ public class Verify : InteractionModuleBase<ShardedInteractionContext>
         }
 
         await using var database = new DatabaseContext();
-        Server? server = await database.servers.FirstOrDefaultAsync(x => x.guildid == Context.Guild.Id);
+        Server? server = await database.servers.FirstOrDefaultAsync(x => x.guildId == Context.Guild.Id);
         if (server is null)
         {
             await Context.ReplyWithEmbedAsync("Error Occurred", "This guild does not exist in our database, please try again.", invisible: true, deleteTimer: 60);
             return;
         }
-        if (string.IsNullOrWhiteSpace(server.banned) is false)
+        if (server.banned)
         {
             await Context.ReplyWithEmbedAsync("Error Occurred", "This guild has been banned from using the bot.", invisible: true, deleteTimer: 60);
             return;

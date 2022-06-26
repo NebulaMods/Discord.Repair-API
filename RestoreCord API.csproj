@@ -13,7 +13,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>RestoreCord</RootNamespace>
-    <Version>0.9.9.0</Version>
+    <Version>0.9.9.5</Version>
     <Authors>Nebula</Authors>
     <Company>Nebula Mods, Inc.</Company>
     <Copyright>Nebula Mods, Inc.</Copyright>

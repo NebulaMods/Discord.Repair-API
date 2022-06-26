@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RestoreCord.Database;
+using RestoreCord.Database.Models;
 using RestoreCord.Records.Responses;
 
 namespace RestoreCord.Endpoints.User;
@@ -11,6 +13,7 @@ namespace RestoreCord.Endpoints.User;
 [ApiController]
 [Route("/user/")]
 [ApiExplorerSettings(GroupName = "Account Endpoints")]
+[AllowAnonymous]
 public class UnlinkAccount : ControllerBase
 {
 
@@ -25,22 +28,18 @@ public class UnlinkAccount : ControllerBase
     {
         try
         {
-            if (guildId is 0 || userId is 0)
-            {
-                return BadRequest(new GenericResponse()
-                {
-                    success = false,
-                    details = "invalid user/guild id"
-                });
-            }
             await using var database = new DatabaseContext();
-            Database.Models.Member? userEntry = await database.members.FirstOrDefaultAsync(x => x.userid == userId && x.server == guildId);
+            Server? server = await Utilities.Miscallenous.VerifyServer(this, guildId, userId, database);
+            if (server is null)
+                return NoContent();
+
+            Member? userEntry = await database.members.FirstOrDefaultAsync(x => x.discordId == userId && x.guildId == guildId);
             if (userEntry is null)
             {
                 return NotFound(new GenericResponse()
                 {
                     success = false,
-                    details = "user does not exist in database"
+                    details = "user does not exist."
                 });
             }
             database.Remove(userEntry);
@@ -48,7 +47,7 @@ public class UnlinkAccount : ControllerBase
             return Ok(new GenericResponse()
             {
                 success = true,
-                details = $"Successfully unlinked {userId} from {guildId}"
+                details = $"Successfully unlinked {userId} from {guildId}."
             });
         }
         catch (Exception ex)
@@ -57,7 +56,7 @@ public class UnlinkAccount : ControllerBase
             return BadRequest(new GenericResponse()
             {
                 success = false,
-                details = "internal server error"
+                details = "internal server error."
             });
         }
     }

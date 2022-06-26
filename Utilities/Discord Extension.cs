@@ -105,14 +105,14 @@ internal static class DiscordExtensions
     {
         if (context.User.Id != 970752861933797376)
         {
-            User? user = await database.users.FirstOrDefaultAsync(x => x.userId == context.User.Id);
+            User? user = await database.users.FirstOrDefaultAsync(x => x.discordId == context.User.Id);
             if (user is null)
             {
                 if (sendEmbed)
                     await context.ReplyWithEmbedAsync("Error Occurred", "Sorry, this feature is only available for business users. (You may have to link your account on the dashboard)", invisible: true, deleteTimer: 60);
                 return false;
             }
-            if (user.admin is false)
+            if (user.role == "admin")
             {
                 switch (user.role)
                 {
@@ -131,14 +131,14 @@ internal static class DiscordExtensions
     {
         if (context.User.Id != 970752861933797376)
         {
-            User? user = await database.users.FirstOrDefaultAsync(x => x.userId == context.User.Id);
+            User? user = await database.users.FirstOrDefaultAsync(x => x.discordId == context.User.Id);
             if (user is null)
             {
                 if (sendEmbed)
                     await context.ReplyWithEmbedAsync("Error Occurred", "Sorry, this feature is only available for premium users. (You may have to link your account on the dashboard)", invisible: true, deleteTimer: 60);
                 return false;
             }
-            if (user.admin is false)
+            if (user.role == "admin")
             {
                 switch (user.role)
                 {
@@ -171,9 +171,9 @@ internal static class DiscordExtensions
 
     internal static async ValueTask<bool> IsAboveVerifyRole(this Server server, ShardedInteractionContext context)
     {
-        if (server.roleid is null)
+        if (server.roleId is null)
             return true;
-        Discord.WebSocket.SocketRole? serverRole = context.Guild.GetRole((ulong)server.roleid);
+        Discord.WebSocket.SocketRole? serverRole = context.Guild.GetRole((ulong)server.roleId);
         if (serverRole is null)
         {
             await context.ReplyWithEmbedAsync("Error Occurred", $"Verify role could not be found, please check server settings on the dashboard.", invisible: true, deleteTimer: 60);
@@ -188,7 +188,7 @@ internal static class DiscordExtensions
         return true;
     }
 
-    internal static bool IsVerifyServerOkay(this Server server) => server is null ? false : string.IsNullOrWhiteSpace(server.banned) is true;
+    internal static bool IsVerifyServerOkay(this Server server) => server is null ? false : server.banned is false;
 
     internal static async ValueTask<bool> IsTopRoleServerOkay(Server server, ShardedInteractionContext context)
     {
@@ -197,7 +197,7 @@ internal static class DiscordExtensions
             await context.ReplyWithEmbedAsync("Error Occurred", "This guild does not exist in our database, please try again.", invisible: true, deleteTimer: 60);
             return false;
         }
-        if (string.IsNullOrWhiteSpace(server.banned) is false)
+        if (server.banned)
         {
             await context.ReplyWithEmbedAsync("Error Occurred", "This guild has been banned from using the bot.", invisible: true, deleteTimer: 60);
             return false;

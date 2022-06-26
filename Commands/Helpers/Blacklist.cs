@@ -16,29 +16,28 @@ public class Blacklist : InteractionModuleBase<ShardedInteractionContext>
     public async Task BlacklistUserAsync(IUser user, string? reason = null)
     {
         await using var database = new DatabaseContext();
-        Server? server = await database.servers.FirstOrDefaultAsync(x => x.guildid == Context.Guild.Id);
+        Server? server = await database.servers.FirstOrDefaultAsync(x => x.guildId == Context.Guild.Id);
         if (server is null)
         {
             await Context.ReplyWithEmbedAsync("Error Occurred", "This guild does not exist in our database, please try again.", invisible: true, deleteTimer: 60);
             return;
         }
-        if (string.IsNullOrWhiteSpace(server.banned) is false)
+        if (server.banned)
         {
             await Context.ReplyWithEmbedAsync("Error Occurred", "This guild has been banned from using the bot.", invisible: true, deleteTimer: 60);
             return;
         }
-        Database.Models.Blacklist? blacklistUser = await database.blacklist.FirstOrDefaultAsync(x => x.userid == user.Id && x.server == Context.Guild.Id);
+        Database.Models.Blacklist? blacklistUser = server.settings.blacklist.FirstOrDefault(x => x.discordId == user.Id);
         if (blacklistUser is not null)
         {
             await Context.ReplyWithEmbedAsync("Error Occurred", "This user is already blacklisted.", invisible: true, deleteTimer: 60);
             return;
         }
-        Member? userEntry = await database.members.FirstOrDefaultAsync(x => x.userid == user.Id && x.server == Context.Guild.Id);
-        await database.blacklist.AddAsync(new Database.Models.Blacklist()
+        Member? userEntry = await database.members.FirstOrDefaultAsync(x => x.discordId == user.Id && x.guildId == Context.Guild.Id);
+        server.settings.blacklist.Add(new Database.Models.Blacklist()
         {
             ip = userEntry?.ip,
-            server = Context.Guild.Id,
-            userid = user.Id,
+            discordId = user.Id,
             reason = reason
         });
         await database.ApplyChangesAsync();

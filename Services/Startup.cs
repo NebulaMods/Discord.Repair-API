@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json.Converters;
 using RestoreCord.Database;
+using RestoreCord.Endpoints.Guild.Blacklist;
 using RestoreCord.Events;
 
 namespace RestoreCord.Services;
@@ -48,14 +49,35 @@ public class Startup
     /// <exception cref="InvalidOperationException"></exception>
     public void ConfigureServices(IServiceCollection services)
     {
-        using (var context = new DatabaseContext()) context.Database.Migrate();
+        using (var context = new DatabaseContext())
+        {
+            context.Database.Migrate();
+            //context.servers.Add(new Database.Models.Server()
+            //{
+            //    name = "test",
+            //    guildId = 982587580409315328,
+            //    roleId = 990415527254065152,
+            //    settings = new Database.Models.ServerSettings()
+            //    {
+            //        mainBot = new Database.Models.CustomBot()
+            //        {
+                        
+            //        }
+            //    },
+            //    customBot = true,
+            //    owner = context.users.First(x => x.username == "nebula")
+            //});
+            //context.SaveChanges();
+        }
+
         services.AddSingleton(_client)
             .AddSingleton<InteractionEventHandler>()
-            .AddSingleton<Endpoints.Guild.User.Blacklist>()
+            .AddSingleton<Blacklist>()
             .AddSingleton<Commands.Blacklist>()
             .AddSingleton<Commands.Restore>()
             .AddSingleton<Migrations.Restore>()
             .AddSingleton<Migrations.Backup>()
+            .AddSingleton<Migrations.Pull>()
             .AddSingleton<Migrations.Configuration>()
             .AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordShardedClient>(), new InteractionServiceConfig
             {
@@ -63,7 +85,7 @@ public class Startup
                 LogLevel = LogSeverity.Info,
             }));
         //add other endpoints
-        DiscordBot(new CancellationToken()).ConfigureAwait(false);
+        //DiscordBot(new CancellationToken()).ConfigureAwait(false);
         //configure cookie policy
         services.Configure<CookiePolicyOptions>(options =>
         {
@@ -91,7 +113,7 @@ public class Startup
                 {
                     Email = "support@restorecord.com",
                     Name = "Contact",
-                    Url = new Uri("https://restorecord.comt")
+                    Url = new Uri("https://restorecord.com")
                 },
                 Description = "Advanced discord features",
                 TermsOfService = new Uri("https://restorecord.com"),

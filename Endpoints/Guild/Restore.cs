@@ -53,14 +53,14 @@ public class Restore : ControllerBase
             return BadRequest(new GenericResponse()
             {
                 success = false,
-                details = "internal server error"
+                details = "internal server error."
             });
         }
     }
 
     private async Task RestoreGuildAsync(ulong guildId)
     {
-        var client = _client;
-        var restore = _restore;
+        DiscordShardedClient? client = _client;
+        Migrations.Restore? restore = _restore;
     }
 }

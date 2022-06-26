@@ -11,7 +11,7 @@ public class ListGuilds : InteractionModuleBase<ShardedInteractionContext>
     public async Task DisplayLinkedGuildsAsync()
     {
         await using var database = new DatabaseContext();
-        List<Member>? guilds = await database.members.Where(x => x.userid == Context.User.Id).ToListAsync();
+        List<Member>? guilds = await database.members.Where(x => x.discordId == Context.User.Id).ToListAsync();
         if (guilds.Any() is false)
         {
             await Context.ReplyWithEmbedAsync("Linked Guilds", "You do not have any guilds linked.", invisible: true, deleteTimer: 60);
@@ -20,20 +20,20 @@ public class ListGuilds : InteractionModuleBase<ShardedInteractionContext>
         string guildString = string.Empty;
         foreach(Member? guild in guilds)
         {
-            Server? guildName = await database.servers.FirstOrDefaultAsync(x => x.guildid == guild.server);
+            Server? guildName = await database.servers.FirstOrDefaultAsync(x => x.guildId == guild.guildId);
             if (guildName is null)
             {
-                guildString += $"{guild.server} | [Unknown Name](https://discord.com/channels/{guild.server})\n";
+                guildString += $"{guild.guildId} | [Unknown Name](https://discord.com/channels/{guild.guildId})\n";
             }
             else
             {
                 if (string.IsNullOrWhiteSpace(guildName.name) is false)
                 {
-                    guildString += $"{guild.server} | [{guildName.name}](https://discord.com/channels/{guild.server})\n";
+                    guildString += $"{guild.guildId} | [{guildName.name}](https://discord.com/channels/{guild.guildId})\n";
                 }
                 else
                 {
-                    guildString += $"{guild.server} | [Unknown Name](https://discord.com/channels/{guild.server})\n";
+                    guildString += $"{guild.guildId} | [Unknown Name](https://discord.com/channels/{guild.guildId})\n";
                 }
             }
         }

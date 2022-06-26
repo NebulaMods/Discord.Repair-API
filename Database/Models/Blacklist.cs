@@ -11,19 +11,15 @@ public class Blacklist
     /// 
     /// </summary>
     [Key]
-    public int id { get; set; }
+    public int key { get; set; }
     /// <summary>
     /// 
     /// </summary>
-    public ulong? userid { get; set; }
+    public ulong? discordId { get; set; }
     /// <summary>
     /// 
     /// </summary>
     public string? ip { get; set; }
-    /// <summary>
-    /// 
-    /// </summary>
-    public ulong? server { get; set; }
     /// <summary>
     /// 
     /// </summary>

@@ -2,23 +2,20 @@
 
 namespace RestoreCord.Database.Models;
 
+/// <summary>
+/// 
+/// </summary>
 public class Member
 {
     [Key]
-    public int id { get; set; }
-    public ulong userid { get; set; }
-    public ulong server { get; set; }
-    public string? access_token { get; set; }
-    public string? refresh_token { get; set; }
+    public int key { get; set; }
+    public ulong discordId { get; set; }
+    public ulong guildId { get; set; }
+    public string? accessToken { get; set; }
+    public string? refreshToken { get; set; }
     public string? ip { get; set; }
     public string? avatar { get; set; }
     public string? username { get; set; }
     public ulong? creationDate { get; set; }
-    public virtual MemberTokenType tokenType { get; set; } = MemberTokenType.RESTORECORD;
-}
-
-public enum MemberTokenType
-{
-    CUSTOM,
-    RESTORECORD
+    public virtual CustomBot? botUsed { get; set; }
 }

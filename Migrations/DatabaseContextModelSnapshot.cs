@@ -25,7 +25,7 @@ namespace RestoreCord.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<int?>("Serverid")
+                    b.Property<int?>("Userkey")
                         .HasColumnType("int");
 
                     b.Property<int?>("afkChannelkey")
@@ -96,7 +96,7 @@ namespace RestoreCord.Migrations
 
                     b.HasKey("key");
 
-                    b.HasIndex("Serverid");
+                    b.HasIndex("Userkey");
 
                     b.HasIndex("afkChannelkey");
 
@@ -653,9 +653,15 @@ namespace RestoreCord.Migrations
 
             modelBuilder.Entity("RestoreCord.Database.Models.Blacklist", b =>
                 {
-                    b.Property<int>("id")
+                    b.Property<int>("key")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    b.Property<int?>("ServerSettingskey")
+                        .HasColumnType("int");
+
+                    b.Property<ulong?>("discordId")
+                        .HasColumnType("bigint unsigned");
 
                     b.Property<string>("ip")
                         .HasColumnType("longtext");
@@ -663,15 +669,11 @@ namespace RestoreCord.Migrations
                     b.Property<string>("reason")
                         .HasColumnType("longtext");
 
-                    b.Property<ulong?>("server")
-                        .HasColumnType("bigint unsigned");
+                    b.HasKey("key");
 
-                    b.Property<ulong?>("userid")
-                        .HasColumnType("bigint unsigned");
+                    b.HasIndex("ServerSettingskey");
 
-                    b.HasKey("id");
-
-                    b.ToTable("blacklist");
+                    b.ToTable("Blacklist");
                 });
 
             modelBuilder.Entity("RestoreCord.Database.Models.CustomBot", b =>
@@ -680,22 +682,35 @@ namespace RestoreCord.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
+                    b.Property<int?>("Userkey")
+                        .HasColumnType("int");
+
                     b.Property<int>("botType")
                         .HasColumnType("int");
 
                     b.Property<string>("clientId")
+                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("clientSecret")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("name")
+                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("token")
+                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("urlRedirect")
+                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.HasKey("key");
+
+                    b.HasIndex("Userkey");
 
                     b.ToTable("CustomBot");
                 });
@@ -732,11 +747,14 @@ namespace RestoreCord.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<string>("MigratedBy")
-                        .HasColumnType("longtext");
+                    b.Property<int>("MigratedBykey")
+                        .HasColumnType("int");
 
                     b.Property<bool>("active")
                         .HasColumnType("tinyint(1)");
+
+                    b.Property<DateTime?>("endDate")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<ulong>("guildId")
                         .HasColumnType("bigint unsigned");
@@ -747,59 +765,102 @@ namespace RestoreCord.Migrations
                     b.Property<int?>("memberStatskey")
                         .HasColumnType("int");
 
-                    b.Property<int>("serverId")
+                    b.Property<int>("serverkey")
                         .HasColumnType("int");
 
+                    b.Property<DateTime>("startDate")
+                        .HasColumnType("datetime(6)");
+
                     b.HasKey("key");
+
+                    b.HasIndex("MigratedBykey");
 
                     b.HasIndex("guildStatskey");
 
                     b.HasIndex("memberStatskey");
+
+                    b.HasIndex("serverkey");
 
                     b.ToTable("statistics");
                 });
 
             modelBuilder.Entity("RestoreCord.Database.Models.Member", b =>
                 {
-                    b.Property<int>("id")
+                    b.Property<int>("key")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<string>("access_token")
+                    b.Property<string>("accessToken")
                         .HasColumnType("longtext");
 
                     b.Property<string>("avatar")
                         .HasColumnType("longtext");
 
+                    b.Property<int?>("botUsedkey")
+                        .HasColumnType("int");
+
                     b.Property<ulong?>("creationDate")
+                        .HasColumnType("bigint unsigned");
+
+                    b.Property<ulong>("discordId")
+                        .HasColumnType("bigint unsigned");
+
+                    b.Property<ulong>("guildId")
                         .HasColumnType("bigint unsigned");
 
                     b.Property<string>("ip")
                         .HasColumnType("longtext");
 
-                    b.Property<string>("refresh_token")
+                    b.Property<string>("refreshToken")
                         .HasColumnType("longtext");
-
-                    b.Property<ulong>("server")
-                        .HasColumnType("bigint unsigned");
-
-                    b.Property<int>("tokenType")
-                        .HasColumnType("int");
-
-                    b.Property<ulong>("userid")
-                        .HasColumnType("bigint unsigned");
 
                     b.Property<string>("username")
                         .HasColumnType("longtext");
 
-                    b.HasKey("id");
+                    b.HasKey("key");
+
+                    b.HasIndex("botUsedkey");
 
                     b.ToTable("members");
                 });
 
             modelBuilder.Entity("RestoreCord.Database.Models.Server", b =>
                 {
-                    b.Property<int>("id")
+                    b.Property<int>("key")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<bool>("banned")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<ulong?>("guildId")
+                        .HasColumnType("bigint unsigned");
+
+                    b.Property<string>("name")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("ownerkey")
+                        .HasColumnType("int");
+
+                    b.Property<ulong?>("roleId")
+                        .HasColumnType("bigint unsigned");
+
+                    b.Property<int>("settingskey")
+                        .HasColumnType("int");
+
+                    b.HasKey("key");
+
+                    b.HasIndex("ownerkey");
+
+                    b.HasIndex("settingskey");
+
+                    b.ToTable("servers");
+                });
+
+            modelBuilder.Entity("RestoreCord.Database.Models.ServerSettings", b =>
+                {
+                    b.Property<int>("key")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
@@ -815,34 +876,14 @@ namespace RestoreCord.Migrations
                     b.Property<int>("autoKickUnVerifiedTime")
                         .HasColumnType("int");
 
-                    b.Property<int?>("backupkey")
-                        .HasColumnType("int");
-
-                    b.Property<string>("banned")
+                    b.Property<string>("backgroundImage")
                         .HasColumnType("longtext");
-
-                    b.Property<string>("bg_image")
-                        .HasColumnType("longtext");
-
-                    b.Property<bool>("customBotEnabled")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<int?>("customBotkey")
-                        .HasColumnType("int");
 
                     b.Property<bool>("dmOnAutoKick")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<ulong?>("guildid")
-                        .HasColumnType("bigint unsigned");
-
-                    b.Property<string>("name")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("owner")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                    b.Property<int?>("mainBotkey")
+                        .HasColumnType("int");
 
                     b.Property<string>("pic")
                         .IsRequired()
@@ -851,11 +892,8 @@ namespace RestoreCord.Migrations
                     b.Property<int>("redirectTime")
                         .HasColumnType("int");
 
-                    b.Property<string>("redirecturl")
+                    b.Property<string>("redirectUrl")
                         .HasColumnType("longtext");
-
-                    b.Property<ulong?>("roleid")
-                        .HasColumnType("bigint unsigned");
 
                     b.Property<string>("vanityUrl")
                         .HasColumnType("longtext");
@@ -863,7 +901,7 @@ namespace RestoreCord.Migrations
                     b.Property<string>("verifyDescription")
                         .HasColumnType("longtext");
 
-                    b.Property<bool?>("vpncheck")
+                    b.Property<bool>("vpnCheck")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<string>("webhook")
@@ -872,13 +910,11 @@ namespace RestoreCord.Migrations
                     b.Property<int>("webhookLogType")
                         .HasColumnType("int");
 
-                    b.HasKey("id");
+                    b.HasKey("key");
 
-                    b.HasIndex("backupkey");
+                    b.HasIndex("mainBotkey");
 
-                    b.HasIndex("customBotkey");
-
-                    b.ToTable("servers");
+                    b.ToTable("ServerSettings");
                 });
 
             modelBuilder.Entity("RestoreCord.Database.Models.Statistics.GuildMigration", b =>
@@ -910,6 +946,12 @@ namespace RestoreCord.Migrations
                     b.Property<int>("bannedCount")
                         .HasColumnType("int");
 
+                    b.Property<int>("blacklistedCount")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("estimatedCompletionTime")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<int>("failedCount")
                         .HasColumnType("int");
 
@@ -938,30 +980,37 @@ namespace RestoreCord.Migrations
 
             modelBuilder.Entity("RestoreCord.Database.Models.User", b =>
                 {
-                    b.Property<int>("id")
+                    b.Property<int>("key")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<bool>("admin")
+                    b.Property<string>("apiToken")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<bool>("banned")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<string>("banned")
-                        .HasColumnType("longtext");
+                    b.Property<DateTime>("createdAt")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<bool>("darkmode")
                         .HasColumnType("tinyint(1)");
+
+                    b.Property<ulong?>("discordId")
+                        .HasColumnType("bigint unsigned");
 
                     b.Property<string>("email")
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<int?>("expiry")
-                        .HasColumnType("int");
+                    b.Property<DateTime?>("expiry")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("googleAuthCode")
                         .HasColumnType("longtext");
 
-                    b.Property<string>("last_ip")
+                    b.Property<string>("lastIP")
                         .HasColumnType("longtext");
 
                     b.Property<string>("password")
@@ -976,26 +1025,20 @@ namespace RestoreCord.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<bool>("twofactor")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<ulong?>("userId")
-                        .HasColumnType("bigint unsigned");
-
                     b.Property<string>("username")
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.HasKey("id");
+                    b.HasKey("key");
 
                     b.ToTable("users");
                 });
 
             modelBuilder.Entity("RestoreCord.Database.Models.BackupModels.Backup", b =>
                 {
-                    b.HasOne("RestoreCord.Database.Models.Server", null)
+                    b.HasOne("RestoreCord.Database.Models.User", null)
                         .WithMany("backups")
-                        .HasForeignKey("Serverid");
+                        .HasForeignKey("Userkey");
 
                     b.HasOne("RestoreCord.Database.Models.BackupModels.Channel.VoiceChannel", "afkChannel")
                         .WithMany()
@@ -1133,8 +1176,28 @@ namespace RestoreCord.Migrations
                     b.Navigation("permissions");
                 });
 
+            modelBuilder.Entity("RestoreCord.Database.Models.Blacklist", b =>
+                {
+                    b.HasOne("RestoreCord.Database.Models.ServerSettings", null)
+                        .WithMany("blacklist")
+                        .HasForeignKey("ServerSettingskey");
+                });
+
+            modelBuilder.Entity("RestoreCord.Database.Models.CustomBot", b =>
+                {
+                    b.HasOne("RestoreCord.Database.Models.User", null)
+                        .WithMany("bots")
+                        .HasForeignKey("Userkey");
+                });
+
             modelBuilder.Entity("RestoreCord.Database.Models.LogModels.Statistics", b =>
                 {
+                    b.HasOne("RestoreCord.Database.Models.User", "MigratedBy")
+                        .WithMany()
+                        .HasForeignKey("MigratedBykey")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("RestoreCord.Database.Models.Statistics.GuildMigration", "guildStats")
                         .WithMany()
                         .HasForeignKey("guildStatskey");
@@ -1143,24 +1206,56 @@ namespace RestoreCord.Migrations
                         .WithMany()
                         .HasForeignKey("memberStatskey");
 
+                    b.HasOne("RestoreCord.Database.Models.Server", "server")
+                        .WithMany()
+                        .HasForeignKey("serverkey")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("MigratedBy");
+
                     b.Navigation("guildStats");
 
                     b.Navigation("memberStats");
+
+                    b.Navigation("server");
+                });
+
+            modelBuilder.Entity("RestoreCord.Database.Models.Member", b =>
+                {
+                    b.HasOne("RestoreCord.Database.Models.CustomBot", "botUsed")
+                        .WithMany()
+                        .HasForeignKey("botUsedkey");
+
+                    b.Navigation("botUsed");
                 });
 
             modelBuilder.Entity("RestoreCord.Database.Models.Server", b =>
                 {
-                    b.HasOne("RestoreCord.Database.Models.BackupModels.Backup", "backup")
+                    b.HasOne("RestoreCord.Database.Models.User", "owner")
                         .WithMany()
-                        .HasForeignKey("backupkey");
+                        .HasForeignKey("ownerkey")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.HasOne("RestoreCord.Database.Models.CustomBot", "customBot")
+                    b.HasOne("RestoreCord.Database.Models.ServerSettings", "settings")
                         .WithMany()
-                        .HasForeignKey("customBotkey");
+                        .HasForeignKey("settingskey")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Navigation("backup");
+                    b.Navigation("owner");
 
-                    b.Navigation("customBot");
+                    b.Navigation("settings");
+                });
+
+            modelBuilder.Entity("RestoreCord.Database.Models.ServerSettings", b =>
+                {
+                    b.HasOne("RestoreCord.Database.Models.CustomBot", "mainBot")
+                        .WithMany()
+                        .HasForeignKey("mainBotkey");
+
+                    b.Navigation("mainBot");
                 });
 
             modelBuilder.Entity("RestoreCord.Database.Models.BackupModels.Backup", b =>
@@ -1200,9 +1295,16 @@ namespace RestoreCord.Migrations
                     b.Navigation("assignedRoles");
                 });
 
-            modelBuilder.Entity("RestoreCord.Database.Models.Server", b =>
+            modelBuilder.Entity("RestoreCord.Database.Models.ServerSettings", b =>
+                {
+                    b.Navigation("blacklist");
+                });
+
+            modelBuilder.Entity("RestoreCord.Database.Models.User", b =>
                 {
                     b.Navigation("backups");
+
+                    b.Navigation("bots");
                 });
 #pragma warning restore 612, 618
         }

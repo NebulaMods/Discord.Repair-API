@@ -7,6 +7,7 @@ using RestoreCord.Database;
 using Discord.Interactions;
 using RestoreCord.Database.Models;
 using RestoreCord.Utilities;
+using Microsoft.EntityFrameworkCore;
 
 namespace RestoreCord.Migrations;
 
@@ -41,7 +42,8 @@ public class Backup
             systemChannelMessageDeny = (int)guild.SystemChannelFlags,
             verificationLevel = (int)guild.VerificationLevel,
         };
-        server.backup = backupEntry;
+        User? user = await database.users.FirstAsync(x => x.username == server.owner.username);
+        user.backups.Add(backupEntry);
         await database.ApplyChangesAsync(server);
         backupEntry.roles = BackupRoles(backupEntry, guild);
         await database.ApplyChangesAsync(server);

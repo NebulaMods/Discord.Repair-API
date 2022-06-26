@@ -28,16 +28,16 @@ public class LinkedGuilds : ControllerBase
                 return BadRequest(new GenericResponse()
                 {
                     success = false,
-                    details = "invalid user id"
+                    details = "invalid parameters, please try again."
                 });
             }
             await using var database = new DatabaseContext();
-            List<Database.Models.Member>? userEntries = await database.members.Where(x => x.userid == userId).ToListAsync();
-            return userEntries is null
+            List<ulong>? userEntries = await database.members.Where(x => x.discordId == userId).Select(x => x.guildId).ToListAsync();
+            return userEntries.Any() is false
                 ? NotFound(new GenericResponse()
                 {
                     success = false,
-                    details = "user does not exist in database"
+                    details = "not linked to any guilds"
                 })
                 : Ok(userEntries);
         }
@@ -47,7 +47,7 @@ public class LinkedGuilds : ControllerBase
             return BadRequest(new GenericResponse()
             {
                 success = false,
-                details = "internal server error"
+                details = "internal server error."
             });
         }
     }

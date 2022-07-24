@@ -1,4 +1,5 @@
 ﻿using Discord.Interactions;
+
 using RestoreCord.Utilities.DiscordAttributes;
 
 namespace RestoreCord.Commands;
@@ -6,9 +7,9 @@ namespace RestoreCord.Commands;
 [RequireAdministrator]
 public class Backup : InteractionModuleBase<ShardedInteractionContext>
 {
-    private readonly Migrations.Restore _restore;
-    private readonly Migrations.Backup _backup;
-    public Backup(Migrations.Restore restore, Migrations.Backup backup)
+    private readonly MigrationMaster.Restore _restore;
+    private readonly MigrationMaster.Backup _backup;
+    public Backup(MigrationMaster.Restore restore, MigrationMaster.Backup backup)
     {
         _restore = restore;
         _backup = backup;

@@ -1,6 +1,8 @@
 ﻿using Discord;
 using Discord.Interactions;
+
 using Microsoft.EntityFrameworkCore;
+
 using RestoreCord.Database;
 
 namespace RestoreCord.Utilities.DiscordAttributes;

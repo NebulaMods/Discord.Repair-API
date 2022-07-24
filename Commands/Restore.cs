@@ -1,4 +1,5 @@
 ﻿using Discord.Interactions;
+
 using RestoreCord.Utilities.DiscordAttributes;
 
 namespace RestoreCord.Commands;
@@ -6,8 +7,8 @@ namespace RestoreCord.Commands;
 [RequireMaxPermissions]
 public class Restore : InteractionModuleBase<ShardedInteractionContext>
 {
-    private readonly Migrations.Restore _restore;
-    public Restore(Migrations.Restore restore)
+    private readonly MigrationMaster.Restore _restore;
+    public Restore(MigrationMaster.Restore restore)
     {
         _restore = restore;
     }

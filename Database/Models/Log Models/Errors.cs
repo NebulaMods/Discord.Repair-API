@@ -2,13 +2,49 @@
 
 namespace RestoreCord.Database.Models.LogModels;
 
-public class Errors
+/// <summary>
+/// 
+/// </summary>
+public record Errors
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [Key]
-    public int id { get; set; }
+    public Guid key { get; init; } = new();
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// 
+    [StringLength(50)]
     public string? location { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// 
+    [StringLength(200)]
     public string? message { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// 
+    [StringLength(300)]
     public string? stackTrace { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// 
+    [StringLength(300)]
     public string? extraInfo { get; set; }
-    public DateTime errorTime { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// 
+    [DataType(DataType.DateTime)]
+    public DateTime errorTime { get; init; } = DateTime.UtcNow;
 }

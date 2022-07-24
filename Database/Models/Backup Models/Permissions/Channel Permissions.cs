@@ -2,151 +2,272 @@
 
 namespace RestoreCord.Database.Models.BackupModels.Permissions;
 
-public class ChannelPermissions
+/// <summary>
+/// 
+/// </summary>
+public record ChannelPermissions
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [Key]
-    public int key { get; set; }
+    public Guid key { get; init; } = new();
+
+    /// <summary>
+    /// 
+    /// </summary>
     public ulong targetId { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
     public int permissionTarget { get; set; }
-    //
-    // Summary:
-    //     If Allowed, a user may send files.
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// 
+    [EnumDataType(typeof(PermissionValue))]
     public PermissionValue AttachFiles { get; set; }
-    //
-    // Summary:
-    //     If Allowed, a user may speak in a voice channel.
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// 
+    [EnumDataType(typeof(PermissionValue))]
     public PermissionValue Speak { get; set; }
-    //
-    // Summary:
-    //     If Allowed, a user may mute users.
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// 
+    [EnumDataType(typeof(PermissionValue))]
     public PermissionValue MuteMembers { get; set; }
-    //
-    // Summary:
-    //     If Allowed, a user may deafen users.
+    
+    /// <summary>
+    /// 
+    /// </summary>
     public PermissionValue DeafenMembers { get; set; }
-    //
-    // Summary:
-    //     If Allowed, a user may move other users between voice channels.
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// 
+    [EnumDataType(typeof(PermissionValue))]
     public PermissionValue MoveMembers { get; set; }
-    //
-    // Summary:
-    //     If Allowed, a user may use voice-activity-detection rather than push-to-talk.
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// 
+    [EnumDataType(typeof(PermissionValue))]
     public PermissionValue UseVAD { get; set; }
-    //
-    // Summary:
-    //     If Allowed, a user may use priority speaker in a voice channel.
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// 
+    [EnumDataType(typeof(PermissionValue))]
     public PermissionValue PrioritySpeaker { get; set; }
-    //
-    // Summary:
-    //     If Allowed, a user may go live in a voice channel.
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// 
+    [EnumDataType(typeof(PermissionValue))]
     public PermissionValue Stream { get; set; }
-    //
-    // Summary:
-    //     If true, a user may use slash commands in this guild.
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// 
+    [EnumDataType(typeof(PermissionValue))]
     public PermissionValue UseApplicationCommands { get; set; }
-    //
-    // Summary:
-    //     If True, a user may edit the webhooks for this channel.
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// 
+    [EnumDataType(typeof(PermissionValue))]
     public PermissionValue ManageWebhooks { get; set; }
-    //
-    // Summary:
-    //     If Allowed, a user may connect to a voice channel.
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// 
+    [EnumDataType(typeof(PermissionValue))]
     public PermissionValue Connect { get; set; }
-    //
-    // Summary:
-    //     If true, a user may request to speak in stage channels.
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// 
+    [EnumDataType(typeof(PermissionValue))]
     public PermissionValue RequestToSpeak { get; set; }
-    //
-    // Summary:
-    //     If true, a user may manage threads in this guild.
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// 
+    [EnumDataType(typeof(PermissionValue))]
     public PermissionValue ManageThreads { get; set; }
-    //
-    // Summary:
-    //     If true, a user may create public threads in this guild.
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// 
+    [EnumDataType(typeof(PermissionValue))]
     public PermissionValue CreatePublicThreads { get; set; }
-    //
-    // Summary:
-    //     If true, a user may create private threads in this guild.
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// 
+    [EnumDataType(typeof(PermissionValue))]
     public PermissionValue CreatePrivateThreads { get; set; }
-    //
-    // Summary:
-    //     If true, a user may use external stickers in this guild.
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// 
+    [EnumDataType(typeof(PermissionValue))]
     public PermissionValue UseExternalStickers { get; set; }
-    //
-    // Summary:
-    //     If Allowed, a user may adjust role permissions. This also implicitly grants all
-    //     other permissions.
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// 
+    [EnumDataType(typeof(PermissionValue))]
     public PermissionValue ManageRoles { get; set; }
-    //
-    // Summary:
-    //     If Allowed, a user may use custom emoji from other guilds.
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// 
+    [EnumDataType(typeof(PermissionValue))]
     public PermissionValue UseExternalEmojis { get; set; }
-    //
-    // Summary:
-    //     If true, a user launch application activities in voice channels in this guild.
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// 
+    [EnumDataType(typeof(PermissionValue))]
     public PermissionValue StartEmbeddedActivities { get; set; }
-    //
-    // Summary:
-    //     If Allowed, a user may read previous messages.
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// [EnumDataType(typeof(PermissionValue))]
     public PermissionValue ReadMessageHistory { get; set; }
-    //
-    // Summary:
-    //     If Allowed, a user may mention @everyone.
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// 
+    [EnumDataType(typeof(PermissionValue))]
     public PermissionValue MentionEveryone { get; set; }
-    //
-    // Summary:
-    //     If Allowed, a user may create, delete and modify this channel.
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// 
+    [EnumDataType(typeof(PermissionValue))]
     public PermissionValue ManageChannel { get; set; }
-    //
-    // Summary:
-    //     If Allowed, a user may add reactions.
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// 
+    [EnumDataType(typeof(PermissionValue))]
     public PermissionValue AddReactions { get; set; }
-    //
-    // Summary:
-    //     If Allowed, a user may create invites.
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// 
+    [EnumDataType(typeof(PermissionValue))]
     public PermissionValue CreateInstantInvite { get; set; }
-    //
-    // Summary:
-    //     If Allowed, a user may send messages.
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// 
+    [EnumDataType(typeof(PermissionValue))]
     public PermissionValue SendMessages { get; set; }
-    //
-    // Summary:
-    //     If Allowed, a user may send text-to-speech messages.
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// 
+    [EnumDataType(typeof(PermissionValue))]
     public PermissionValue SendTTSMessages { get; set; }
-    //
-    // Summary:
-    //     If Allowed, a user may delete messages.
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// 
+    [EnumDataType(typeof(PermissionValue))]
     public PermissionValue ManageMessages { get; set; }
-    //
-    // Summary:
-    //     If Allowed, Discord will auto-embed links sent by this user.
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// 
+    [EnumDataType(typeof(PermissionValue))]
     public PermissionValue EmbedLinks { get; set; }
-    //
-    // Summary:
-    //     If true, a user may send messages in threads in this guild.
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// 
+    [EnumDataType(typeof(PermissionValue))]
     public PermissionValue SendMessagesInThreads { get; set; }
-    //
-    // Summary:
-    //     If Allowed, a user may join channels.
+    
+    /// <summary>
+    /// 
+    /// </summary>
     public PermissionValue ViewChannel { get; set; }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// 
+    [EnumDataType(typeof(PermissionValue))]
     public PermissionValue useVoiceActivation { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// 
+    [EnumDataType(typeof(PermissionValue))]
     public PermissionValue useSlashCommands { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// 
+    [EnumDataType(typeof(PermissionValue))]
     public PermissionValue usePrivateThreads { get; set; }
 }
 
+/// <summary>
+/// 
+/// </summary>
 public enum PermissionValue
 {
-    //
-    // Summary:
-    //     Allows this permission.
+    
+    /// <summary>
+    /// 
+    /// </summary>
     Allow = 0,
-    //
-    // Summary:
-    //     Denies this permission.
+    
+    /// <summary>
+    /// 
+    /// </summary>
     Deny = 1,
-    //
-    // Summary:
-    //     Inherits the permission settings.
+   
+    /// <summary>
+    /// 
+    /// </summary>
     Inherit = 2
 }

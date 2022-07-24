@@ -2,10 +2,28 @@
 
 namespace RestoreCord.Database.Models.BackupModels;
 
-public class Emoji
+/// <summary>
+/// 
+/// </summary>
+public record Emoji
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [Key]
-    public int key { get; set; }
+    public Guid key { get; init; } = new();
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// 
+    [StringLength(100)]
     public string? name { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// 
+    [StringLength(100)]
     public string? url { get; set; }
 }

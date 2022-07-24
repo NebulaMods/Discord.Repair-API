@@ -3,7 +3,7 @@
 /// <summary>
 /// 
 /// </summary>
-public record GenericResponse
+public record Generic
 {
     /// <summary>
     /// 

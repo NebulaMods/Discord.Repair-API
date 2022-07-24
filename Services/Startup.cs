@@ -1,16 +1,21 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
+
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
+
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+
 using Newtonsoft.Json.Converters;
+
 using RestoreCord.Database;
-using RestoreCord.Endpoints.Guild.Blacklist;
 using RestoreCord.Events;
+
+using Blacklist = RestoreCord.Endpoints.V1.Guild.User.Blacklist;
 
 namespace RestoreCord.Services;
 
@@ -52,6 +57,15 @@ public class Startup
         using (var context = new DatabaseContext())
         {
             context.Database.Migrate();
+            //var user = new Database.Models.User()
+            //{
+            //    username = "nebula",
+            //    email = "lol",
+            //    role = "admin",
+            //    password = "ujdshfn",
+
+            //};
+            //context.users.Add(user);
             //context.servers.Add(new Database.Models.Server()
             //{
             //    name = "test",
@@ -61,11 +75,14 @@ public class Startup
             //    {
             //        mainBot = new Database.Models.CustomBot()
             //        {
-                        
+            //            clientId = "j",
+            //            clientSecret = "a",
+            //            name = "h",
+            //            token = "d",
+            //            urlRedirect = "d"
             //        }
             //    },
-            //    customBot = true,
-            //    owner = context.users.First(x => x.username == "nebula")
+            //    owner = user
             //});
             //context.SaveChanges();
         }
@@ -75,10 +92,10 @@ public class Startup
             .AddSingleton<Blacklist>()
             .AddSingleton<Commands.Blacklist>()
             .AddSingleton<Commands.Restore>()
-            .AddSingleton<Migrations.Restore>()
-            .AddSingleton<Migrations.Backup>()
-            .AddSingleton<Migrations.Pull>()
-            .AddSingleton<Migrations.Configuration>()
+            .AddSingleton<MigrationMaster.Restore>()
+            .AddSingleton<MigrationMaster.Backup>()
+            .AddSingleton<MigrationMaster.Pull>()
+            .AddSingleton<MigrationMaster.Configuration>()
             .AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordShardedClient>(), new InteractionServiceConfig
             {
                 DefaultRunMode = RunMode.Async,

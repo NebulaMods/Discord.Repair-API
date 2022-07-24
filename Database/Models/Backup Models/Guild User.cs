@@ -2,12 +2,38 @@
 
 namespace RestoreCord.Database.Models.BackupModels;
 
-public class GuildUser
+/// <summary>
+/// 
+/// </summary>
+public record GuildUser
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [Key]
-    public int key { get; set; }
+    public Guid key { get; set; } = new();
+
+    /// <summary>
+    /// 
+    /// </summary>
     public ulong id { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// 
+    [StringLength(100)]
     public string? username { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// 
+    [StringLength(100)]
     public string? avatarUrl { get; set; }
-    public virtual ICollection<GuildUserRole> assignedRoles { get; set; } = new HashSet<GuildUserRole>();
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public virtual ICollection<Role> assignedRoles { get; set; } = new HashSet<Role>();
 }

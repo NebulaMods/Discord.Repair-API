@@ -1,5 +1,7 @@
 ﻿using Discord.Interactions;
+
 using Microsoft.EntityFrameworkCore;
+
 using RestoreCord.Database;
 using RestoreCord.Database.Models;
 using RestoreCord.Utilities;
@@ -20,20 +22,20 @@ public class ListGuilds : InteractionModuleBase<ShardedInteractionContext>
         string guildString = string.Empty;
         foreach(Member? guild in guilds)
         {
-            Server? guildName = await database.servers.FirstOrDefaultAsync(x => x.guildId == guild.guildId);
+            Server? guildName = await database.servers.FirstOrDefaultAsync(x => x.guildId == guild.server.guildId);
             if (guildName is null)
             {
-                guildString += $"{guild.guildId} | [Unknown Name](https://discord.com/channels/{guild.guildId})\n";
+                guildString += $"{guild.server.guildId} | [Unknown Name](https://discord.com/channels/{guild.server.guildId})\n";
             }
             else
             {
                 if (string.IsNullOrWhiteSpace(guildName.name) is false)
                 {
-                    guildString += $"{guild.guildId} | [{guildName.name}](https://discord.com/channels/{guild.guildId})\n";
+                    guildString += $"{guild.server.guildId} | [{guildName.name}](https://discord.com/channels/{guild.server.guildId})\n";
                 }
                 else
                 {
-                    guildString += $"{guild.guildId} | [Unknown Name](https://discord.com/channels/{guild.guildId})\n";
+                    guildString += $"{guild.server.guildId} | [Unknown Name](https://discord.com/channels/{guild.server.guildId})\n";
                 }
             }
         }

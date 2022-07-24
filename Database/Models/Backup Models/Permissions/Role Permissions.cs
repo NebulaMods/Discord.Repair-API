@@ -2,172 +2,225 @@
 
 namespace RestoreCord.Database.Models.BackupModels.Permissions;
 
-public class RolePermissions
+/// <summary>
+/// 
+/// </summary>
+public record RolePermissions
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [Key]
-    public int key { get; set; }
-    //
-    // Summary:
-    //     If true, a user may speak in a voice channel.
+    public Guid key { get; init; } = new();
+    
+    /// <summary>
+    /// 
+    /// </summary>
     public bool Speak { get; set; }
-    //
-    // Summary:
-    //     If true, a user may mute users.
+    
+    /// <summary>
+    /// 
+    /// </summary>
     public bool MuteMembers { get; set; }
-    //
-    // Summary:
-    //     If true, a user may deafen users.
+    
+    /// <summary>
+    /// 
+    /// </summary>
     public bool DeafenMembers { get; set; }
-    //
-    // Summary:
-    //     If true, a user may move other users between voice channels.
+    
+    /// <summary>
+    /// 
+    /// </summary>
     public bool MoveMembers { get; set; }
-    //
-    // Summary:
-    //     If true, a user may use voice-activity-detection rather than push-to-talk.
+    
+    /// <summary>
+    /// 
+    /// </summary>
     public bool UseVAD { get; set; }
-    //
-    // Summary:
-    //     If True, a user may use priority speaker in a voice channel.
+    
+    /// <summary>
+    /// 
+    /// </summary>
     public bool PrioritySpeaker { get; set; }
-    //
-    // Summary:
-    //     If True, a user may stream video in a voice channel.
+    
+    /// <summary>
+    /// 
+    /// </summary>
     public bool Stream { get; set; }
-    //
-    // Summary:
-    //     If true, a user may change their own nickname.
+    
+    /// <summary>
+    /// 
+    /// </summary>
     public bool ChangeNickname { get; set; }
-    //
-    // Summary:
-    //     If true, a user may change the nickname of other users.
+    
+    /// <summary>
+    /// 
+    /// </summary>
     public bool ManageNicknames { get; set; }
-    //
-    // Summary:
-    //     If true, a user may edit the emojis and stickers for this guild.
+    
+    /// <summary>
+    /// 
+    /// </summary>
     public bool ManageEmojisAndStickers { get; set; }
-    //
-    // Summary:
-    //     If true, a user may edit the webhooks for this guild.
+    
+    /// <summary>
+    /// 
+    /// </summary>
     public bool ManageWebhooks { get; set; }
-    //
-    // Summary:
-    //     If true, a user may connect to a voice channel.
+    
+    /// <summary>
+    /// 
+    /// </summary>
     public bool Connect { get; set; }
-    //
-    // Summary:
-    //     If true, a user may use slash commands in this guild.
+    
+    /// <summary>
+    /// 
+    /// </summary>
     public bool UseApplicationCommands { get; set; }
-    //
-    // Summary:
-    //     If true, a user may request to speak in stage channels.
+    
+    /// <summary>
+    /// 
+    /// </summary>
     public bool RequestToSpeak { get; set; }
-    //
-    // Summary:
-    //     If true, a user may create, edit, and delete events.
+    
+    /// <summary>
+    /// 
+    /// </summary>
     public bool ManageEvents { get; set; }
-    //
-    // Summary:
-    //     If true, a user may manage threads in this guild.
+    
+    /// <summary>
+    /// 
+    /// </summary>
     public bool ManageThreads { get; set; }
-    //
-    // Summary:
-    //     If true, a user may create public threads in this guild.
+    
+    /// <summary>
+    /// 
+    /// </summary>
     public bool CreatePublicThreads { get; set; }
-    //
-    // Summary:
-    //     If true, a user may create private threads in this guild.
+    
+    /// <summary>
+    /// 
+    /// </summary>
     public bool CreatePrivateThreads { get; set; }
-    //
-    // Summary:
-    //     If true, a user may use external stickers in this guild.
+    
+    /// <summary>
+    /// 
+    /// </summary>
     public bool UseExternalStickers { get; set; }
-    //
-    // Summary:
-    //     If true, a user may adjust roles.
+    
+    /// <summary>
+    /// 
+    /// </summary>
     public bool ManageRoles { get; set; }
-    //
-    // Summary:
-    //     If true, a user may use custom emoji from other guilds.
+    
+    /// <summary>
+    /// 
+    /// </summary>
     public bool UseExternalEmojis { get; set; }
-    //
-    // Summary:
-    //     If true, a user may send files.
+    
+    /// <summary>
+    /// 
+    /// </summary>
     public bool AttachFiles { get; set; }
-    //
-    // Summary:
-    //     If true, a user may read previous messages.
+    
+    /// <summary>
+    /// 
+    /// </summary>
     public bool ReadMessageHistory { get; set; }
-    //
-    // Summary:
-    //     If true, a user may create invites.
+    
+    /// <summary>
+    /// 
+    /// </summary>
     public bool CreateInstantInvite { get; set; }
-    //
-    // Summary:
-    //     If true, a user may ban users from the guild.
+    
+    /// <summary>
+    /// 
+    /// </summary>
     public bool BanMembers { get; set; }
-    //
-    // Summary:
-    //     If true, a user may kick users from the guild.
+    
+    /// <summary>
+    /// 
+    /// </summary>
     public bool KickMembers { get; set; }
-    //
-    // Summary:
-    //     If true, a user is granted all permissions, and cannot have them revoked via
+    
+    /// <summary>
+    /// 
+    /// </summary>
     //     channel permissions.
     public bool Administrator { get; set; }
-    //
-    // Summary:
-    //     If true, a user may mention @everyone.
+    
+    /// <summary>
+    /// 
+    /// </summary>
     public bool MentionEveryone { get; set; }
-    //
-    // Summary:
-    //     If true, a user may adjust guild properties.
+    
+    /// <summary>
+    /// 
+    /// </summary>
     public bool ManageGuild { get; set; }
-    //
-    // Summary:
-    //     If true, a user may add reactions.
+    
+    /// <summary>
+    /// 
+    /// </summary>
     public bool AddReactions { get; set; }
-    //
-    // Summary:
-    //     If true, a user may create, delete and modify channels.
+    
+    /// <summary>
+    /// 
+    /// </summary>
     public bool ManageChannels { get; set; }
-    //
-    // Summary:
-    //     If true, a user may view the guild insights.
+    
+    /// <summary>
+    /// 
+    /// </summary>
     public bool ViewGuildInsights { get; set; }
-    //
-    // Summary:
-    //     If True, a user may view channels.
+    
+    /// <summary>
+    /// 
+    /// </summary>
     public bool ViewChannel { get; set; }
-    //
-    // Summary:
-    //     If True, a user may send messages.
+    
+    /// <summary>
+    /// 
+    /// </summary>
     public bool SendMessages { get; set; }
-    //
-    // Summary:
-    //     If true, a user may send text-to-speech messages.
+    
+    /// <summary>
+    /// 
+    /// </summary>
     public bool SendTTSMessages { get; set; }
-    //
-    // Summary:
-    //     If true, a user may delete messages.
+    
+    /// <summary>
+    /// 
+    /// </summary>
     public bool ManageMessages { get; set; }
-    //
-    // Summary:
-    //     If true, Discord will auto-embed links sent by this user.
+    
+    /// <summary>
+    /// 
+    /// </summary>
     public bool EmbedLinks { get; set; }
-    //
-    // Summary:
-    //     If true, a user may send messages in threads in this guild.
+    
+    /// <summary>
+    /// 
+    /// </summary>
     public bool SendMessagesInThreads { get; set; }
-    //
-    // Summary:
-    //     If true, a user may view the audit log.
+    
+    /// <summary>
+    /// 
+    /// </summary>
     public bool ViewAuditLog { get; set; }
-    //
-    // Summary:
-    //     If true, a user launch application activities in voice channels in this guild.
+    
+    /// <summary>
+    /// 
+    /// </summary>
     public bool StartEmbeddedActivities { get; set; }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public bool useVoiceActivation { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
     public bool moderateMembers { get; set; }
 }

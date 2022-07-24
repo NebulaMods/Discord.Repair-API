@@ -1,14 +1,35 @@
-﻿using System.Net;
+﻿using System.Collections.Concurrent;
+using System.Net;
 
 namespace RestoreCord.Utilities;
 public class ProxyConfiguration
 {
     public Dictionary<Uri, NetworkCredential> _credentialList = new();
+    public ConcurrentDictionary<Guid, HttpClient> _proxyPool = new();
     public ProxyConfiguration()
     {
-
     }
 }
+public class ProxyGen
+{
+    public async ValueTask<HttpClient> SetupHttpClientAsync(string proxyList, CancellationToken cancellationToken)
+    {
+        var proxy = new ProxyGenerator();
+        await proxy.LoadProxyListAsync(proxyList, cancellationToken);
+        using var handler = new HttpClientHandler()
+        {
+            Proxy = proxy,
+            PreAuthenticate = true,
+            UseDefaultCredentials = false,
+            UseProxy = true
+        };
+        var httpClient = new HttpClient(handler)
+        {
+        };
+        return httpClient;
+    }
+}
+
 public class ProxyGenerator : IWebProxy
 {
     private readonly Uri proxyUri;

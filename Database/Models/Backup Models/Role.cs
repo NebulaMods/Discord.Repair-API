@@ -2,18 +2,70 @@
 
 namespace RestoreCord.Database.Models.BackupModels;
 
-public class Role
+/// <summary>
+/// 
+/// </summary>
+public record Role
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [Key]
-    public int key { get; set; }
+    public Guid key { get; init; } = new();
+
+    /// <summary>
+    /// 
+    /// </summary>
     public ulong id { get; set; }
-    public string name { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// 
+    [StringLength(100)]
+    public string? name { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// 
+    [StringLength(100)]
     public string? icon { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
     public uint color { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
     public bool isHoisted { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
     public bool isManaged { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
     public bool isMentionable { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
     public int position { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
     public bool isEveryone { get; set; }
-    public virtual Permissions.RolePermissions permissions { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// 
+    [DataType(DataType.Custom)]
+    public virtual Permissions.RolePermissions? permissions { get; set; }
 }

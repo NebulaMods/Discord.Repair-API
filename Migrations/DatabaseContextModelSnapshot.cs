@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RestoreCord.Database;
 
 #nullable disable
@@ -16,83 +17,98 @@ namespace RestoreCord.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.4")
-                .HasAnnotation("Relational:MaxIdentifierLength", 64);
+                .HasAnnotation("ProductVersion", "6.0.7")
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
+
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("RestoreCord.Database.Models.BackupModels.Backup", b =>
                 {
-                    b.Property<int>("key")
+                    b.Property<Guid>("key")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("uuid");
 
-                    b.Property<int?>("Userkey")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("Userkey")
+                        .HasColumnType("uuid");
 
-                    b.Property<int?>("afkChannelkey")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("afkChannelkey")
+                        .HasColumnType("uuid");
 
                     b.Property<int?>("afkTimeout")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("bannerUrl")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<DateTime>("creationDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("timestamp with time zone");
 
-                    b.Property<int?>("defaultChannelkey")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("defaultChannelkey")
+                        .HasColumnType("uuid");
 
                     b.Property<int>("defaultMessageNotifications")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("description")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
 
                     b.Property<string>("discoverySplashUrl")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<int>("explicitContentFilterLevel")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("guildName")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("iconUrl")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<bool?>("isBoostProgressBarEnabled")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<bool?>("isWidgetEnabled")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("preferredLocale")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
-                    b.Property<int?>("publicUpdatesChannelkey")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("publicUpdatesChannelkey")
+                        .HasColumnType("uuid");
 
-                    b.Property<int?>("rulesChannelkey")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("rulesChannelkey")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("splashUrl")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<int>("systemChannelMessageDeny")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    b.Property<int?>("systemChannelkey")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("systemChannelkey")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("vanityUrl")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<int>("verificationLevel")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    b.Property<int?>("widgetChannelkey")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("widgetChannelkey")
+                        .HasColumnType("uuid");
 
                     b.HasKey("key");
 
@@ -115,22 +131,22 @@ namespace RestoreCord.Migrations
 
             modelBuilder.Entity("RestoreCord.Database.Models.BackupModels.Channel.CategoryChannel", b =>
                 {
-                    b.Property<int>("key")
+                    b.Property<Guid>("key")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("uuid");
 
-                    b.Property<int?>("Backupkey")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("Backupkey")
+                        .HasColumnType("uuid");
 
-                    b.Property<ulong>("id")
-                        .HasColumnType("bigint unsigned");
+                    b.Property<decimal>("id")
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("name")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<int>("position")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("key");
 
@@ -141,45 +157,47 @@ namespace RestoreCord.Migrations
 
             modelBuilder.Entity("RestoreCord.Database.Models.BackupModels.Channel.TextChannel", b =>
                 {
-                    b.Property<int>("key")
+                    b.Property<Guid>("key")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("uuid");
 
-                    b.Property<int?>("Backupkey")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("Backupkey")
+                        .HasColumnType("uuid");
 
                     b.Property<int?>("archiveAfter")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<bool>("archived")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
-                    b.Property<int?>("categorykey")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("categorykey")
+                        .HasColumnType("uuid");
 
-                    b.Property<ulong>("id")
-                        .HasColumnType("bigint unsigned");
+                    b.Property<decimal>("id")
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<bool>("locked")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("name")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<bool>("nsfw")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<int>("position")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("slowModeInterval")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<bool>("synced")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("topic")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.HasKey("key");
 
@@ -192,39 +210,42 @@ namespace RestoreCord.Migrations
 
             modelBuilder.Entity("RestoreCord.Database.Models.BackupModels.Channel.VoiceChannel", b =>
                 {
-                    b.Property<int>("key")
+                    b.Property<Guid>("key")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("uuid");
 
-                    b.Property<int?>("Backupkey")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("Backupkey")
+                        .HasColumnType("uuid");
 
                     b.Property<int>("bitrate")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    b.Property<int?>("categorykey")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("categorykey")
+                        .HasColumnType("uuid");
 
-                    b.Property<ulong>("id")
-                        .HasColumnType("bigint unsigned");
+                    b.Property<decimal>("id")
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("name")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<int>("position")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("region")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<bool>("synced")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<int?>("userLimit")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("videoQuality")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.HasKey("key");
 
@@ -237,18 +258,20 @@ namespace RestoreCord.Migrations
 
             modelBuilder.Entity("RestoreCord.Database.Models.BackupModels.Emoji", b =>
                 {
-                    b.Property<int>("key")
+                    b.Property<Guid>("key")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("uuid");
 
-                    b.Property<int?>("Backupkey")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("Backupkey")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("name")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("url")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.HasKey("key");
 
@@ -259,21 +282,23 @@ namespace RestoreCord.Migrations
 
             modelBuilder.Entity("RestoreCord.Database.Models.BackupModels.GuildUser", b =>
                 {
-                    b.Property<int>("key")
+                    b.Property<Guid>("key")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("uuid");
 
-                    b.Property<int?>("Backupkey")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("Backupkey")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("avatarUrl")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
-                    b.Property<ulong>("id")
-                        .HasColumnType("bigint unsigned");
+                    b.Property<decimal>("id")
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("username")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.HasKey("key");
 
@@ -282,50 +307,32 @@ namespace RestoreCord.Migrations
                     b.ToTable("GuildUser");
                 });
 
-            modelBuilder.Entity("RestoreCord.Database.Models.BackupModels.GuildUserRole", b =>
-                {
-                    b.Property<int>("key")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<int?>("GuildUserkey")
-                        .HasColumnType("int");
-
-                    b.Property<int>("rolekey")
-                        .HasColumnType("int");
-
-                    b.HasKey("key");
-
-                    b.HasIndex("GuildUserkey");
-
-                    b.HasIndex("rolekey");
-
-                    b.ToTable("GuildUserRole");
-                });
-
             modelBuilder.Entity("RestoreCord.Database.Models.BackupModels.Message", b =>
                 {
-                    b.Property<int>("key")
+                    b.Property<Guid>("key")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("uuid");
 
-                    b.Property<int?>("TextChannelkey")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("TextChannelkey")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("content")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
 
                     b.Property<int>("position")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    b.Property<ulong>("userId")
-                        .HasColumnType("bigint unsigned");
+                    b.Property<decimal>("userId")
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("userPicture")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("username")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.HasKey("key");
 
@@ -336,123 +343,123 @@ namespace RestoreCord.Migrations
 
             modelBuilder.Entity("RestoreCord.Database.Models.BackupModels.Permissions.ChannelPermissions", b =>
                 {
-                    b.Property<int>("key")
+                    b.Property<Guid>("key")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("uuid");
 
                     b.Property<int>("AddReactions")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("AttachFiles")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    b.Property<int?>("CategoryChannelkey")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("CategoryChannelkey")
+                        .HasColumnType("uuid");
 
                     b.Property<int>("Connect")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("CreateInstantInvite")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("CreatePrivateThreads")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("CreatePublicThreads")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("DeafenMembers")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("EmbedLinks")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("ManageChannel")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("ManageMessages")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("ManageRoles")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("ManageThreads")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("ManageWebhooks")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("MentionEveryone")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("MoveMembers")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("MuteMembers")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("PrioritySpeaker")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("ReadMessageHistory")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("RequestToSpeak")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("SendMessages")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("SendMessagesInThreads")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("SendTTSMessages")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("Speak")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("StartEmbeddedActivities")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("Stream")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    b.Property<int?>("TextChannelkey")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("TextChannelkey")
+                        .HasColumnType("uuid");
 
                     b.Property<int>("UseApplicationCommands")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("UseExternalEmojis")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("UseExternalStickers")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("UseVAD")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("ViewChannel")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    b.Property<int?>("VoiceChannelkey")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("VoiceChannelkey")
+                        .HasColumnType("uuid");
 
                     b.Property<int>("permissionTarget")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    b.Property<ulong>("targetId")
-                        .HasColumnType("bigint unsigned");
+                    b.Property<decimal>("targetId")
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<int>("usePrivateThreads")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("useSlashCommands")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("useVoiceActivation")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("key");
 
@@ -467,135 +474,135 @@ namespace RestoreCord.Migrations
 
             modelBuilder.Entity("RestoreCord.Database.Models.BackupModels.Permissions.RolePermissions", b =>
                 {
-                    b.Property<int>("key")
+                    b.Property<Guid>("key")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("uuid");
 
                     b.Property<bool>("AddReactions")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("Administrator")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("AttachFiles")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("BanMembers")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("ChangeNickname")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("Connect")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("CreateInstantInvite")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("CreatePrivateThreads")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("CreatePublicThreads")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("DeafenMembers")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("EmbedLinks")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("KickMembers")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("ManageChannels")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("ManageEmojisAndStickers")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("ManageEvents")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("ManageGuild")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("ManageMessages")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("ManageNicknames")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("ManageRoles")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("ManageThreads")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("ManageWebhooks")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("MentionEveryone")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("MoveMembers")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("MuteMembers")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("PrioritySpeaker")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("ReadMessageHistory")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("RequestToSpeak")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("SendMessages")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("SendMessagesInThreads")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("SendTTSMessages")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("Speak")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("StartEmbeddedActivities")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("Stream")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("UseApplicationCommands")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("UseExternalEmojis")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("UseExternalStickers")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("UseVAD")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("ViewAuditLog")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("ViewChannel")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("ViewGuildInsights")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("moderateMembers")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("useVoiceActivation")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.HasKey("key");
 
@@ -604,70 +611,94 @@ namespace RestoreCord.Migrations
 
             modelBuilder.Entity("RestoreCord.Database.Models.BackupModels.Role", b =>
                 {
-                    b.Property<int>("key")
+                    b.Property<Guid>("key")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("uuid");
 
-                    b.Property<int?>("Backupkey")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("Backupkey")
+                        .HasColumnType("uuid");
 
-                    b.Property<uint>("color")
-                        .HasColumnType("int unsigned");
+                    b.Property<Guid?>("GuildUserkey")
+                        .HasColumnType("uuid");
+
+                    b.Property<long>("color")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("icon")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
-                    b.Property<ulong>("id")
-                        .HasColumnType("bigint unsigned");
+                    b.Property<decimal>("id")
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<bool>("isEveryone")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("isHoisted")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("isManaged")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("isMentionable")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("name")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
-                    b.Property<int>("permissionskey")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("permissionskey")
+                        .HasColumnType("uuid");
 
                     b.Property<int>("position")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("key");
 
                     b.HasIndex("Backupkey");
+
+                    b.HasIndex("GuildUserkey");
 
                     b.HasIndex("permissionskey");
 
                     b.ToTable("Role");
                 });
 
+            modelBuilder.Entity("RestoreCord.Database.Models.BackupModels.Sticker", b =>
+                {
+                    b.Property<Guid>("key")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("Backupkey")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("key");
+
+                    b.HasIndex("Backupkey");
+
+                    b.ToTable("Sticker");
+                });
+
             modelBuilder.Entity("RestoreCord.Database.Models.Blacklist", b =>
                 {
-                    b.Property<int>("key")
+                    b.Property<Guid>("key")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("uuid");
 
-                    b.Property<int?>("ServerSettingskey")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("ServerSettingskey")
+                        .HasColumnType("uuid");
 
-                    b.Property<ulong?>("discordId")
-                        .HasColumnType("bigint unsigned");
+                    b.Property<decimal?>("discordId")
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("ip")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("reason")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.HasKey("key");
 
@@ -678,35 +709,35 @@ namespace RestoreCord.Migrations
 
             modelBuilder.Entity("RestoreCord.Database.Models.CustomBot", b =>
                 {
-                    b.Property<int>("key")
+                    b.Property<Guid>("key")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("uuid");
 
-                    b.Property<int?>("Userkey")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("Userkey")
+                        .HasColumnType("uuid");
 
                     b.Property<int>("botType")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("clientId")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("clientSecret")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("name")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("token")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("urlRedirect")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
 
                     b.HasKey("key");
 
@@ -717,59 +748,63 @@ namespace RestoreCord.Migrations
 
             modelBuilder.Entity("RestoreCord.Database.Models.LogModels.Errors", b =>
                 {
-                    b.Property<int>("id")
+                    b.Property<Guid>("key")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("errorTime")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("extraInfo")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
 
                     b.Property<string>("location")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("message")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.Property<string>("stackTrace")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
 
-                    b.HasKey("id");
+                    b.HasKey("key");
 
                     b.ToTable("errors");
                 });
 
             modelBuilder.Entity("RestoreCord.Database.Models.LogModels.Statistics", b =>
                 {
-                    b.Property<int>("key")
+                    b.Property<Guid>("key")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("uuid");
 
-                    b.Property<int>("MigratedBykey")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("MigratedBykey")
+                        .HasColumnType("uuid");
 
                     b.Property<bool>("active")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<DateTime?>("endDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("timestamp with time zone");
 
-                    b.Property<ulong>("guildId")
-                        .HasColumnType("bigint unsigned");
+                    b.Property<decimal>("guildId")
+                        .HasColumnType("numeric(20,0)");
 
-                    b.Property<int?>("guildStatskey")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("guildStatskey")
+                        .HasColumnType("uuid");
 
-                    b.Property<int?>("memberStatskey")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("memberStatskey")
+                        .HasColumnType("uuid");
 
-                    b.Property<int>("serverkey")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("serverkey")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("startDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("key");
 
@@ -786,68 +821,76 @@ namespace RestoreCord.Migrations
 
             modelBuilder.Entity("RestoreCord.Database.Models.Member", b =>
                 {
-                    b.Property<int>("key")
+                    b.Property<Guid>("key")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("accessToken")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("avatar")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
-                    b.Property<int?>("botUsedkey")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("botUsedkey")
+                        .HasColumnType("uuid");
 
-                    b.Property<ulong?>("creationDate")
-                        .HasColumnType("bigint unsigned");
+                    b.Property<decimal?>("creationDate")
+                        .HasColumnType("numeric(20,0)");
 
-                    b.Property<ulong>("discordId")
-                        .HasColumnType("bigint unsigned");
-
-                    b.Property<ulong>("guildId")
-                        .HasColumnType("bigint unsigned");
+                    b.Property<decimal>("discordId")
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("ip")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("refreshToken")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<Guid?>("serverkey")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("username")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.HasKey("key");
 
                     b.HasIndex("botUsedkey");
+
+                    b.HasIndex("serverkey");
 
                     b.ToTable("members");
                 });
 
             modelBuilder.Entity("RestoreCord.Database.Models.Server", b =>
                 {
-                    b.Property<int>("key")
+                    b.Property<Guid>("key")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("uuid");
 
                     b.Property<bool>("banned")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
-                    b.Property<ulong?>("guildId")
-                        .HasColumnType("bigint unsigned");
+                    b.Property<decimal?>("guildId")
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("name")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
-                    b.Property<int>("ownerkey")
-                        .HasColumnType("int");
+                    b.Property<Guid>("ownerkey")
+                        .HasColumnType("uuid");
 
-                    b.Property<ulong?>("roleId")
-                        .HasColumnType("bigint unsigned");
+                    b.Property<decimal?>("roleId")
+                        .HasColumnType("numeric(20,0)");
 
-                    b.Property<int>("settingskey")
-                        .HasColumnType("int");
+                    b.Property<Guid>("settingskey")
+                        .HasColumnType("uuid");
 
                     b.HasKey("key");
 
@@ -860,55 +903,61 @@ namespace RestoreCord.Migrations
 
             modelBuilder.Entity("RestoreCord.Database.Models.ServerSettings", b =>
                 {
-                    b.Property<int>("key")
+                    b.Property<Guid>("key")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("uuid");
 
                     b.Property<bool>("autoBlacklist")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("autoJoin")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("autoKickUnVerified")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<int>("autoKickUnVerifiedTime")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("backgroundImage")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
 
                     b.Property<bool>("dmOnAutoKick")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
-                    b.Property<int?>("mainBotkey")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("mainBotkey")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("pic")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
 
                     b.Property<int>("redirectTime")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("redirectUrl")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
 
                     b.Property<string>("vanityUrl")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
 
                     b.Property<string>("verifyDescription")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
 
                     b.Property<bool>("vpnCheck")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("webhook")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
 
                     b.Property<int>("webhookLogType")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("key");
 
@@ -919,15 +968,15 @@ namespace RestoreCord.Migrations
 
             modelBuilder.Entity("RestoreCord.Database.Models.Statistics.GuildMigration", b =>
                 {
-                    b.Property<int>("key")
+                    b.Property<Guid>("key")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("startTime")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<TimeSpan>("totalTime")
-                        .HasColumnType("time(6)");
+                        .HasColumnType("interval");
 
                     b.HasKey("key");
 
@@ -936,42 +985,42 @@ namespace RestoreCord.Migrations
 
             modelBuilder.Entity("RestoreCord.Database.Models.Statistics.MemberMigration", b =>
                 {
-                    b.Property<int>("key")
+                    b.Property<Guid>("key")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("uuid");
 
                     b.Property<int>("alreadyHereCount")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("bannedCount")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("blacklistedCount")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("estimatedCompletionTime")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("failedCount")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("invalidTokenCount")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("startTime")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("successCount")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("tooManyGuildsCount")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("totalCount")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<TimeSpan>("totalTime")
-                        .HasColumnType("time(6)");
+                        .HasColumnType("interval");
 
                     b.HasKey("key");
 
@@ -980,54 +1029,62 @@ namespace RestoreCord.Migrations
 
             modelBuilder.Entity("RestoreCord.Database.Models.User", b =>
                 {
-                    b.Property<int>("key")
+                    b.Property<Guid>("key")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("apiToken")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<bool>("banned")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<DateTime>("createdAt")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("darkmode")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
-                    b.Property<ulong?>("discordId")
-                        .HasColumnType("bigint unsigned");
+                    b.Property<decimal?>("discordId")
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("email")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<DateTime?>("expiry")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("googleAuthCode")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("lastIP")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
 
                     b.Property<string>("password")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("pfp")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("role")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
 
                     b.Property<string>("username")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
 
                     b.HasKey("key");
 
@@ -1124,21 +1181,6 @@ namespace RestoreCord.Migrations
                         .HasForeignKey("Backupkey");
                 });
 
-            modelBuilder.Entity("RestoreCord.Database.Models.BackupModels.GuildUserRole", b =>
-                {
-                    b.HasOne("RestoreCord.Database.Models.BackupModels.GuildUser", null)
-                        .WithMany("assignedRoles")
-                        .HasForeignKey("GuildUserkey");
-
-                    b.HasOne("RestoreCord.Database.Models.BackupModels.Role", "role")
-                        .WithMany()
-                        .HasForeignKey("rolekey")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("role");
-                });
-
             modelBuilder.Entity("RestoreCord.Database.Models.BackupModels.Message", b =>
                 {
                     b.HasOne("RestoreCord.Database.Models.BackupModels.Channel.TextChannel", null)
@@ -1167,13 +1209,22 @@ namespace RestoreCord.Migrations
                         .WithMany("roles")
                         .HasForeignKey("Backupkey");
 
+                    b.HasOne("RestoreCord.Database.Models.BackupModels.GuildUser", null)
+                        .WithMany("assignedRoles")
+                        .HasForeignKey("GuildUserkey");
+
                     b.HasOne("RestoreCord.Database.Models.BackupModels.Permissions.RolePermissions", "permissions")
                         .WithMany()
-                        .HasForeignKey("permissionskey")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("permissionskey");
 
                     b.Navigation("permissions");
+                });
+
+            modelBuilder.Entity("RestoreCord.Database.Models.BackupModels.Sticker", b =>
+                {
+                    b.HasOne("RestoreCord.Database.Models.BackupModels.Backup", null)
+                        .WithMany("stickers")
+                        .HasForeignKey("Backupkey");
                 });
 
             modelBuilder.Entity("RestoreCord.Database.Models.Blacklist", b =>
@@ -1194,9 +1245,7 @@ namespace RestoreCord.Migrations
                 {
                     b.HasOne("RestoreCord.Database.Models.User", "MigratedBy")
                         .WithMany()
-                        .HasForeignKey("MigratedBykey")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("MigratedBykey");
 
                     b.HasOne("RestoreCord.Database.Models.Statistics.GuildMigration", "guildStats")
                         .WithMany()
@@ -1208,9 +1257,7 @@ namespace RestoreCord.Migrations
 
                     b.HasOne("RestoreCord.Database.Models.Server", "server")
                         .WithMany()
-                        .HasForeignKey("serverkey")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("serverkey");
 
                     b.Navigation("MigratedBy");
 
@@ -1227,7 +1274,13 @@ namespace RestoreCord.Migrations
                         .WithMany()
                         .HasForeignKey("botUsedkey");
 
+                    b.HasOne("RestoreCord.Database.Models.Server", "server")
+                        .WithMany()
+                        .HasForeignKey("serverkey");
+
                     b.Navigation("botUsed");
+
+                    b.Navigation("server");
                 });
 
             modelBuilder.Entity("RestoreCord.Database.Models.Server", b =>
@@ -1265,6 +1318,8 @@ namespace RestoreCord.Migrations
                     b.Navigation("emojis");
 
                     b.Navigation("roles");
+
+                    b.Navigation("stickers");
 
                     b.Navigation("textChannels");
 

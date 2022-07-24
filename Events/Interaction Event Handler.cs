@@ -1,10 +1,12 @@
-﻿using Discord;
+﻿using System.Reflection;
+
+using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
+
 using RestoreCord.Database;
 using RestoreCord.Database.Models.LogModels;
 using RestoreCord.Utilities;
-using System.Reflection;
 
 namespace RestoreCord.Events;
 

@@ -1,8 +1,11 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
+
 using Discord;
 using Discord.Interactions;
+
 using Microsoft.EntityFrameworkCore;
+
 using RestoreCord.Utilities;
 
 namespace RestoreCord.Commands;

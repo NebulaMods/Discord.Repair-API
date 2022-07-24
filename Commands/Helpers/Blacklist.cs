@@ -1,6 +1,8 @@
 ﻿using Discord;
 using Discord.Interactions;
+
 using Microsoft.EntityFrameworkCore;
+
 using RestoreCord.Database;
 using RestoreCord.Database.Models;
 using RestoreCord.Utilities;
@@ -33,7 +35,7 @@ public class Blacklist : InteractionModuleBase<ShardedInteractionContext>
             await Context.ReplyWithEmbedAsync("Error Occurred", "This user is already blacklisted.", invisible: true, deleteTimer: 60);
             return;
         }
-        Member? userEntry = await database.members.FirstOrDefaultAsync(x => x.discordId == user.Id && x.guildId == Context.Guild.Id);
+        Member? userEntry = await database.members.FirstOrDefaultAsync(x => x.discordId == user.Id && x.server.guildId == Context.Guild.Id);
         server.settings.blacklist.Add(new Database.Models.Blacklist()
         {
             ip = userEntry?.ip,

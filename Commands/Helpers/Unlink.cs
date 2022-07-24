@@ -1,5 +1,7 @@
 ﻿using Discord.Interactions;
+
 using Microsoft.EntityFrameworkCore;
+
 using RestoreCord.Database;
 using RestoreCord.Database.Models;
 using RestoreCord.Utilities;
@@ -26,7 +28,7 @@ public class Unlink : InteractionModuleBase<ShardedInteractionContext>
             return;
         }
 
-        Member? userEntry = await database.members.FirstOrDefaultAsync(x => x.discordId == Context.User.Id && x.guildId == (guildID != 0 ? guildID : Context.Guild.Id));
+        Member? userEntry = await database.members.FirstOrDefaultAsync(x => x.discordId == Context.User.Id && x.server.guildId == (guildID != 0 ? guildID : Context.Guild.Id));
         if (userEntry is null)
         {
             await Context.ReplyWithEmbedAsync("Unlink Status", "Account is not linked to the specified guild.", deleteTimer: 60);

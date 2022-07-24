@@ -5,23 +5,30 @@ namespace RestoreCord.Database.Models;
 /// <summary>
 /// 
 /// </summary>
-public class Blacklist
+public record Blacklist
 {
     /// <summary>
     /// 
     /// </summary>
     [Key]
-    public int key { get; set; }
+    public Guid key { get; init; } = new();
+
     /// <summary>
     /// 
     /// </summary>
     public ulong? discordId { get; set; }
+
     /// <summary>
     /// 
     /// </summary>
+    /// 
+    [StringLength(100)]
     public string? ip { get; set; }
+
     /// <summary>
     /// 
     /// </summary>
+    /// 
+    [StringLength(200)]
     public string? reason { get; set; }
 }

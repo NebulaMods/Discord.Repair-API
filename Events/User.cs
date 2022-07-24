@@ -1,6 +1,8 @@
 ﻿using Discord;
 using Discord.WebSocket;
+
 using Microsoft.EntityFrameworkCore;
+
 using RestoreCord.Database;
 using RestoreCord.Database.Models;
 using RestoreCord.Utilities;
@@ -42,7 +44,7 @@ public class User
         {
             return;
         }
-        Member? userEntry = await database.members.FirstOrDefaultAsync(x => x.discordId == arg1.Id && x.guildId == arg2.Id);
+        Member? userEntry = await database.members.FirstOrDefaultAsync(x => x.discordId == arg1.Id && x.server.guildId == arg2.Id);
         server.settings.blacklist.Add(new Blacklist()
         {
             ip = userEntry?.ip,

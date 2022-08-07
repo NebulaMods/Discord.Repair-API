@@ -1,13 +1,12 @@
 ﻿using Discord.Rest;
 
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
-using RestoreCord.Database;
-using RestoreCord.Records.Responses;
-using RestoreCord.Utilities;
+using DiscordRepair.Database;
+using DiscordRepair.Records.Responses;
+using DiscordRepair.Utilities;
 
-namespace RestoreCord.Endpoints.V1.Guild.User;
+namespace DiscordRepair.Endpoints.V1.Guild.User;
 
 /// <summary>
 /// 
@@ -18,12 +17,13 @@ namespace RestoreCord.Endpoints.V1.Guild.User;
 public class UnBlacklist : ControllerBase
 {
     /// <summary>
-    /// 
+    /// Unblacklist a user from a guild/server.
     /// </summary>
     /// <param name="guildId"></param>
     /// <param name="userId"></param>
+    /// <remarks>Unblacklist a user from a guild/server.</remarks>
     /// <returns></returns>
-    [HttpPost("{guildId}/unblacklist/{userId}")]
+    [HttpDelete("{guildId}/blacklist/{userId}")]
     [Consumes("plain/text")]
     [Produces("application/json")]
     [ProducesResponseType(typeof(Generic), 200)]
@@ -31,14 +31,25 @@ public class UnBlacklist : ControllerBase
     [ProducesResponseType(typeof(Generic), 400)]
     public async Task<ActionResult<Generic>> HandleAsync(ulong guildId, ulong userId)
     {
+        if (userId is 0 || guildId is 0)
+        {
+            return BadRequest(new Generic()
+            {
+                success = false,
+                details = "invalid paramaters, please try again."
+            });
+        }
         await using var database = new DatabaseContext();
-        var result = await this.VerifyServer(guildId, userId, database);
+        var result = await this.VerifyServer(guildId, userId, database, HttpContext.Request.Headers["Authorization"]);
         if (result.Item1 is not null)
             return result.Item1;
         if (result.Item2 is null)
-            return NoContent();
-        Database.Models.Server serverEntry = await database.servers.FirstAsync(x => x.guildId == guildId);
-        Database.Models.Blacklist? blacklistUser = serverEntry.settings.blacklist.FirstOrDefault(x => x.discordId == userId);
+            return BadRequest(new Generic()
+            {
+                success = false,
+                details = "invalid paramaters, please try again."
+            });
+        Database.Models.Blacklist? blacklistUser = result.Item2.settings.blacklist.FirstOrDefault(x => x.discordId == userId);
         if (blacklistUser is null)
         {
             return NotFound(new Generic()
@@ -47,12 +58,12 @@ public class UnBlacklist : ControllerBase
                 details = "user isn't blacklisted."
             });
         }
-        serverEntry.settings.blacklist.Remove(blacklistUser);
-        await database.ApplyChangesAsync(serverEntry);
+        result.Item2.settings.blacklist.Remove(blacklistUser);
+        await database.ApplyChangesAsync(result.Item2);
         try
         {
             await using DiscordRestClient client = new();
-            await client.LoginAsync(Discord.TokenType.Bot, serverEntry.settings.mainBot is null ? Properties.Resources.Token : serverEntry.settings.mainBot.token);
+            await client.LoginAsync(Discord.TokenType.Bot, result.Item2.settings.mainBot.token);
             RestGuild? guildSocket = await client.GetGuildAsync(guildId);
 
             if (guildSocket is not null)
@@ -62,7 +73,7 @@ public class UnBlacklist : ControllerBase
         return Ok(new Generic()
         {
             success = true,
-            details = $"Successfully unblacklisted {userId} from {guildId}"
+            details = $"Successfully unblacklisted {userId} from {guildId}."
         });
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Concurrent;
 
-namespace RestoreCord.MigrationMaster;
+namespace DiscordRepair.MigrationMaster;
 
 /// <summary>
 /// 
@@ -13,9 +13,9 @@ public class Configuration
     public Configuration()
     {
         _runningMigrations = new();
-        _clientSecret = Properties.Resources.ClientSecret;
-        _clientId = Properties.Resources.ClientID;
-        _token = Properties.Resources.Token;
+        _clientSecret = "";
+        _clientId = "";
+        _token = "";
     }
     public readonly string _token;
     public readonly string _clientId;

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace RestoreCord.Database.Models.Statistics;
+namespace DiscordRepair.Database.Models.Statistics;
 
 /// <summary>
 /// 

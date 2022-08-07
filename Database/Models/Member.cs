@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace RestoreCord.Database.Models;
+namespace DiscordRepair.Database.Models;
 
 /// <summary>
 /// 
@@ -25,7 +25,8 @@ public record Member
     /// </summary>
     /// 
     [DataType(DataType.Custom)]
-    public virtual Server? server { get; set; }
+    [Required]
+    public virtual Server server { get; set; }
 
     /// <summary>
     /// 
@@ -39,7 +40,8 @@ public record Member
     /// </summary>
     /// 
     [StringLength(100)]
-    public string? refreshToken { get; set; }
+    [Required]
+    public string refreshToken { get; set; }
 
     /// <summary>
     /// 
@@ -72,5 +74,6 @@ public record Member
     /// </summary>
     /// 
     [DataType(DataType.Custom)]
-    public virtual CustomBot? botUsed { get; set; }
+    [Required]
+    public virtual CustomBot botUsed { get; set; }
 }

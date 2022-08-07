@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-using RestoreCord.Database.Models;
-using RestoreCord.Database.Models.LogModels;
+using DiscordRepair.Database.Models;
+using DiscordRepair.Database.Models.LogModels;
 
-namespace RestoreCord.Database;
+namespace DiscordRepair.Database;
 
 /// <summary>
 /// 

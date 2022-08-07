@@ -1,50 +1,39 @@
-﻿using Discord;
+﻿using System.Security.Cryptography;
 
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Discord;
 
-using RestoreCord.Database;
-using RestoreCord.Database.Models;
-using RestoreCord.Records.Responses;
+using Konscious.Security.Cryptography;
 
-namespace RestoreCord.Utilities;
+namespace DiscordRepair.Utilities;
 
 internal static class Miscallenous
 {
     internal static Color RandomDiscordColour() => new(new Random().Next(0, 255), new Random().Next(0, 255), new Random().Next(0, 255));
 
-    internal static async ValueTask<(ActionResult?, Server?)> VerifyServer(this ControllerBase @base, ulong guildId, ulong userId, DatabaseContext database)
+    internal static string GenerateApiToken()
     {
-        if (userId is 0 || guildId is 0)
-        {
-            return (@base.BadRequest(new Generic() { success = false, details = "invalid parameters, please try again." }), null);
-        }
-        Server? server = await database.servers.FirstOrDefaultAsync(x => x.guildId == guildId);
-        return server is null
-            ? (@base.BadRequest(new Generic() { success = false, details = "guild does not exist, please try again." }), null)
-            : server.banned
-            ? (@base.BadRequest(new Generic() { success = false, details = "guild is banned." }), null)
-            : ((ActionResult?, Server?))(null, server);
+        using var cryptRNG = RandomNumberGenerator.Create();
+        byte[] tokenBuffer = new byte[64];
+        cryptRNG.GetBytes(tokenBuffer);
+        return Convert.ToBase64String(tokenBuffer);
     }
-    internal static async ValueTask<(ActionResult?, Server?)> VerifyServer(this ControllerBase @base, ulong guildId, DatabaseContext database)
+
+    internal static string WhoAmI(this HttpContext httpContext)
     {
-        if (guildId is 0)
-        {
-            return (@base.BadRequest(new Generic() { success = false, details = "invalid parameters, please try again." }), null);
-        }
-        Server? server = await database.servers.FirstOrDefaultAsync(x => x.guildId == guildId);
-        return server is null
-            ? (@base.BadRequest(new Generic()
-            {
-                success = false,
-                details = "guild does not exist, please try again."
-            }), null)
-            : server.banned
-            ? (@base.BadRequest(new Generic()
-            {
-                success = false,
-                details = "guild is banned."
-            }), null)
-            : ((ActionResult?, Server?))(null, server);
+        return httpContext.User.Claims.First(x => x.Type == "username").Value;
     }
+
+    internal static async ValueTask<string> HashPassword(string password)
+    {
+        using Argon2id argon2 = new(Convert.FromBase64String(password))
+        {
+            Salt = Convert.FromBase64String(Properties.Resources.Argon2Salt),
+            DegreeOfParallelism = 2, // four cores
+            Iterations = 4,
+            MemorySize = 128 * 128 // .5 GB
+        };
+        byte[]? hashed = await argon2.GetBytesAsync(128);
+        return Convert.ToBase64String(hashed);
+    }
+    internal static async ValueTask<bool> VerifyHash(string password, string hashedPassword) => await HashPassword(password) == hashedPassword;
 }

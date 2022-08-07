@@ -4,21 +4,29 @@ using Discord;
 using Discord.Rest;
 
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
-using RestoreCord.Database;
-using RestoreCord.Database.Models;
-using RestoreCord.Records.Responses;
-using RestoreCord.Utilities;
+using DiscordRepair.Database;
+using DiscordRepair.Records.Responses;
+using DiscordRepair.Utilities;
 
-namespace RestoreCord.Endpoints.V1.Guild;
+namespace DiscordRepair.Endpoints.V1.Guild;
 
+/// <summary>
+/// 
+/// </summary>
 [ApiController]
 [Route("/v1/guild/")]
 [ApiExplorerSettings(GroupName = "Guild Endpoints")]
 public class Message : ControllerBase
 {
-
+    /// <summary>
+    /// Send a message to a discord channel using the defaault bot for the server/guild.
+    /// </summary>
+    /// <param name="guildId"></param>
+    /// <param name="channelId"></param>
+    /// <param name="message"></param>
+    /// <remarks>Send a message to a discord channel using the defaault bot for the server/guild.</remarks>
+    /// <returns></returns>
     [HttpPost("{guildId}/{channelId}/message")]
     [Consumes("application/json")]
     [Produces("application/json")]
@@ -27,38 +35,33 @@ public class Message : ControllerBase
     [ProducesResponseType(typeof(Generic), 400)]
     public async Task<ActionResult<Generic>> HandleAsync(ulong guildId, ulong channelId, Records.Requests.Guild.Message message)
     {
-        if (message is null)
+        if (message is null || guildId is 0 || channelId is 0)
             return BadRequest(new Generic()
             {
                 success = false,
-                details = ""
+                details = "invalid paramaters, please try again."
             });
         await using var client = new DiscordRestClient();
         await using var database = new DatabaseContext();
-        var result = await this.VerifyServer(guildId, database);
+        var result = await this.VerifyServer(guildId, database, HttpContext.Request.Headers["Authorization"]);
         if (result.Item1 is not null)
             return result.Item1;
         if (result.Item2 is null)
-            return NoContent();
-        Database.Models.Server serverEntry = await database.servers.FirstAsync(x => x.guildId == guildId);
-        await client.LoginAsync(TokenType.Bot, serverEntry.settings.mainBot is null ? Properties.Resources.Token : serverEntry.settings.mainBot.token);
+            return BadRequest(new Generic()
+            {
+                success = false,
+                details = "invalid paramaters, please try again."
+            });
+        await client.LoginAsync(TokenType.Bot, result.Item2.settings.mainBot.token);
         //login
         var guild = await client.GetGuildAsync(guildId);
-        if (guild == null) return BadRequest(new Generic()
-        {
-            success = false
-        });
+        if (guild == null) 
+            return BadRequest(new Generic()
+            {
+                success = false,
+                details = "guild is invalid."
+            });
         var channel = await guild.GetTextChannelAsync(channelId);
-        if (message.verifyMessage is null)
-        {
-            if (message.embeds?.Length > 10)
-                return BadRequest(new Generic()
-                {
-                    success = false
-                });
-            await channel.SendMessageAsync(message.text, message.isTts, components: message.component, embeds: message.embeds);
-            return Ok();
-        }
         var discordColour = new Discord.Color();
         System.Drawing.Color color = new();
         switch (message.verifyMessage.embedColour)
@@ -137,7 +140,7 @@ public class Message : ControllerBase
                         {
                             Style = ButtonStyle.Link,
                             Label = "Verify",
-                            Url = $"https://discord.com/oauth2/authorize?client_id=791106018175614988&scope=identify+guilds.join&response_type=code&prompt=none&prompt=none&redirect_uri=https://restorecord.com/auth/&state={guildId}",
+                            Url = $"https://discord.com/oauth2/authorize?client_id={result.Item2.settings.mainBot.clientId}&scope=identify+guilds.join&response_type=code&prompt=none&prompt=none&redirect_uri=https://discord.repair/verify/&state={guildId}",
                         }.Build(),
                     }
                 }
@@ -155,8 +158,8 @@ public class Message : ControllerBase
             },
             Footer = new EmbedFooterBuilder
             {
-                Text = "RestoreCord",
-                IconUrl = "https://i.imgur.com/Nfy4OoG.png"
+                Text = "Discord Repair",
+                IconUrl = "https://discord.repair/content/logo.png"
             },
             ImageUrl = message.verifyMessage.imageUrl,
             Description = string.IsNullOrWhiteSpace(message.verifyMessage.embedDescription) is false ? message.verifyMessage.embedDescription : "Click the \"Verify\" button and press Authorize to view the rest of the server",
@@ -165,7 +168,7 @@ public class Message : ControllerBase
         return Ok(new Generic()
         {
             success = true,
-            details = "successfully sent message to discord channel"
+            details = "successfully sent message to discord channel."
         });
     }
 }

@@ -1,10 +1,9 @@
-﻿using Discord.WebSocket;
-
+﻿
 using Microsoft.AspNetCore.Mvc;
 
-using RestoreCord.Records.Responses;
+using DiscordRepair.Records.Responses;
 
-namespace RestoreCord.Endpoints.V1.Guild;
+namespace DiscordRepair.Endpoints.V1.Guild;
 
 /// <summary>
 /// 
@@ -14,16 +13,14 @@ namespace RestoreCord.Endpoints.V1.Guild;
 [ApiExplorerSettings(GroupName = "Guild Endpoints")]
 public class Restore : ControllerBase
 {
-    private readonly DiscordShardedClient _client;
     private readonly MigrationMaster.Restore _restore;
 
     /// <summary>
     /// 
     /// </summary>
     /// <param name="client"></param>
-    public Restore(DiscordShardedClient client, MigrationMaster.Restore restore)
+    public Restore(MigrationMaster.Restore restore)
     {
-        _client = client;
         _restore = restore;
     }
 
@@ -54,7 +51,6 @@ public class Restore : ControllerBase
 
     private async Task RestoreGuildAsync(ulong guildId)
     {
-        DiscordShardedClient? client = _client;
         MigrationMaster.Restore? restore = _restore;
     }
 }

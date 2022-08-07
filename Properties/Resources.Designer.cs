@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace RestoreCord.Properties {
+namespace DiscordRepair.Properties {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace RestoreCord.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("RestoreCord.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("DiscordRepair.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,20 +61,11 @@ namespace RestoreCord.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 791106018175614988.
+        ///   Looks up a localized string similar to BuzMnvYTHaE/Q2s7bpOeY8DDkzt7Jlq5Etn8ItIkCGJbgOiCtofT2TIl0wvOOzkVhmmsY6rAlVCUkMHnkorx2Q==.
         /// </summary>
-        internal static string ClientID {
+        internal static string Argon2Salt {
             get {
-                return ResourceManager.GetString("ClientID", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to zQV10oh4g_eFsQ9AfVrxE9BuWmLdCUig.
-        /// </summary>
-        internal static string ClientSecret {
-            get {
-                return ResourceManager.GetString("ClientSecret", resourceCulture);
+                return ResourceManager.GetString("Argon2Salt", resourceCulture);
             }
         }
         
@@ -88,20 +79,11 @@ namespace RestoreCord.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 889688908374376500.
+        ///   Looks up a localized string similar to 6LclXFYhAAAAAHYYxC0hV9Lv8rqN07QIO0dZId9z.
         /// </summary>
-        internal static string TestClientID {
+        internal static string ReCaptchaKey {
             get {
-                return ResourceManager.GetString("TestClientID", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to t7EnedRPAykKb8Rt-Z9wSEp7empu01ss.
-        /// </summary>
-        internal static string TestClientSecret {
-            get {
-                return ResourceManager.GetString("TestClientSecret", resourceCulture);
+                return ResourceManager.GetString("ReCaptchaKey", resourceCulture);
             }
         }
         
@@ -115,16 +97,7 @@ namespace RestoreCord.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to OTcwNzU3MTY3MDEzNTg5MDMz.GUhQ5m.x6auY52ObOJibb8peYuTZiTO33h2xUF-vTHEOo.
-        /// </summary>
-        internal static string TestToken {
-            get {
-                return ResourceManager.GetString("TestToken", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to https://nebulamods.ca/discord.
+        ///   Looks up a localized string similar to http://localhost:420/v1/discord-user/link.
         /// </summary>
         internal static string TestUrlRedirect {
             get {
@@ -133,16 +106,7 @@ namespace RestoreCord.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to NzkxMTA2MDE4MTc1NjE0OTg4.X-KU5A.5JLKR-T1tfcmu5hSFbj2Ol9z5aE.
-        /// </summary>
-        internal static string Token {
-            get {
-                return ResourceManager.GetString("Token", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to https://restorecord.com/auth.
+        ///   Looks up a localized string similar to http://localhost:420/v1/discord-user/link.
         /// </summary>
         internal static string UrlRedirect {
             get {

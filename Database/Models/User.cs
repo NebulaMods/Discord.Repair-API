@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-using RestoreCord.Database.Models.BackupModels;
+using DiscordRepair.Database.Models.BackupModels;
 
-namespace RestoreCord.Database.Models;
+namespace DiscordRepair.Database.Models;
 
 /// <summary>
 /// 
@@ -28,7 +28,7 @@ public record User
     [Required]
     [EmailAddress]
     [StringLength(100)]
-    public string? email { get; set; }
+    public string email { get; set; }
 
     /// <summary>
     /// 
@@ -43,15 +43,16 @@ public record User
     /// </summary>
     /// 
     [Required]
-    [StringLength(32)]
-    public string role { get; set; } = "free";
+    [EnumDataType(typeof(AccountType))]
+    public virtual AccountType accountType{ get; set; } = AccountType.Free;
 
     /// <summary>
     /// 
     /// </summary>
     /// 
     [StringLength(100)]
-    public string pfp { get; set; } = "https://i.imgur.com/w65Dpnw.png";
+    [DataType(DataType.Url)]
+    public string pfp { get; set; } = "https://nebulamods.ca/content/images/logo-nebulamods.png";
 
     /// <summary>
     /// 
@@ -62,20 +63,8 @@ public record User
     /// 
     /// </summary>
     /// 
-    [StringLength(100)]
-    public string? googleAuthCode { get; set; }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public bool darkmode { get; set; }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// 
-    [DataType(DataType.DateTime)]
-    public DateTime? expiry { get; set; }
+    [DataType(DataType.Date)]
+    public DateOnly? expiry { get; set; }
 
     /// <summary>
     /// 
@@ -102,7 +91,7 @@ public record User
     /// 
     [Required]
     [StringLength(100)]
-    public string apiToken { get; set; }
+    public string apiToken { get; set; } = Utilities.Miscallenous.GenerateApiToken();
 
     /// <summary>
     /// 
@@ -117,4 +106,28 @@ public record User
     /// 
     [DataType(DataType.Custom)]
     public virtual ICollection<Backup> backups { get; set; } = new HashSet<Backup>();
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public virtual ICollection<Blacklist> globalBlacklist { get; set; } = new HashSet<Blacklist>();
+}
+
+/// <summary>
+/// 
+/// </summary>
+public enum AccountType
+{
+    /// <summary>
+    /// 
+    /// </summary>
+    Free,
+    /// <summary>
+    /// 
+    /// </summary>
+    Premium,
+    /// <summary>
+    /// 
+    /// </summary>
+    Staff
 }

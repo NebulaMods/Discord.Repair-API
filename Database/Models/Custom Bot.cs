@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace RestoreCord.Database.Models;
+namespace DiscordRepair.Database.Models;
 
 /// <summary>
 /// 
@@ -17,36 +17,29 @@ public record CustomBot
     /// 
     /// </summary>
     /// 
-    [StringLength(100)]
-    public string? name { get; set; }
+    [StringLength(64)]
+    public string name { get; set; }
 
     /// <summary>
     /// 
     /// </summary>
     /// 
     [StringLength(100)]
-    public string? token { get; set; }
+    public string token { get; set; }
 
     /// <summary>
     /// 
     /// </summary>
     /// 
     [StringLength(100)]
-    public string? clientSecret { get; set; }
+    public string clientSecret { get; set; }
 
     /// <summary>
     /// 
     /// </summary>
     /// 
-    [StringLength(100)]
-    public string? clientId { get; set; }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// 
-    [StringLength(150)]
-    public string? urlRedirect { get; set; }
+    [StringLength(25)]
+    public string clientId { get; set; }
 
     /// <summary>
     /// 

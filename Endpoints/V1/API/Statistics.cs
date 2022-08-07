@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace RestoreCord.Endpoints.V1.API;
+namespace DiscordRepair.Endpoints.V1.API;
 
 /// <summary>
 /// 

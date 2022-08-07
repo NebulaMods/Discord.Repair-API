@@ -2,9 +2,9 @@
 
 #nullable disable
 
-namespace RestoreCord.Migrations;
+namespace DiscordRepair.Migrations;
 
-public partial class initialCreation : Migration
+public partial class InitialCreation : Migration
 {
     protected override void Up(MigrationBuilder migrationBuilder)
     {
@@ -120,12 +120,10 @@ public partial class initialCreation : Migration
                 username = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
                 email = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                 password = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                role = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
+                accountType = table.Column<int>(type: "integer", nullable: false),
                 pfp = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                 banned = table.Column<bool>(type: "boolean", nullable: false),
-                googleAuthCode = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
-                darkmode = table.Column<bool>(type: "boolean", nullable: false),
-                expiry = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                expiry = table.Column<DateOnly>(type: "date", nullable: true),
                 createdAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                 lastIP = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
                 discordId = table.Column<decimal>(type: "numeric(20,0)", nullable: true),
@@ -141,11 +139,10 @@ public partial class initialCreation : Migration
             columns: table => new
             {
                 key = table.Column<Guid>(type: "uuid", nullable: false),
-                name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
-                token = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
-                clientSecret = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
-                clientId = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
-                urlRedirect = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: true),
+                name = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
+                token = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                clientSecret = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                clientId = table.Column<string>(type: "character varying(25)", maxLength: 25, nullable: false),
                 botType = table.Column<int>(type: "integer", nullable: false),
                 Userkey = table.Column<Guid>(type: "uuid", nullable: true)
             },
@@ -164,21 +161,14 @@ public partial class initialCreation : Migration
             columns: table => new
             {
                 key = table.Column<Guid>(type: "uuid", nullable: false),
-                autoKickUnVerified = table.Column<bool>(type: "boolean", nullable: false),
-                autoKickUnVerifiedTime = table.Column<int>(type: "integer", nullable: false),
-                autoJoin = table.Column<bool>(type: "boolean", nullable: false),
-                verifyDescription = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: true),
-                redirectTime = table.Column<int>(type: "integer", nullable: false),
                 vanityUrl = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: true),
                 webhookLogType = table.Column<int>(type: "integer", nullable: false),
-                dmOnAutoKick = table.Column<bool>(type: "boolean", nullable: false),
-                autoBlacklist = table.Column<bool>(type: "boolean", nullable: false),
                 redirectUrl = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: true),
                 pic = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
                 backgroundImage = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: true),
                 vpnCheck = table.Column<bool>(type: "boolean", nullable: false),
                 webhook = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: true),
-                mainBotkey = table.Column<Guid>(type: "uuid", nullable: true)
+                mainBotkey = table.Column<Guid>(type: "uuid", nullable: false)
             },
             constraints: table =>
             {
@@ -187,7 +177,8 @@ public partial class initialCreation : Migration
                     name: "FK_ServerSettings_CustomBot_mainBotkey",
                     column: x => x.mainBotkey,
                     principalTable: "CustomBot",
-                    principalColumn: "key");
+                    principalColumn: "key",
+                    onDelete: ReferentialAction.Cascade);
             });
 
         migrationBuilder.CreateTable(
@@ -198,7 +189,8 @@ public partial class initialCreation : Migration
                 discordId = table.Column<decimal>(type: "numeric(20,0)", nullable: true),
                 ip = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                 reason = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
-                ServerSettingskey = table.Column<Guid>(type: "uuid", nullable: true)
+                ServerSettingskey = table.Column<Guid>(type: "uuid", nullable: true),
+                Userkey = table.Column<Guid>(type: "uuid", nullable: true)
             },
             constraints: table =>
             {
@@ -207,6 +199,11 @@ public partial class initialCreation : Migration
                     name: "FK_Blacklist_ServerSettings_ServerSettingskey",
                     column: x => x.ServerSettingskey,
                     principalTable: "ServerSettings",
+                    principalColumn: "key");
+                table.ForeignKey(
+                    name: "FK_Blacklist_users_Userkey",
+                    column: x => x.Userkey,
+                    principalTable: "users",
                     principalColumn: "key");
             });
 
@@ -217,7 +214,7 @@ public partial class initialCreation : Migration
                 key = table.Column<Guid>(type: "uuid", nullable: false),
                 ownerkey = table.Column<Guid>(type: "uuid", nullable: false),
                 name = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                guildId = table.Column<decimal>(type: "numeric(20,0)", nullable: true),
+                guildId = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
                 roleId = table.Column<decimal>(type: "numeric(20,0)", nullable: true),
                 banned = table.Column<bool>(type: "boolean", nullable: false),
                 settingskey = table.Column<Guid>(type: "uuid", nullable: false)
@@ -245,14 +242,14 @@ public partial class initialCreation : Migration
             {
                 key = table.Column<Guid>(type: "uuid", nullable: false),
                 discordId = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
-                serverkey = table.Column<Guid>(type: "uuid", nullable: true),
+                serverkey = table.Column<Guid>(type: "uuid", nullable: false),
                 accessToken = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
-                refreshToken = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                refreshToken = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                 ip = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                 avatar = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                 username = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                 creationDate = table.Column<decimal>(type: "numeric(20,0)", nullable: true),
-                botUsedkey = table.Column<Guid>(type: "uuid", nullable: true)
+                botUsedkey = table.Column<Guid>(type: "uuid", nullable: false)
             },
             constraints: table =>
             {
@@ -261,12 +258,14 @@ public partial class initialCreation : Migration
                     name: "FK_members_CustomBot_botUsedkey",
                     column: x => x.botUsedkey,
                     principalTable: "CustomBot",
-                    principalColumn: "key");
+                    principalColumn: "key",
+                    onDelete: ReferentialAction.Cascade);
                 table.ForeignKey(
                     name: "FK_members_servers_serverkey",
                     column: x => x.serverkey,
                     principalTable: "servers",
-                    principalColumn: "key");
+                    principalColumn: "key",
+                    onDelete: ReferentialAction.Cascade);
             });
 
         migrationBuilder.CreateTable(
@@ -651,6 +650,11 @@ public partial class initialCreation : Migration
             name: "IX_Blacklist_ServerSettingskey",
             table: "Blacklist",
             column: "ServerSettingskey");
+
+        migrationBuilder.CreateIndex(
+            name: "IX_Blacklist_Userkey",
+            table: "Blacklist",
+            column: "Userkey");
 
         migrationBuilder.CreateIndex(
             name: "IX_CategoryChannel_Backupkey",

@@ -1,10 +1,9 @@
-﻿using Discord.WebSocket;
-
+﻿
 using Microsoft.AspNetCore.Mvc;
 
-using RestoreCord.Records.Responses;
+using DiscordRepair.Records.Responses;
 
-namespace RestoreCord.Endpoints.V1.Guild;
+namespace DiscordRepair.Endpoints.V1.Guild;
 
 /// <summary>
 /// 
@@ -14,16 +13,6 @@ namespace RestoreCord.Endpoints.V1.Guild;
 [ApiExplorerSettings(GroupName = "Guild Endpoints")]
 public class Backup : ControllerBase
 {
-    private readonly DiscordShardedClient _client;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="client"></param>
-    public Backup(DiscordShardedClient client)
-    {
-        _client = client;
-    }
 
     /// <summary>
     /// 

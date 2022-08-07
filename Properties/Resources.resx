@@ -117,34 +117,22 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ClientID" xml:space="preserve">
-    <value>791106018175614988</value>
-  </data>
-  <data name="ClientSecret" xml:space="preserve">
-    <value>zQV10oh4g_eFsQ9AfVrxE9BuWmLdCUig</value>
+  <data name="Argon2Salt" xml:space="preserve">
+    <value>BuzMnvYTHaE/Q2s7bpOeY8DDkzt7Jlq5Etn8ItIkCGJbgOiCtofT2TIl0wvOOzkVhmmsY6rAlVCUkMHnkorx2Q==</value>
   </data>
   <data name="MySQLPass" xml:space="preserve">
     <value>oNeFHuxBMt6h6z</value>
   </data>
-  <data name="TestClientID" xml:space="preserve">
-    <value>889688908374376500</value>
-  </data>
-  <data name="TestClientSecret" xml:space="preserve">
-    <value>t7EnedRPAykKb8Rt-Z9wSEp7empu01ss</value>
+  <data name="ReCaptchaKey" xml:space="preserve">
+    <value>6LclXFYhAAAAAHYYxC0hV9Lv8rqN07QIO0dZId9z</value>
   </data>
   <data name="TestMySQLPass" xml:space="preserve">
     <value>testpass420</value>
   </data>
-  <data name="TestToken" xml:space="preserve">
-    <value>OTcwNzU3MTY3MDEzNTg5MDMz.GUhQ5m.x6auY52ObOJibb8peYuTZiTO33h2xUF-vTHEOo</value>
-  </data>
   <data name="TestUrlRedirect" xml:space="preserve">
-    <value>https://nebulamods.ca/discord</value>
-  </data>
-  <data name="Token" xml:space="preserve">
-    <value>NzkxMTA2MDE4MTc1NjE0OTg4.X-KU5A.5JLKR-T1tfcmu5hSFbj2Ol9z5aE</value>
+    <value>http://localhost:420/v1/discord-user/link</value>
   </data>
   <data name="UrlRedirect" xml:space="preserve">
-    <value>https://restorecord.com/auth</value>
+    <value>http://localhost:420/v1/discord-user/link</value>
   </data>
 </root>

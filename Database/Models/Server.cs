@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace RestoreCord.Database.Models;
+namespace DiscordRepair.Database.Models;
 
 /// <summary>
 /// 
@@ -32,7 +32,9 @@ public record Server
     /// <summary>
     /// 
     /// </summary>
-    public ulong? guildId { get; set; }
+    /// 
+    [Required]
+    public ulong guildId { get; set; }
 
     /// <summary>
     /// 

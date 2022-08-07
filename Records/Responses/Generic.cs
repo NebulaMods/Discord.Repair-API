@@ -1,4 +1,4 @@
-﻿namespace RestoreCord.Records.Responses;
+﻿namespace DiscordRepair.Records.Responses;
 
 /// <summary>
 /// 

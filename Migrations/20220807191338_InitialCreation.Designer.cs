@@ -5,15 +5,15 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using RestoreCord.Database;
+using DiscordRepair.Database;
 
 #nullable disable
 
-namespace RestoreCord.Migrations
+namespace DiscordRepair.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20220724214243_initialCreation")]
-    partial class initialCreation
+    [Migration("20220807191338_InitialCreation")]
+    partial class InitialCreation
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -691,6 +691,9 @@ namespace RestoreCord.Migrations
                     b.Property<Guid?>("ServerSettingskey")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("Userkey")
+                        .HasColumnType("uuid");
+
                     b.Property<decimal?>("discordId")
                         .HasColumnType("numeric(20,0)");
 
@@ -705,6 +708,8 @@ namespace RestoreCord.Migrations
                     b.HasKey("key");
 
                     b.HasIndex("ServerSettingskey");
+
+                    b.HasIndex("Userkey");
 
                     b.ToTable("Blacklist");
                 });
@@ -722,24 +727,24 @@ namespace RestoreCord.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("clientId")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .IsRequired()
+                        .HasMaxLength(25)
+                        .HasColumnType("character varying(25)");
 
                     b.Property<string>("clientSecret")
+                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
                     b.Property<string>("name")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
 
                     b.Property<string>("token")
+                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
-
-                    b.Property<string>("urlRedirect")
-                        .HasMaxLength(150)
-                        .HasColumnType("character varying(150)");
 
                     b.HasKey("key");
 
@@ -835,7 +840,7 @@ namespace RestoreCord.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<Guid?>("botUsedkey")
+                    b.Property<Guid>("botUsedkey")
                         .HasColumnType("uuid");
 
                     b.Property<decimal?>("creationDate")
@@ -849,10 +854,11 @@ namespace RestoreCord.Migrations
                         .HasColumnType("character varying(100)");
 
                     b.Property<string>("refreshToken")
+                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<Guid?>("serverkey")
+                    b.Property<Guid>("serverkey")
                         .HasColumnType("uuid");
 
                     b.Property<string>("username")
@@ -877,7 +883,7 @@ namespace RestoreCord.Migrations
                     b.Property<bool>("banned")
                         .HasColumnType("boolean");
 
-                    b.Property<decimal?>("guildId")
+                    b.Property<decimal>("guildId")
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("name")
@@ -909,35 +915,17 @@ namespace RestoreCord.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<bool>("autoBlacklist")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("autoJoin")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("autoKickUnVerified")
-                        .HasColumnType("boolean");
-
-                    b.Property<int>("autoKickUnVerifiedTime")
-                        .HasColumnType("integer");
-
                     b.Property<string>("backgroundImage")
                         .HasMaxLength(150)
                         .HasColumnType("character varying(150)");
 
-                    b.Property<bool>("dmOnAutoKick")
-                        .HasColumnType("boolean");
-
-                    b.Property<Guid?>("mainBotkey")
+                    b.Property<Guid>("mainBotkey")
                         .HasColumnType("uuid");
 
                     b.Property<string>("pic")
                         .IsRequired()
                         .HasMaxLength(150)
                         .HasColumnType("character varying(150)");
-
-                    b.Property<int>("redirectTime")
-                        .HasColumnType("integer");
 
                     b.Property<string>("redirectUrl")
                         .HasMaxLength(150)
@@ -946,10 +934,6 @@ namespace RestoreCord.Migrations
                     b.Property<string>("vanityUrl")
                         .HasMaxLength(150)
                         .HasColumnType("character varying(150)");
-
-                    b.Property<string>("verifyDescription")
-                        .HasMaxLength(300)
-                        .HasColumnType("character varying(300)");
 
                     b.Property<bool>("vpnCheck")
                         .HasColumnType("boolean");
@@ -1035,6 +1019,9 @@ namespace RestoreCord.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<int>("accountType")
+                        .HasColumnType("integer");
+
                     b.Property<string>("apiToken")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -1046,9 +1033,6 @@ namespace RestoreCord.Migrations
                     b.Property<DateTime>("createdAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<bool>("darkmode")
-                        .HasColumnType("boolean");
-
                     b.Property<decimal?>("discordId")
                         .HasColumnType("numeric(20,0)");
 
@@ -1057,12 +1041,8 @@ namespace RestoreCord.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<DateTime?>("expiry")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("googleAuthCode")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                    b.Property<DateOnly?>("expiry")
+                        .HasColumnType("date");
 
                     b.Property<string>("lastIP")
                         .HasMaxLength(64)
@@ -1077,11 +1057,6 @@ namespace RestoreCord.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
-
-                    b.Property<string>("role")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
 
                     b.Property<string>("username")
                         .IsRequired()
@@ -1234,6 +1209,10 @@ namespace RestoreCord.Migrations
                     b.HasOne("RestoreCord.Database.Models.ServerSettings", null)
                         .WithMany("blacklist")
                         .HasForeignKey("ServerSettingskey");
+
+                    b.HasOne("RestoreCord.Database.Models.User", null)
+                        .WithMany("globalBlacklist")
+                        .HasForeignKey("Userkey");
                 });
 
             modelBuilder.Entity("RestoreCord.Database.Models.CustomBot", b =>
@@ -1274,11 +1253,15 @@ namespace RestoreCord.Migrations
                 {
                     b.HasOne("RestoreCord.Database.Models.CustomBot", "botUsed")
                         .WithMany()
-                        .HasForeignKey("botUsedkey");
+                        .HasForeignKey("botUsedkey")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("RestoreCord.Database.Models.Server", "server")
                         .WithMany()
-                        .HasForeignKey("serverkey");
+                        .HasForeignKey("serverkey")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("botUsed");
 
@@ -1308,7 +1291,9 @@ namespace RestoreCord.Migrations
                 {
                     b.HasOne("RestoreCord.Database.Models.CustomBot", "mainBot")
                         .WithMany()
-                        .HasForeignKey("mainBotkey");
+                        .HasForeignKey("mainBotkey")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("mainBot");
                 });
@@ -1362,6 +1347,8 @@ namespace RestoreCord.Migrations
                     b.Navigation("backups");
 
                     b.Navigation("bots");
+
+                    b.Navigation("globalBlacklist");
                 });
 #pragma warning restore 612, 618
         }

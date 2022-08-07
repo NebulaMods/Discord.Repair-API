@@ -1,10 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-using RestoreCord.Database;
-using RestoreCord.Records.Responses;
+using DiscordRepair.Database;
+using DiscordRepair.Records.Responses;
 
-namespace RestoreCord.Endpoints.V1.DiscordUser;
+namespace DiscordRepair.Endpoints.V1.DiscordUser;
 
 /// <summary>
 /// 
@@ -12,12 +13,14 @@ namespace RestoreCord.Endpoints.V1.DiscordUser;
 [ApiController]
 [Route("/v1/discord-user/")]
 [ApiExplorerSettings(GroupName = "Discord Account Endpoints")]
+[AllowAnonymous]
 public class LinkedGuilds : ControllerBase
 {
     /// <summary>
-    /// 
+    /// Display the guilds associated to a user ID.
     /// </summary>
     /// <param name="userId"></param>
+    /// <remarks>Display the guilds associated to a user ID.</remarks>
     /// <returns></returns>
     [HttpGet("{userId}/guilds")]
     [Consumes("plain/text")]

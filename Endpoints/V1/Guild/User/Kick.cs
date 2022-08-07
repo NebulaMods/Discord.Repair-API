@@ -3,10 +3,10 @@ using Discord.Rest;
 
 using Microsoft.AspNetCore.Mvc;
 
-using RestoreCord.Records.Responses;
-using RestoreCord.Utilities;
+using DiscordRepair.Records.Responses;
+using DiscordRepair.Utilities;
 
-namespace RestoreCord.Endpoints.V1.Guild.User;
+namespace DiscordRepair.Endpoints.V1.Guild.User;
 
 /// <summary>
 /// 
@@ -17,10 +17,11 @@ namespace RestoreCord.Endpoints.V1.Guild.User;
 public class Kick : ControllerBase
 {
     /// <summary>
-    /// 
+    /// Kick a specific user or all unverified users.
     /// </summary>
     /// <param name="guildId"></param>
     /// <param name="userId"></param>
+    /// <remarks>Kick a specific user or all unverified users.</remarks>
     /// <returns></returns>
     [HttpPost("{guildId}/kick")]
     [Consumes("plain/text")]
@@ -30,14 +31,26 @@ public class Kick : ControllerBase
     [ProducesResponseType(typeof(Generic), 400)]
     public async Task<ActionResult<Generic>> HandleAsync(ulong guildId, ulong? userId = null)
     {
+        if (guildId is 0)
+        {
+            return BadRequest(new Generic()
+            {
+                success = false,
+                details = "invalid paramaters, please try again."
+            });
+        }
         await using var database = new Database.DatabaseContext();
         await using var client = new DiscordRestClient();
-        var result = await this.VerifyServer(guildId, database);
+        var result = await this.VerifyServer(guildId, database, HttpContext.Request.Headers["Authorization"]);
         if (result.Item1 is not null)
             return result.Item1;
         if (result.Item2 is null)
-            return NoContent();
-        await client.LoginAsync(Discord.TokenType.Bot, result.Item2.settings.mainBot is not null ? result.Item2.settings.mainBot?.token : Properties.Resources.Token);
+            return BadRequest(new Generic()
+            {
+                success = false,
+                details = "invalid paramaters, please try again."
+            });
+        await client.LoginAsync(TokenType.Bot, result.Item2.settings.mainBot.token);
         var guild = await client.GetGuildAsync(guildId);
         if (guild is null)
         {

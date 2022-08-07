@@ -1,15 +1,14 @@
-using Discord.WebSocket;
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-using RestoreCord.Database;
-using RestoreCord.Database.Models;
-using RestoreCord.MigrationMaster.Models;
-using RestoreCord.Records.Responses;
-using RestoreCord.Utilities;
+using DiscordRepair.Database;
+using DiscordRepair.Database.Models;
+using DiscordRepair.MigrationMaster.Models;
+using DiscordRepair.Records.Responses;
+using DiscordRepair.Utilities;
 
-namespace RestoreCord.Endpoints.V1.Guild;
+namespace DiscordRepair.Endpoints.V1.Guild;
 
 /// <summary>
 /// 
@@ -21,25 +20,23 @@ public class Migrate : ControllerBase
 {
     private readonly MigrationMaster.Pull _migration;
     private readonly MigrationMaster.Configuration _migrationConfiguration;
-    private readonly DiscordShardedClient _client;
 
     /// <summary>
     /// 
     /// </summary>
     /// <param name="migration"></param>
-    /// <param name="client"></param>
-    public Migrate(MigrationMaster.Pull migration, DiscordShardedClient client, MigrationMaster.Configuration migrationConfiguration)
+    public Migrate(MigrationMaster.Pull migration, MigrationMaster.Configuration migrationConfiguration)
     {
         _migration = migration;
-        _client = client;
         _migrationConfiguration = migrationConfiguration;
     }
 
     /// <summary>
-    /// 
+    /// Migrate/Pull users to your server using the guild ID.
     /// </summary>
     /// <param name="guildId"></param>
     /// <param name="userId"></param>
+    /// <remarks>Migrate/Pull users to your server using the guild ID.</remarks>
     /// <returns></returns>
     [HttpPost("{guildId}/migrate")]
     [Consumes("plain/text")]
@@ -50,12 +47,11 @@ public class Migrate : ControllerBase
     public async Task<ActionResult<Records.Responses.Guild.Migration>> HandleAsync(ulong guildId, ulong? userId = null)
     {
         await using var database = new DatabaseContext();
-        var result = await this.VerifyServer(guildId, database);
+        var result = await this.VerifyServer(guildId, database, HttpContext.Request.Headers["Authorization"]);
         if (result.Item1 is not null)
             return result.Item1;
         if (result.Item2 is null)
             return NoContent();
-        Database.Models.Server serverEntry = await database.servers.FirstAsync(x => x.guildId == guildId);
 
         if (await DiscordExtensions.IsGuildBusy(guildId))
         {
@@ -66,7 +62,7 @@ public class Migrate : ControllerBase
             });
         }
         //check if any users r in linked
-        List<Member>? members = await database.members.Where(x => x.server == serverEntry).ToListAsync();
+        List<Member>? members = await database.members.Where(x => x.server == result.Item2).ToListAsync();
         if  (members is null)
         {
             return BadRequest(new Records.Responses.Guild.Migration()
@@ -81,12 +77,12 @@ public class Migrate : ControllerBase
             {
                 totalCount = members.Count,
                 estimatedCompletionTime = DateTime.Now.AddSeconds(members.Count * 1.2),
-                blacklistedCount = serverEntry.settings.blacklist.Count
+                blacklistedCount = result.Item2.settings.blacklist.Count
             },
             active = true,
             guildId = guildId,
-            server = serverEntry,
-            MigratedBy = serverEntry.owner
+            server = result.Item2,
+            MigratedBy = result.Item2.owner
         };
         await database.statistics.AddAsync(statistics);
         await database.ApplyChangesAsync();
@@ -109,8 +105,7 @@ public class Migrate : ControllerBase
         }
         Database.Models.Server server = await database.servers.FirstAsync(x => x.guildId == guildId);
         MigrationMaster.Pull? mig = _migration;
-        DiscordShardedClient? discordClient = _client;
-        HttpClient? http = await mig.CreateHttpClientAsync(server.settings.mainBot is not null ? server.settings.mainBot.token : Properties.Resources.Token, server.settings.mainBot is not null ? server.name : "RestoreCord");
+        HttpClient? http = await mig.CreateHttpClientAsync(server.settings.mainBot.token, server.name);
 
         try
         {

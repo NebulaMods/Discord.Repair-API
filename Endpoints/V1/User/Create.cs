@@ -1,21 +1,101 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
-using RestoreCord.Records.Responses;
+using Newtonsoft.Json;
 
-namespace RestoreCord.Endpoints.V1.User;
+using DiscordRepair.Database;
+using DiscordRepair.Records.Requests.User;
+using DiscordRepair.Records.Responses;
+using DiscordRepair.Services;
 
+namespace DiscordRepair.Endpoints.V1.User;
+
+/// <summary>
+/// 
+/// </summary>
 [ApiController]
 [Route("/v1/user/")]
 [ApiExplorerSettings(GroupName = "Account Endpoints")]
+[AllowAnonymous]
 public class Create : ControllerBase
 {
-    [HttpPut("create")]
+    private readonly TokenLoader _tokenLoader;
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="tokenLoader"></param>
+    public Create(TokenLoader tokenLoader)
+    {
+        _tokenLoader = tokenLoader;
+    }
+
+    /// <summary>
+    /// Create a new user.
+    /// </summary>
+    /// <param name="userRequest"></param>
+    /// <remarks>Create a new user.</remarks>
+    /// <returns></returns>
+    [HttpPut]
     [Consumes("application/json")]
     [Produces("application/json")]
-    [ProducesResponseType(typeof(Generic), 200)]
+    [ProducesResponseType(typeof(Generic), 201)]
     [ProducesResponseType(typeof(Generic), 400)]
-    public async Task<ActionResult> HandlesAsync()
+    public async Task<ActionResult<Generic>> HandlesAsync(CreateUserRequest userRequest)
     {
-        return Ok(new Generic());
+        if (userRequest is null)
+        {
+            return BadRequest(new Generic()
+            {
+                success = false,
+                details = "invalid paramaters, please try again."
+            });
+        }
+        using var http = new HttpClient();
+        var content = new
+        {
+            secret = Properties.Resources.ReCaptchaKey,
+            response = userRequest.captchaCode,
+        };
+        StringContent htmlContent = new(JsonConvert.SerializeObject(content));
+        var captchaResults = await http.PostAsync("https://www.google.com/recaptcha/api/siteverify", htmlContent);
+        var newString = await captchaResults.Content.ReadAsStringAsync();
+        if (newString.Contains("sucess: true") is false)
+        {
+            return BadRequest(new Generic()
+            {
+                success = false,
+                details = "invalid captcha, please try again."
+            });
+        }
+        await using var database = new DatabaseContext();
+        var user = await database.users.FirstOrDefaultAsync(x => x.username == userRequest.username || x.email == userRequest.email);
+        if (user is not null)
+        {
+            return BadRequest(new Generic()
+            {
+                success = false,
+                details = "user already exists, please try again."
+            });
+        }
+        var newUser = new Database.Models.User()
+        {
+            email = userRequest.email,
+            password = await Utilities.Miscallenous.HashPassword(userRequest.password),
+            username = userRequest.username,
+        };
+        await database.users.AddAsync(newUser);
+        await database.ApplyChangesAsync();
+        _tokenLoader.APITokens.TryAdd(newUser.apiToken, newUser.username);
+        return Created($"https://discord.repair/v1/user/{userRequest.username}", newUser.apiToken);
+    }
+
+    public record ReCaptchaResponse
+    {
+        public bool success { get; set; }
+        public DateTime challenge_ts { get; set; }
+        public string hostname { get; set; }
+        public string? error_codes { get; set; }
     }
 }

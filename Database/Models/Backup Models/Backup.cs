@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-using RestoreCord.Database.Models.BackupModels.Channel;
+using DiscordRepair.Database.Models.BackupModels.Channel;
 
-namespace RestoreCord.Database.Models.BackupModels;
+namespace DiscordRepair.Database.Models.BackupModels;
 
 /// <summary>
 /// 

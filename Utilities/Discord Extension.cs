@@ -1,12 +1,13 @@
 ﻿using Discord;
-using Discord.Interactions;
 
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-using RestoreCord.Database;
-using RestoreCord.Database.Models;
+using DiscordRepair.Database;
+using DiscordRepair.Database.Models;
+using DiscordRepair.Records.Responses;
 
-namespace RestoreCord.Utilities;
+namespace DiscordRepair.Utilities;
 
 internal static class DiscordExtensions
 {
@@ -14,9 +15,9 @@ internal static class DiscordExtensions
     {
         try
         {
-            if (context is not ShardedInteractionContext shardedContext)
+            if (context is not Discord.Rest.RestInteractionContext restContext)
             {
-                throw new ArgumentNullException(nameof(shardedContext), "Failed to convert context to a sharded context.");
+                throw new ArgumentNullException(nameof(restContext), "Failed to convert context to a sharded context.");
             }
 
             Embed? embed = new EmbedBuilder()
@@ -43,7 +44,7 @@ internal static class DiscordExtensions
                 embed = embed.ToEmbedBuilder().WithFields(embeds).Build();
             }
 
-            if (shardedContext.Interaction.HasResponded)
+            if (restContext.Interaction.HasResponded)
             {
                 await context.Interaction.ModifyOriginalResponseAsync(x => x.Embed = embed);
             }
@@ -103,58 +104,55 @@ internal static class DiscordExtensions
         catch { }
     }
 
-    internal static async ValueTask<bool> CheckBusinessMembership(DatabaseContext database, ShardedInteractionContext context, bool sendEmbed = true)
+    internal static async ValueTask<(ActionResult?, Server?)> VerifyServer(this ControllerBase @base, ulong guildId, ulong userId, DatabaseContext database, string? token = null, bool useToken = true)
     {
-        if (context.User.Id != 970752861933797376)
+        if (userId is 0 || guildId is 0)
         {
-            User? user = await database.users.FirstOrDefaultAsync(x => x.discordId == context.User.Id);
-            if (user is null)
+            return (@base.BadRequest(new Generic() { success = false, details = "invalid parameters, please try again." }), null);
+        }
+        Server? server = await database.servers.FirstOrDefaultAsync(x => x.guildId == guildId);
+        if (server is null)
+            return (@base.BadRequest(new Generic() { success = false, details = "guild does not exist, please try again." }), null);
+        if (useToken)
+        {
+            if (string.IsNullOrWhiteSpace(token))
             {
-                if (sendEmbed)
-                    await context.ReplyWithEmbedAsync("Error Occurred", "Sorry, this feature is only available for business users. (You may have to link your account on the dashboard)", invisible: true, deleteTimer: 60);
-                return false;
+                return (@base.BadRequest(new Generic() { success = false, details = "invalid token." }), null);
             }
-            if (user.role == "admin")
+            if (server.owner.apiToken != token)
             {
-                switch (user.role)
-                {
-                    case "business":
-                        return true;
-                    default:
-                        if (sendEmbed)
-                            await context.ReplyWithEmbedAsync("Error Occurred", "Sorry, this feature is only available for business users. (You may have to link your account on the dashboard)", invisible: true, deleteTimer: 60);
-                        return false;
-                }
+                return (@base.BadRequest(new Generic() { success = false, details = "user does not own this server." }), null);
+
             }
         }
-        return true;
+        return server.banned
+            ? (@base.BadRequest(new Generic() { success = false, details = "guild is banned." }), null)
+            : ((ActionResult?, Server?))(null, server);
     }
-    internal static async ValueTask<bool> CheckPremiumMembership(DatabaseContext database, ShardedInteractionContext context, bool sendEmbed = true)
+    internal static async ValueTask<(ActionResult?, Server?)> VerifyServer(this ControllerBase @base, ulong guildId, DatabaseContext database, string? token = null, bool useToken = true)
     {
-        if (context.User.Id != 970752861933797376)
+        if (guildId is 0)
         {
-            User? user = await database.users.FirstOrDefaultAsync(x => x.discordId == context.User.Id);
-            if (user is null)
+            return (@base.BadRequest(new Generic() { success = false, details = "invalid parameters, please try again." }), null);
+        }
+        Server? server = await database.servers.FirstOrDefaultAsync(x => x.guildId == guildId);
+        if (server is null)
+            return (@base.BadRequest(new Generic() { success = false, details = "guild does not exist, please try again." }), null);
+        if (useToken)
+        {
+            if (string.IsNullOrWhiteSpace(token))
             {
-                if (sendEmbed)
-                    await context.ReplyWithEmbedAsync("Error Occurred", "Sorry, this feature is only available for premium users. (You may have to link your account on the dashboard)", invisible: true, deleteTimer: 60);
-                return false;
+                return (@base.BadRequest(new Generic() { success = false, details = "invalid token." }), null);
             }
-            if (user.role == "admin")
+            if (server.owner.apiToken != token)
             {
-                switch (user.role)
-                {
-                    case "business":
-                    case "premium":
-                        return true;
-                    default:
-                        if (sendEmbed)
-                            await context.ReplyWithEmbedAsync("Error Occurred", "Sorry, this feature is only available for premium users. (You may have to link your account on the dashboard)", invisible: true, deleteTimer: 60);
-                        return false;
-                }
+                return (@base.BadRequest(new Generic() { success = false, details = "user does not own this server." }), null);
+
             }
         }
-        return true;
+        return server.banned
+            ? (@base.BadRequest(new Generic() { success = false, details = "guild is banned." }), null)
+            : ((ActionResult?, Server?))(null, server);
     }
     
     internal static async ValueTask<bool> IsGuildBusy(ulong guildId)
@@ -171,28 +169,35 @@ internal static class DiscordExtensions
         }
     }
 
-    internal static async ValueTask<bool> IsAboveVerifyRole(this Server server, ShardedInteractionContext context)
-    {
-        if (server.roleId is null)
-            return true;
-        Discord.WebSocket.SocketRole? serverRole = context.Guild.GetRole((ulong)server.roleId);
-        if (serverRole is null)
-        {
-            await context.ReplyWithEmbedAsync("Error Occurred", $"Verify role could not be found, please check server settings on the dashboard.", invisible: true, deleteTimer: 60);
-            return false;
-        }
-        Discord.WebSocket.SocketRole? isRoleAboveMe = context.Guild.CurrentUser.Roles.FirstOrDefault(x => x.Position > serverRole.Position);
-        if (isRoleAboveMe is null)
-        {
-            await context.ReplyWithEmbedAsync("Error Occurred", $"Bot role is not above {serverRole.Mention}", invisible: true, deleteTimer: 60);
-            return false;
-        }
-        return true;
-    }
+    //internal static async ValueTask<bool> IsAboveVerifyRole(this Server server, Discord.Rest.RestInteractionContext context)
+    //{
+    //    if (server.roleId is null)
+    //        return true;
+    //    Discord.Rest.RestRole? serverRole = context.Guild.GetRole((ulong)server.roleId);
+    //    if (serverRole is null)
+    //    {
+    //        await context.ReplyWithEmbedAsync("Error Occurred", $"Verify role could not be found, please check server settings on the dashboard.", invisible: true, deleteTimer: 60);
+    //        return false;
+    //    }
+    //    var user = await context.Guild.GetCurrentUserAsync();
+    //    if (user is null)
+    //    {
+    //        await context.ReplyWithEmbedAsync("Error Occurred", $"Unable to fetch user data.", invisible: true, deleteTimer: 60);
+    //        return false;
+    //    }
+    //    var guildRoles = context.Guild.Roles;
+    //    Discord.Rest.RestRole? isRoleAboveMe = user.RoleIds.FirstOrDefault(x => x.Position > serverRole.Position);
+    //    if (isRoleAboveMe is null)
+    //    {
+    //        await context.ReplyWithEmbedAsync("Error Occurred", $"Bot role is not above {serverRole.Mention}", invisible: true, deleteTimer: 60);
+    //        return false;
+    //    }
+    //    return true;
+    //}
 
     internal static bool IsVerifyServerOkay(this Server server) => server is null ? false : server.banned is false;
 
-    internal static async ValueTask<bool> IsTopRoleServerOkay(Server server, ShardedInteractionContext context)
+    internal static async ValueTask<bool> IsTopRoleServerOkay(Server server, Discord.Rest.RestInteractionContext context)
     {
         if (server is null)
         {

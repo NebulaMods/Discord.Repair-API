@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace RestoreCord.Database.Models;
+namespace DiscordRepair.Database.Models;
 
 /// <summary>
 /// 
@@ -16,33 +16,6 @@ public record ServerSettings
     /// <summary>
     /// 
     /// </summary>
-    public bool autoKickUnVerified { get; set; } = false;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public int autoKickUnVerifiedTime { get; set; } = 10;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public bool autoJoin { get; set; } = false;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// 
-    [StringLength(300)]
-    public string? verifyDescription { get; set; }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public int redirectTime { get; set; }
-
-    /// <summary>
-    /// 
-    /// </summary>
     /// 
     [StringLength(150)]
     public string? vanityUrl { get; set; }
@@ -51,16 +24,6 @@ public record ServerSettings
     /// 
     /// </summary>
     public int webhookLogType { get; set; }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public bool dmOnAutoKick { get; set; } = false;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public bool autoBlacklist { get; set; } = false;
 
     /// <summary>
     /// 
@@ -82,6 +45,7 @@ public record ServerSettings
     /// </summary>
     /// 
     [StringLength(150)]
+    [DataType(DataType.Url)]
     public string? backgroundImage { get; set; }
 
     /// <summary>
@@ -100,11 +64,12 @@ public record ServerSettings
     /// 
     /// </summary>
     /// 
+    [Required]
     [DataType(DataType.Custom)]
-    public virtual CustomBot? mainBot { get; set; }
+    public virtual CustomBot mainBot { get; set; }
 
     /// <summary>
     /// 
     /// </summary>
-    public virtual ICollection<Blacklist>? blacklist { get; set; }
+    public virtual ICollection<Blacklist> blacklist { get; set; } = new HashSet<Blacklist>();
 }

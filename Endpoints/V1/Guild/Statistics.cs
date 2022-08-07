@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-using RestoreCord.Records.Responses;
-using RestoreCord.Utilities;
+using DiscordRepair.Records.Responses;
+using DiscordRepair.Utilities;
 
-namespace RestoreCord.Endpoints.V1.Guild;
+namespace DiscordRepair.Endpoints.V1.Guild;
 
 /// <summary>
 /// 
@@ -16,9 +16,10 @@ public class Statistics : ControllerBase
 {
 
     /// <summary>
-    /// 
+    /// Returns the most recent or currently active server history.
     /// </summary>
     /// <param name="guildId"></param>
+    /// <remarks>Returns the most recent or currently active server history.</remarks>
     /// <returns></returns>
     [HttpGet("{guildId}/stats")]
     [Consumes("plain/text")]
@@ -29,7 +30,7 @@ public class Statistics : ControllerBase
     public async Task<ActionResult<Records.Responses.Guild.Statistics>> HandleAsync(ulong guildId)
     {
         await using var database = new Database.DatabaseContext();
-        var result = await this.VerifyServer(guildId, database);
+        var result = await this.VerifyServer(guildId, database, HttpContext.Request.Headers["Authorization"]);
         if (result.Item1 is not null)
             return result.Item1;
         if (result.Item2 is null)
@@ -39,7 +40,7 @@ public class Statistics : ControllerBase
             ? NotFound(new Generic()
             {
                 success = false,
-                details = "no migration history"
+                details = "no migration history."
             })
             : Ok(new Records.Responses.Guild.Statistics()
             {

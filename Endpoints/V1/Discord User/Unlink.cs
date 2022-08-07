@@ -1,12 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-using RestoreCord.Database;
-using RestoreCord.Database.Models;
-using RestoreCord.Records.Responses;
-using RestoreCord.Utilities;
+using DiscordRepair.Database;
+using DiscordRepair.Database.Models;
+using DiscordRepair.Records.Responses;
+using DiscordRepair.Utilities;
 
-namespace RestoreCord.Endpoints.V1.DiscordUser;
+namespace DiscordRepair.Endpoints.V1.DiscordUser;
 
 /// <summary>
 /// 
@@ -14,14 +16,16 @@ namespace RestoreCord.Endpoints.V1.DiscordUser;
 [ApiController]
 [Route("/v1/discord-user/")]
 [ApiExplorerSettings(GroupName = "Discord Account Endpoints")]
+[AllowAnonymous]
 public class UnlinkAccount : ControllerBase
 {
 
     /// <summary>
-    /// 
+    /// Unlink a discord user from a guild/server.
     /// </summary>
     /// <param name="userId"></param>
     /// <param name="guildId"></param>
+    /// <remarks>Unlink a discord user from a guild/server.</remarks>
     /// <returns></returns>
     [HttpPost("{userId}/unlink/{guildId}")]
     [Consumes("plain/text")]
@@ -31,12 +35,24 @@ public class UnlinkAccount : ControllerBase
     [ProducesResponseType(typeof(Generic), 400)]
     public async Task<ActionResult<Generic>> HandleAsync(ulong userId, ulong guildId)
     {
+        if (userId == 0 || guildId == 0)
+        {
+            return BadRequest(new Generic()
+            {
+                success = false,
+                details = "invalid paramaters, please try again."
+            });
+        }
         await using var database = new DatabaseContext();
         var result = await this.VerifyServer(guildId, userId, database);
         if (result.Item1 is not null)
             return result.Item1;
         if (result.Item2 is null)
-            return NoContent();
+            return BadRequest(new Generic()
+            {
+                success = false,
+                details = "invalid paramaters, please try again."
+            });
         Database.Models.Server serverEntry = await database.servers.FirstAsync(x => x.guildId == guildId);
 
         Member? userEntry = await database.members.FirstOrDefaultAsync(x => x.discordId == userId && x.server.guildId == guildId);

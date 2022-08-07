@@ -1,4 +1,4 @@
-﻿namespace RestoreCord.Records.Requests.Guild.User;
+﻿namespace DiscordRepair.Records.Requests.Guild.User;
 
 /// <summary>
 /// 

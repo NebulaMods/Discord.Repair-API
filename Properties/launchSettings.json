@@ -17,7 +17,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "RestoreCord": {
+    "Discord.Repair": {
       "commandName": "Project",
       "launchUrl": "swagger",
       "environmentVariables": {

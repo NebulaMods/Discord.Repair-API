@@ -1,17 +1,14 @@
 ﻿using Discord;
-using Discord.Interactions;
-using Discord.WebSocket;
 
 using Microsoft.EntityFrameworkCore;
 
-using RestoreCord.Database;
-using RestoreCord.Database.Models;
-using RestoreCord.Database.Models.BackupModels;
-using RestoreCord.Database.Models.BackupModels.Channel;
-using RestoreCord.Database.Models.BackupModels.Permissions;
-using RestoreCord.Utilities;
+using DiscordRepair.Database;
+using DiscordRepair.Database.Models;
+using DiscordRepair.Database.Models.BackupModels;
+using DiscordRepair.Database.Models.BackupModels.Channel;
+using DiscordRepair.Database.Models.BackupModels.Permissions;
 
-namespace RestoreCord.MigrationMaster;
+namespace DiscordRepair.MigrationMaster;
 
 /// <summary>
 /// 
@@ -24,7 +21,7 @@ public class Backup
         _configuration = configuration;
     }
 
-    public async ValueTask<Database.Models.BackupModels.Backup> BackupGuildAsync(Server server, DatabaseContext database, SocketGuild guild, ShardedInteractionContext context)
+    public async ValueTask<Database.Models.BackupModels.Backup> BackupGuildAsync(Server server, DatabaseContext database, Discord.Rest.RestGuild guild, Discord.Rest.RestInteractionContext context)
     {
         var backupEntry = new Database.Models.BackupModels.Backup
         {
@@ -49,14 +46,10 @@ public class Backup
         await database.ApplyChangesAsync(server);
         backupEntry.roles = BackupRoles(backupEntry, guild);
         await database.ApplyChangesAsync(server);
-        if (await DiscordExtensions.CheckBusinessMembership(database, context, false))
-        {
-            backupEntry.users = await BackupUsersAsync(backupEntry, guild);
-            guild.PurgeUserCache();
-        }
-        backupEntry.catgeoryChannels = BackupCategories(backupEntry, guild);
-        backupEntry.textChannels = BackupTextChannels(backupEntry, guild);
-        backupEntry.voiceChannels = BackupVoiceChannels(backupEntry, guild);
+        backupEntry.users = await BackupUsersAsync(backupEntry, guild);
+        backupEntry.catgeoryChannels = await BackupCategories(backupEntry, guild);
+        backupEntry.textChannels = await BackupTextChannels(backupEntry, guild);
+        backupEntry.voiceChannels = await BackupVoiceChannels(backupEntry, guild);
         backupEntry.emojis = await BackupEmojisAsync(backupEntry,guild);
 
         //
@@ -285,38 +278,35 @@ public class Backup
         permission.ViewChannel = (PermissionValue)x.Permissions.ViewChannel;
     }
 
-    internal ICollection<CategoryChannel> BackupCategories(Database.Models.BackupModels.Backup backup, SocketGuild guild)
+    internal async Task<ICollection<CategoryChannel>> BackupCategories(Database.Models.BackupModels.Backup backup, Discord.Rest.RestGuild guild)
     {
         var channels = new HashSet<CategoryChannel>();
-        var guildChannels = guild.CategoryChannels.ToList();
-        foreach (SocketCategoryChannel? channel in guildChannels)
+        var guildChannels = await guild.GetCategoryChannelsAsync();
+        foreach (var channel in guildChannels)
         {
             channels.Add(UpdateCategoryChannel(backup, channel));
         }
-        guildChannels.Clear();
         return channels;
     }
-    internal ICollection<TextChannel> BackupTextChannels(Database.Models.BackupModels.Backup backup, SocketGuild guild)
+    internal async Task<ICollection<TextChannel>> BackupTextChannels(Database.Models.BackupModels.Backup backup, Discord.Rest.RestGuild guild)
     {
         var channels = new HashSet<TextChannel>();
-        var guildChannels = guild.TextChannels.ToList();
-        foreach (SocketTextChannel? channel in guildChannels)
+        var guildChannels = await guild.GetTextChannelsAsync();
+        foreach (var channel in guildChannels)
         {
-            if (channel as SocketThreadChannel is null)
+            if (channel as Discord.Rest.RestThreadChannel is null)
                 channels.Add(UpdateTextChannel(backup, channel));
         }
-        guildChannels.Clear();
         return channels;
     }
-    internal ICollection<VoiceChannel> BackupVoiceChannels(Database.Models.BackupModels.Backup backup, SocketGuild guild)
+    internal async Task<ICollection<VoiceChannel>> BackupVoiceChannels(Database.Models.BackupModels.Backup backup, Discord.Rest.RestGuild guild)
     {
         var channels = new HashSet<VoiceChannel>();
-        var guildChannels = guild.VoiceChannels.ToList();
-        foreach (SocketVoiceChannel? channel in guildChannels)
+        var guildChannels = await guild.GetVoiceChannelsAsync();
+        foreach (var channel in guildChannels)
         {
             channels.Add(UpdateVoiceChannel(backup, channel));
         }
-        guildChannels.Clear();
         return channels;
     }
 
@@ -368,7 +358,7 @@ public class Backup
                 permissionList.Add(CreateChannelPermissionEntry(x, x.TargetId));
             }
             channelPerms1.Clear();
-            return channel as SocketNewsChannel is not null
+            return channel as Discord.Rest.RestNewsChannel is not null
             ? new TextChannel
             {
                 id = channel.Id,
@@ -402,7 +392,7 @@ public class Backup
             channelEntry.archiveAfter = null;
             channelEntry.nsfw = channel.IsNsfw;
             channelEntry.topic = channel.Topic;
-            if (channel as SocketNewsChannel is null)
+            if (channel as Discord.Rest.RestNewsChannel is null)
                 channelEntry.slowModeInterval = channel.SlowModeInterval;
             var channelPerms = channel.PermissionOverwrites.ToList();
             foreach (Overwrite x in channelPerms)

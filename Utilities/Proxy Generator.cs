@@ -1,7 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Net;
 
-namespace RestoreCord.Utilities;
+namespace DiscordRepair.Utilities;
 public class ProxyConfiguration
 {
     public Dictionary<Uri, NetworkCredential> _credentialList = new();

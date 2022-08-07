@@ -8,11 +8,11 @@ using Microsoft.EntityFrameworkCore;
 
 using Newtonsoft.Json;
 
-using RestoreCord.Database;
-using RestoreCord.Database.Models;
-using RestoreCord.MigrationMaster.Models;
+using DiscordRepair.Database;
+using DiscordRepair.Database.Models;
+using DiscordRepair.MigrationMaster.Models;
 
-namespace RestoreCord.MigrationMaster;
+namespace DiscordRepair.MigrationMaster;
 
 /// <summary>
 /// 
@@ -46,7 +46,7 @@ public class Pull
             DefaultRetryMode = RetryMode.RetryTimeouts,
             //RestClientProvider = DefaultRestClientProvider.Create(useProxy: true),
         });
-        await client.LoginAsync(TokenType.Bot, server.settings.mainBot is not null ? server.settings.mainBot.token : Properties.Resources.Token);
+        await client.LoginAsync(TokenType.Bot, server.settings.mainBot.token);
 
         Discord.Rest.RestGuild? guildSocket = await client.GetGuildAsync(guildId);
 

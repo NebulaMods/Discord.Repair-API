@@ -2,7 +2,7 @@
 
 using Discord.Net;
 
-namespace RestoreCord.Database;
+namespace DiscordRepair.Database;
 
 internal static class DatabaseContextExtension
 {

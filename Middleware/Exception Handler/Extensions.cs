@@ -1,4 +1,4 @@
-﻿namespace RestoreCord.Middleware.ExceptionHandler;
+﻿namespace DiscordRepair.Middleware.ExceptionHandler;
 
 public static class Extensions
 {

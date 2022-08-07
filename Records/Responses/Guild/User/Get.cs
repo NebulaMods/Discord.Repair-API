@@ -1,6 +1,6 @@
-﻿namespace RestoreCord.Records.Responses.Guild.User;
+﻿namespace DiscordRepair.Records.Responses.Guild.User;
 
-public record Get
+public record GetUserResponse
 {
     public ulong discordId { get; set; }
     public ulong guildId { get; set; }

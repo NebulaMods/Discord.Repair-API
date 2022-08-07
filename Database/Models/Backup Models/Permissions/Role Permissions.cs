@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace RestoreCord.Database.Models.BackupModels.Permissions;
+namespace DiscordRepair.Database.Models.BackupModels.Permissions;
 
 /// <summary>
 /// 

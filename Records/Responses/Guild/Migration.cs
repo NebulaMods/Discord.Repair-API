@@ -1,4 +1,4 @@
-﻿namespace RestoreCord.Records.Responses.Guild;
+﻿namespace DiscordRepair.Records.Responses.Guild;
 
 /// <summary>
 /// 

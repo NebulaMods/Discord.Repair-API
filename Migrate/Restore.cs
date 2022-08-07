@@ -1,4 +1,4 @@
-﻿namespace RestoreCord.MigrationMaster;
+﻿namespace DiscordRepair.MigrationMaster;
 
 /// <summary>
 /// 

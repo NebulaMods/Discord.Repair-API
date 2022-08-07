@@ -1,10 +1,6 @@
-﻿using System.Diagnostics;
-using System.Reflection;
+﻿using System.Reflection;
 
-using Discord;
-using Discord.Interactions;
-using Discord.WebSocket;
-
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.EntityFrameworkCore;
@@ -12,19 +8,16 @@ using Microsoft.OpenApi.Models;
 
 using Newtonsoft.Json.Converters;
 
-using RestoreCord.Database;
-using RestoreCord.Events;
+using DiscordRepair.Database;
+using DiscordRepair.Middleware;
 
-using Blacklist = RestoreCord.Endpoints.V1.Guild.User.Blacklist;
-
-namespace RestoreCord.Services;
+namespace DiscordRepair.Services;
 
 /// <summary>
 /// 
 /// </summary>
 public class Startup
 {
-    private DiscordShardedClient _client;
     /// <summary>
     /// 
     /// </summary>
@@ -32,19 +25,19 @@ public class Startup
     {
         //var proxy = new Utilities.ProxyGenerator();
         //_ = proxy.LoadProxyListAsync("");
-        _client = new DiscordShardedClient(new DiscordSocketConfig
-        {
-            LogLevel = LogSeverity.Debug,
-            AlwaysDownloadUsers = false,
-            GatewayIntents = GatewayIntents.GuildMembers | GatewayIntents.Guilds | GatewayIntents.GuildIntegrations,
-            UseSystemClock = true,
-            MessageCacheSize = 0,
-            UseInteractionSnowflakeDate = true,
-            LogGatewayIntentWarnings = false,
-            DefaultRetryMode = RetryMode.RetryTimeouts,
-            //RestClientProvider = DefaultRestClientProvider.Create(useProxy: true),
-            //WebSocketProvider = DefaultWebSocketProvider.Create(proxy)
-        });
+        //_client = new DiscordShardedClient(new DiscordSocketConfig
+        //{
+        //    LogLevel = LogSeverity.Debug,
+        //    AlwaysDownloadUsers = false,
+        //    GatewayIntents = GatewayIntents.GuildMembers | GatewayIntents.Guilds | GatewayIntents.GuildIntegrations,
+        //    UseSystemClock = true,
+        //    MessageCacheSize = 0,
+        //    UseInteractionSnowflakeDate = true,
+        //    LogGatewayIntentWarnings = false,
+        //    DefaultRetryMode = RetryMode.RetryTimeouts,
+        //    //RestClientProvider = DefaultRestClientProvider.Create(useProxy: true),
+        //    //WebSocketProvider = DefaultWebSocketProvider.Create(proxy)
+        //});
     }
 
     /// <summary>
@@ -57,52 +50,14 @@ public class Startup
         using (var context = new DatabaseContext())
         {
             context.Database.Migrate();
-            //var user = new Database.Models.User()
-            //{
-            //    username = "nebula",
-            //    email = "lol",
-            //    role = "admin",
-            //    password = "ujdshfn",
-
-            //};
-            //context.users.Add(user);
-            //context.servers.Add(new Database.Models.Server()
-            //{
-            //    name = "test",
-            //    guildId = 982587580409315328,
-            //    roleId = 990415527254065152,
-            //    settings = new Database.Models.ServerSettings()
-            //    {
-            //        mainBot = new Database.Models.CustomBot()
-            //        {
-            //            clientId = "j",
-            //            clientSecret = "a",
-            //            name = "h",
-            //            token = "d",
-            //            urlRedirect = "d"
-            //        }
-            //    },
-            //    owner = user
-            //});
-            //context.SaveChanges();
         }
-
-        services.AddSingleton(_client)
-            .AddSingleton<InteractionEventHandler>()
-            .AddSingleton<Blacklist>()
-            .AddSingleton<Commands.Blacklist>()
-            .AddSingleton<Commands.Restore>()
+        services
+            .AddSingleton<TokenLoader>()
             .AddSingleton<MigrationMaster.Restore>()
             .AddSingleton<MigrationMaster.Backup>()
             .AddSingleton<MigrationMaster.Pull>()
-            .AddSingleton<MigrationMaster.Configuration>()
-            .AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordShardedClient>(), new InteractionServiceConfig
-            {
-                DefaultRunMode = RunMode.Async,
-                LogLevel = LogSeverity.Info,
-            }));
+            .AddSingleton<MigrationMaster.Configuration>();
         //add other endpoints
-        //DiscordBot(new CancellationToken()).ConfigureAwait(false);
         //configure cookie policy
         services.Configure<CookiePolicyOptions>(options =>
         {
@@ -111,6 +66,17 @@ public class Startup
             // requires using Microsoft.AspNetCore.Http;
             options.MinimumSameSitePolicy = SameSiteMode.None;
         });
+        //configure auth
+        services.AddAuthentication(Authentication.Schemes.MainScheme).AddScheme<AuthenticationSchemeOptions, Authentication.Handler>(Authentication.Schemes.MainScheme, null);
+
+        //configure authorization
+        services.AddAuthorization(authorizationOptions =>
+        {
+            authorizationOptions.FallbackPolicy = new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
+            .AddAuthenticationSchemes(Authentication.Schemes.MainScheme)
+            .RequireAuthenticatedUser().Build();
+        });
+
         #region Swagger
         //configure json options for swagger
         services.AddControllers().AddNewtonsoftJson(jsonOptions =>
@@ -124,7 +90,7 @@ public class Startup
             //swagger document options
             swaggerGenOptions.SwaggerDoc("v1", new OpenApiInfo
             {
-                Title = "RestoreCord | API",
+                Title = "Discord.Repair | API",
                 Version = $"{Assembly.GetExecutingAssembly().GetName().Version}",
                 Contact = new OpenApiContact()
                 {
@@ -137,6 +103,24 @@ public class Startup
             });
 
             //swagger auth
+            swaggerGenOptions.AddSecurityDefinition(Authentication.Schemes.MainScheme, new OpenApiSecurityScheme
+            {
+                Description = "Please enter your API Token to gain access to the endpoints.",
+                Name = "Authorization",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.ApiKey,
+            });
+            swaggerGenOptions.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {{
+                new OpenApiSecurityScheme
+                {
+                    Reference = new OpenApiReference
+                    {
+                        Id = Authentication.Schemes.MainScheme,
+                        Type = ReferenceType.SecurityScheme
+                    }
+                }, new List<string>()
+            }});
             string? xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
             string? xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
             swaggerGenOptions.IncludeXmlComments(xmlPath);
@@ -156,14 +140,6 @@ public class Startup
         #endregion
     }
 
-    private async Task DiscordBot(CancellationToken cancellationToken)
-    {
-        if (Debugger.IsAttached)
-            await _client.LoginAsync(TokenType.Bot, Properties.Resources.TestToken);
-        else
-            await _client.LoginAsync(TokenType.Bot, Properties.Resources.Token);
-        await _client.StartAsync();
-    }
 
     /// <summary>
     /// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -184,9 +160,9 @@ public class Startup
         //config for swagger ui
         app.UseSwaggerUI(swaggerOptions =>
         {
-            swaggerOptions.SwaggerEndpoint("/swagger/v1/swagger.json", "RestoreCord");
+            swaggerOptions.SwaggerEndpoint("/swagger/v1/swagger.json", "Discord.Repair");
             swaggerOptions.RoutePrefix = string.Empty;
-            swaggerOptions.DocumentTitle = "RestoreCord | API";
+            swaggerOptions.DocumentTitle = "Discord.Repair | API";
             swaggerOptions.EnableDeepLinking();
             swaggerOptions.EnableValidator(null);
             swaggerOptions.EnablePersistAuthorization();
@@ -194,7 +170,6 @@ public class Startup
             swaggerOptions.DisplayRequestDuration();
             swaggerOptions.ShowExtensions();
         });
-
         //inject cookies
         app.UseCookiePolicy();
         //inject routing
@@ -205,6 +180,8 @@ public class Startup
             x.AllowAnyHeader();
             x.AllowAnyOrigin();
         });
+        app.UseAuthentication();
+        app.UseAuthorization();
 
         //inject endpoints
         app.UseEndpoints(endpoints =>

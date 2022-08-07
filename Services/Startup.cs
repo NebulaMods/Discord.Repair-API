@@ -94,12 +94,12 @@ public class Startup
                 Version = $"{Assembly.GetExecutingAssembly().GetName().Version}",
                 Contact = new OpenApiContact()
                 {
-                    Email = "support@restorecord.com",
+                    Email = "support@discord.repair",
                     Name = "Contact",
-                    Url = new Uri("https://restorecord.com")
+                    Url = new Uri("https://discord.repair")
                 },
                 Description = "Advanced discord features",
-                TermsOfService = new Uri("https://restorecord.com"),
+                TermsOfService = new Uri("https://discord.repair"),
             });
 
             //swagger auth

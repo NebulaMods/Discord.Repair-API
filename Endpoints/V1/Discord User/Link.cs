@@ -8,6 +8,7 @@ using DiscordRepair.Database;
 using DiscordRepair.Database.Models;
 using DiscordRepair.Records.Responses;
 using DiscordRepair.Utilities;
+using Discord.Rest;
 
 namespace DiscordRepair.Endpoints.V1.DiscordUser;
 
@@ -106,6 +107,12 @@ public class Link : ControllerBase
         };
         await database.members.AddAsync(newMember);
         await database.ApplyChangesAsync();
+        if (result.Item2.roleId is not null)
+        {
+            using var discordClient = new DiscordRestClient();
+            await discordClient.LoginAsync(Discord.TokenType.Bot, result.Item2.settings.mainBot.token);
+            await discordClient.AddRoleAsync(result.Item2.guildId, newMember.discordId, (ulong)result.Item2.roleId);
+        }
         return Created($"https://discord.repair/v1/discord-user/{newMember.discordId}/guilds", new Generic()
         {
             success = true,
@@ -156,10 +163,25 @@ public class Link : ControllerBase
                 success = false,
                 details = "invalid paramaters, please try again."
             });
-        var results1 = await GetInfo(code, http, result.Item2.settings.mainBot.clientId, result.Item2.settings.mainBot.clientSecret, Properties.Resources.UrlRedirect);
-        var results = JsonConvert.DeserializeObject<TokenResponse>(results1);
+        var results = JsonConvert.DeserializeObject<TokenResponse>(await GetInfo(code, http, result.Item2.settings.mainBot.clientId, result.Item2.settings.mainBot.clientSecret, Properties.Resources.UrlRedirect));
+        if (results is null)
+        {
+            return BadRequest(new Generic()
+            {
+                success = false,
+                details = "invalid, please try again."
+            });
+        }
         var results2 = JsonConvert.DeserializeObject<AboutMe>(await GetAboutMe(results.access_token, http));
-        Database.Models.Blacklist? blacklistUser = result.Item2.settings.blacklist.FirstOrDefault(x => x.discordId == results2.user.id);
+        if (results2 is null)
+        {
+            return BadRequest(new Generic()
+            {
+                success = false,
+                details = "invalid, please try again."
+            });
+        }
+        Blacklist? blacklistUser = result.Item2.settings.blacklist.FirstOrDefault(x => x.discordId == results2.user.id);
         if (blacklistUser is not null)
         {
             return BadRequest(new Generic()
@@ -180,6 +202,12 @@ public class Link : ControllerBase
         };
         await database.members.AddAsync(newMember);
         await database.ApplyChangesAsync();
+        if (result.Item2.roleId is not null)
+        {
+            using var discordClient = new DiscordRestClient();
+            await discordClient.LoginAsync(Discord.TokenType.Bot, result.Item2.settings.mainBot.token);
+            await discordClient.AddRoleAsync(result.Item2.guildId, newMember.discordId, (ulong)result.Item2.roleId);
+        }
         return Created($"https://discord.repair/v1/discord-user/{newMember.discordId}/guilds",new Generic()
         {
             success = true,
@@ -187,7 +215,7 @@ public class Link : ControllerBase
         });
     }
 
-    public static async ValueTask<string?> GetInfo(string code, HttpClient http, string clientId, string clientSecret, string uriRedirect)
+    public static async ValueTask<string> GetInfo(string code, HttpClient http, string clientId, string clientSecret, string uriRedirect)
     {
         var content = new FormUrlEncodedContent(new Dictionary<string, string>
         {
@@ -211,11 +239,11 @@ public class Link : ControllerBase
 
     public record TokenResponse
     {
-        public string? access_token { get; set; }
+        public string access_token { get; set; }
         public long expires_in { get; set; }
-        public string? refresh_token { get; set; }
-        public string? scope { get; set; }
-        public string? token_type { get; set; }
+        public string refresh_token { get; set; }
+        public string scope { get; set; }
+        public string token_type { get; set; }
     }
     public record Application
     {
@@ -248,6 +276,4 @@ public class Link : ControllerBase
         public string discriminator { get; set; }
         public int public_flags { get; set; }
     }
-
-
 }

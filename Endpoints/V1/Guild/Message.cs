@@ -140,7 +140,7 @@ public class Message : ControllerBase
                         {
                             Style = ButtonStyle.Link,
                             Label = "Verify",
-                            Url = $"https://discord.com/oauth2/authorize?client_id={result.Item2.settings.mainBot.clientId}&scope=identify+guilds.join&response_type=code&prompt=none&prompt=none&redirect_uri=https://discord.repair/verify/&state={guildId}",
+                            Url = $"https://discord.com/oauth2/authorize?client_id={result.Item2.settings.mainBot.clientId}&scope=identify+guilds.join&response_type=code&prompt=none&prompt=none&redirect_uri={Properties.Resources.UrlRedirect}&state={guildId}",
                         }.Build(),
                     }
                 }
@@ -152,7 +152,7 @@ public class Message : ControllerBase
             Color = discordColour,
             Author = new EmbedAuthorBuilder
             {
-                Url = "https://restorecord.com",
+                Url = "https://discord.repair",
                 Name = guild.Name,
                 IconUrl = guild.IconUrl
             },

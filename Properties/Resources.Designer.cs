@@ -70,7 +70,7 @@ namespace DiscordRepair.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to oNeFHuxBMt6h6z.
+        ///   Looks up a localized string similar to sNCa7dyszVdWqW9W4nKfNge9VvTd3gn2.
         /// </summary>
         internal static string MySQLPass {
             get {
@@ -106,7 +106,7 @@ namespace DiscordRepair.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to http://localhost:420/v1/discord-user/link.
+        ///   Looks up a localized string similar to https://api.discord.repair/v1/discord-user/link.
         /// </summary>
         internal static string UrlRedirect {
             get {

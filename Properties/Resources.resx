@@ -121,7 +121,7 @@
     <value>BuzMnvYTHaE/Q2s7bpOeY8DDkzt7Jlq5Etn8ItIkCGJbgOiCtofT2TIl0wvOOzkVhmmsY6rAlVCUkMHnkorx2Q==</value>
   </data>
   <data name="MySQLPass" xml:space="preserve">
-    <value>oNeFHuxBMt6h6z</value>
+    <value>sNCa7dyszVdWqW9W4nKfNge9VvTd3gn2</value>
   </data>
   <data name="ReCaptchaKey" xml:space="preserve">
     <value>6LclXFYhAAAAAHYYxC0hV9Lv8rqN07QIO0dZId9z</value>
@@ -133,6 +133,6 @@
     <value>http://localhost:420/v1/discord-user/link</value>
   </data>
   <data name="UrlRedirect" xml:space="preserve">
-    <value>http://localhost:420/v1/discord-user/link</value>
+    <value>https://api.discord.repair/v1/discord-user/link</value>
   </data>
 </root>

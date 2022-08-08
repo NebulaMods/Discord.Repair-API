@@ -53,15 +53,18 @@ public class Create : ControllerBase
             });
         }
         using var http = new HttpClient();
-        var content = new
+        http.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type","application/x-www-form-urlencoded");
+        var requestResults = await http.PostAsync($"https://www.google.com/recaptcha/api/siteverify?secret={Properties.Resources.ReCaptchaKey}&response={userRequest.captchaCode}", null);
+        var captchaResults = JsonConvert.DeserializeObject<ReCaptchaResponse>(await requestResults.Content.ReadAsStringAsync());
+        if (captchaResults is null)
         {
-            secret = Properties.Resources.ReCaptchaKey,
-            response = userRequest.captchaCode,
-        };
-        StringContent htmlContent = new(JsonConvert.SerializeObject(content));
-        var captchaResults = await http.PostAsync("https://www.google.com/recaptcha/api/siteverify", htmlContent);
-        var newString = await captchaResults.Content.ReadAsStringAsync();
-        if (newString.Contains("sucess: true") is false)
+            return BadRequest(new Generic()
+            {
+                success = false,
+                details = "invalid captcha, please try again."
+            });
+        }
+        if (captchaResults.success is false)
         {
             return BadRequest(new Generic()
             {
@@ -94,8 +97,9 @@ public class Create : ControllerBase
     public record ReCaptchaResponse
     {
         public bool success { get; set; }
-        public DateTime challenge_ts { get; set; }
-        public string hostname { get; set; }
-        public string? error_codes { get; set; }
+        public DateTime? challenge_ts { get; set; }
+        public string? hostname { get; set; }
+        [JsonProperty("error-codes")]
+        public List<string?>? ErrorCodes { get; set; }
     }
 }

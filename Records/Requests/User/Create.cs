@@ -19,7 +19,7 @@ public record CreateUserRequest
     public string password { get; set; }
 
     [Required]
-    [StringLength(100)]
+    [StringLength(800, MinimumLength = 250)]
     public string captchaCode { get; set; }
 }
 

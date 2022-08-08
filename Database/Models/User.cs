@@ -34,7 +34,6 @@ public record User
     /// 
     /// </summary>
     [Required]
-    [StringLength(100)]
     [DataType(DataType.Password)]
     public string password { get; set; }
 
@@ -50,7 +49,7 @@ public record User
     /// 
     /// </summary>
     /// 
-    [StringLength(100)]
+    [StringLength(250)]
     [DataType(DataType.Url)]
     public string pfp { get; set; } = "https://nebulamods.ca/content/images/logo-nebulamods.png";
 

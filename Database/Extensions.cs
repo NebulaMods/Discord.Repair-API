@@ -18,7 +18,7 @@ internal static class DatabaseContextExtension
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            await ex.LogErrorAsync();
             return 0;
         }
     }

@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
+using Newtonsoft.Json;
+
 namespace DiscordRepair.Records.Requests.User;
 
 public record CreateUserRequest
@@ -19,7 +21,8 @@ public record CreateUserRequest
     public string password { get; set; }
 
     [Required]
-    [StringLength(800, MinimumLength = 250)]
+    //[StringLength(800, MinimumLength = 250)]
+    [JsonProperty("h-captcha-response")]
     public string captchaCode { get; set; }
 }
 

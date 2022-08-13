@@ -16,6 +16,8 @@ public class TokenLoader
         foreach(var user in users)
         {
             APITokens.TryAdd(user.apiToken, user.username);
+            //if (APITokens.TryAdd(user.apiToken, user.username))
+            //    Console.WriteLine($"{user.username} loaded: {user.apiToken}");
         }
     }
 }

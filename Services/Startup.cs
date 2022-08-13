@@ -10,6 +10,7 @@ using Newtonsoft.Json.Converters;
 
 using DiscordRepair.Database;
 using DiscordRepair.Middleware;
+using DiscordRepair.Middleware.CORs;
 
 namespace DiscordRepair.Services;
 
@@ -65,6 +66,15 @@ public class Startup
             options.CheckConsentNeeded = context => true;
             // requires using Microsoft.AspNetCore.Http;
             options.MinimumSameSitePolicy = SameSiteMode.None;
+        });
+        services.AddCors(x =>
+        {
+            x.AddDefaultPolicy(x =>
+            {
+                x.AllowAnyHeader();
+                x.AllowAnyMethod();
+                x.AllowAnyOrigin();
+            });
         });
         //configure auth
         services.AddAuthentication(Authentication.Schemes.MainScheme).AddScheme<AuthenticationSchemeOptions, Authentication.Handler>(Authentication.Schemes.MainScheme, null);
@@ -156,7 +166,7 @@ public class Startup
         });
         //inject swagger
         app.UseSwagger();
-
+        app.UseCORsOptions();
         //config for swagger ui
         app.UseSwaggerUI(swaggerOptions =>
         {
@@ -174,12 +184,7 @@ public class Startup
         app.UseCookiePolicy();
         //inject routing
         app.UseRouting();
-        app.UseCors(x =>
-        {
-            x.AllowAnyMethod();
-            x.AllowAnyHeader();
-            x.AllowAnyOrigin();
-        });
+        app.UseCors();
         app.UseAuthentication();
         app.UseAuthorization();
 

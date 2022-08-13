@@ -9,6 +9,7 @@ using DiscordRepair.Database;
 using DiscordRepair.Records.Requests.User;
 using DiscordRepair.Records.Responses;
 using DiscordRepair.Services;
+using Microsoft.AspNetCore.DataProtection;
 
 namespace DiscordRepair.Endpoints.V1.User;
 
@@ -53,9 +54,16 @@ public class Create : ControllerBase
             });
         }
         using var http = new HttpClient();
-        http.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type","application/x-www-form-urlencoded");
-        var requestResults = await http.PostAsync($"https://www.google.com/recaptcha/api/siteverify?secret={Properties.Resources.ReCaptchaKey}&response={userRequest.captchaCode}", null);
-        var captchaResults = JsonConvert.DeserializeObject<ReCaptchaResponse>(await requestResults.Content.ReadAsStringAsync());
+        var formContent = new Dictionary<string, string>
+        {
+            { "response", userRequest.captchaCode },
+            { "secret", Properties.Resources.HCaptchaKey },
+            { "sitekey", "0d92223e-505f-4dd9-a808-55378fa9307c" }
+        };
+        var content = new FormUrlEncodedContent(formContent);
+        //content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/x-www-form-urlencoded");
+        var requestResults = await http.PostAsync($"https://hcaptcha.com/siteverify", content);
+        var captchaResults = JsonConvert.DeserializeObject<HCaptchaResponse>(await requestResults.Content.ReadAsStringAsync());
         if (captchaResults is null)
         {
             return BadRequest(new Generic()
@@ -92,14 +100,5 @@ public class Create : ControllerBase
         await database.ApplyChangesAsync();
         _tokenLoader.APITokens.TryAdd(newUser.apiToken, newUser.username);
         return Created($"https://discord.repair/v1/user/{userRequest.username}", newUser.apiToken);
-    }
-
-    public record ReCaptchaResponse
-    {
-        public bool success { get; set; }
-        public DateTime? challenge_ts { get; set; }
-        public string? hostname { get; set; }
-        [JsonProperty("error-codes")]
-        public List<string?>? ErrorCodes { get; set; }
     }
 }

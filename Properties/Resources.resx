@@ -120,6 +120,9 @@
   <data name="Argon2Salt" xml:space="preserve">
     <value>BuzMnvYTHaE/Q2s7bpOeY8DDkzt7Jlq5Etn8ItIkCGJbgOiCtofT2TIl0wvOOzkVhmmsY6rAlVCUkMHnkorx2Q==</value>
   </data>
+  <data name="HCaptchaKey" xml:space="preserve">
+    <value>0x5265636983aD665417634717B30a062940eb1400</value>
+  </data>
   <data name="MySQLPass" xml:space="preserve">
     <value>sNCa7dyszVdWqW9W4nKfNge9VvTd3gn2</value>
   </data>

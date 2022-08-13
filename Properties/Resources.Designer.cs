@@ -70,6 +70,15 @@ namespace DiscordRepair.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 0x5265636983aD665417634717B30a062940eb1400.
+        /// </summary>
+        internal static string HCaptchaKey {
+            get {
+                return ResourceManager.GetString("HCaptchaKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to sNCa7dyszVdWqW9W4nKfNge9VvTd3gn2.
         /// </summary>
         internal static string MySQLPass {

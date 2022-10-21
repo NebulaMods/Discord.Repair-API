@@ -22,7 +22,7 @@ public record CreateUserRequest
 
     [Required]
     //[StringLength(800, MinimumLength = 250)]
-    [JsonProperty("h-captcha-response")]
+    //[JsonProperty("h-captcha-response")]
     public string captchaCode { get; set; }
 }
 

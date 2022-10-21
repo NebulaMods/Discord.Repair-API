@@ -79,7 +79,7 @@ public class Create : ControllerBase
         };
         await database.servers.AddAsync(newServer);
         await database.ApplyChangesAsync();
-        return Created($"https://discord.repair/v1/server/{newServer.key}", new CreateServerResponse()
+        return Created($"https://api.discord.repair/v1/server/{newServer.key}", new CreateServerResponse()
         {
             key = newServer.key,
             botName = customBot.name,

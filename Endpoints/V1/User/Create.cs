@@ -54,16 +54,23 @@ public class Create : ControllerBase
             });
         }
         using var http = new HttpClient();
+        //var formContent = new Dictionary<string, string>
+        //{
+        //    { "response", userRequest.captchaCode },
+        //    { "secret", Properties.Resources.HCaptchaKey },
+        //    { "sitekey", "0d92223e-505f-4dd9-a808-55378fa9307c" }
+        //};
         var formContent = new Dictionary<string, string>
         {
             { "response", userRequest.captchaCode },
-            { "secret", Properties.Resources.HCaptchaKey },
-            { "sitekey", "0d92223e-505f-4dd9-a808-55378fa9307c" }
+            { "secret", Properties.Resources.ReCaptchaKey },
         };
         var content = new FormUrlEncodedContent(formContent);
-        //content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/x-www-form-urlencoded");
-        var requestResults = await http.PostAsync($"https://hcaptcha.com/siteverify", content);
-        var captchaResults = JsonConvert.DeserializeObject<HCaptchaResponse>(await requestResults.Content.ReadAsStringAsync());
+        content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/x-www-form-urlencoded");
+        //var requestResults = await http.PostAsync($"https://hcaptcha.com/siteverify", content);
+        var requestResults = await http.PostAsync($"https://www.google.com/recaptcha/api/siteverify", content);
+        var captchaResults = JsonConvert.DeserializeObject<ReCaptchaResponse>(await requestResults.Content.ReadAsStringAsync());
+        //var captchaResults = JsonConvert.DeserializeObject<HCaptchaResponse>(await requestResults.Content.ReadAsStringAsync());
         if (captchaResults is null)
         {
             return BadRequest(new Generic()
@@ -99,6 +106,6 @@ public class Create : ControllerBase
         await database.users.AddAsync(newUser);
         await database.ApplyChangesAsync();
         _tokenLoader.APITokens.TryAdd(newUser.apiToken, newUser.username);
-        return Created($"https://discord.repair/v1/user/{userRequest.username}", newUser.apiToken);
+        return Created($"https://api.discord.repair/v1/user/{userRequest.username}", newUser.apiToken);
     }
 }

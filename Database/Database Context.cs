@@ -10,7 +10,12 @@ namespace DiscordRepair.Database;
 /// </summary>
 public class DatabaseContext : DbContext
 {
-    private readonly string _connectionString = $"Host=localhost;Database=restorecord_main;User ID=restorecord_db;Password={Properties.Resources.MySQLPass}";
+
+#if (DEBUG)
+    private readonly string _connectionString = $"host=localhost;user id=discord_db;database=discord.repair_db;password=Test1234";
+#else
+private readonly string _connectionString = $"Host=localhost;Database=discord.repair_db;User ID=bot;Password={Properties.Resources.MySQLPass}";
+#endif
     protected override void OnConfiguring(DbContextOptionsBuilder options) => options.UseNpgsql(_connectionString,x =>
     {
         

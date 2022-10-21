@@ -113,7 +113,7 @@ public class Link : ControllerBase
             await discordClient.LoginAsync(Discord.TokenType.Bot, result.Item2.settings.mainBot.token);
             await discordClient.AddRoleAsync(result.Item2.guildId, newMember.discordId, (ulong)result.Item2.roleId);
         }
-        return Created($"https://discord.repair/v1/discord-user/{newMember.discordId}/guilds", new Generic()
+        return Created($"https://api.discord.repair/v1/discord-user/{newMember.discordId}/guilds", new Generic()
         {
             success = true,
             details = "successfully linked user to server."
@@ -208,7 +208,7 @@ public class Link : ControllerBase
             await discordClient.LoginAsync(Discord.TokenType.Bot, result.Item2.settings.mainBot.token);
             await discordClient.AddRoleAsync(result.Item2.guildId, newMember.discordId, (ulong)result.Item2.roleId);
         }
-        return Created($"https://discord.repair/v1/discord-user/{newMember.discordId}/guilds",new Generic()
+        return Created($"https://api.discord.repair/v1/discord-user/{newMember.discordId}/guilds",new Generic()
         {
             success = true,
             details = $"successfully linked user."

@@ -58,7 +58,7 @@ public class Create : ControllerBase
         };
         user.bots.Add(newBot);
         await database.ApplyChangesAsync(user);
-        return Created($"https://discord.repair/v1/custom-bot/{newBot.key}", newBot);
+        return Created($"https://api.discord.repair/v1/custom-bot/{newBot.key}", newBot);
     }
 
 }

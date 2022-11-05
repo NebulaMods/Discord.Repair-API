@@ -11,6 +11,7 @@ using Newtonsoft.Json.Converters;
 using DiscordRepair.Database;
 using DiscordRepair.Middleware;
 using DiscordRepair.Middleware.CORs;
+using DiscordRepair.Middleware.ExceptionHandler;
 
 namespace DiscordRepair.Services;
 
@@ -65,7 +66,6 @@ public class Startup
             // This lambda determines whether user consent for non-essential cookies is needed for a given request.
             options.CheckConsentNeeded = context => true;
             // requires using Microsoft.AspNetCore.Http;
-            options.MinimumSameSitePolicy = SameSiteMode.None;
         });
         services.AddCors(x =>
         {
@@ -167,6 +167,7 @@ public class Startup
         //inject swagger
         app.UseSwagger();
         app.UseCORsOptions();
+        //app.UseErrorHandler();
         //config for swagger ui
         app.UseSwaggerUI(swaggerOptions =>
         {
@@ -186,7 +187,7 @@ public class Startup
         app.UseRouting();
         app.UseCors();
         app.UseAuthentication();
-        app.UseAuthorization();
+        //app.UseAuthorization();
 
         //inject endpoints
         app.UseEndpoints(endpoints =>

@@ -24,7 +24,7 @@ namespace DiscordRepair.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("RestoreCord.Database.Models.BackupModels.Backup", b =>
+            modelBuilder.Entity("Discord.Repair.Database.Models.BackupModels.Backup", b =>
                 {
                     b.Property<Guid>("key")
                         .ValueGeneratedOnAdd()
@@ -131,7 +131,7 @@ namespace DiscordRepair.Migrations
                     b.ToTable("Backup");
                 });
 
-            modelBuilder.Entity("RestoreCord.Database.Models.BackupModels.Channel.CategoryChannel", b =>
+            modelBuilder.Entity("Discord.Repair.Database.Models.BackupModels.Channel.CategoryChannel", b =>
                 {
                     b.Property<Guid>("key")
                         .ValueGeneratedOnAdd()
@@ -157,7 +157,7 @@ namespace DiscordRepair.Migrations
                     b.ToTable("CategoryChannel");
                 });
 
-            modelBuilder.Entity("RestoreCord.Database.Models.BackupModels.Channel.TextChannel", b =>
+            modelBuilder.Entity("Discord.Repair.Database.Models.BackupModels.Channel.TextChannel", b =>
                 {
                     b.Property<Guid>("key")
                         .ValueGeneratedOnAdd()
@@ -210,7 +210,7 @@ namespace DiscordRepair.Migrations
                     b.ToTable("TextChannel");
                 });
 
-            modelBuilder.Entity("RestoreCord.Database.Models.BackupModels.Channel.VoiceChannel", b =>
+            modelBuilder.Entity("Discord.Repair.Database.Models.BackupModels.Channel.VoiceChannel", b =>
                 {
                     b.Property<Guid>("key")
                         .ValueGeneratedOnAdd()
@@ -258,7 +258,7 @@ namespace DiscordRepair.Migrations
                     b.ToTable("VoiceChannel");
                 });
 
-            modelBuilder.Entity("RestoreCord.Database.Models.BackupModels.Emoji", b =>
+            modelBuilder.Entity("Discord.Repair.Database.Models.BackupModels.Emoji", b =>
                 {
                     b.Property<Guid>("key")
                         .ValueGeneratedOnAdd()
@@ -282,7 +282,7 @@ namespace DiscordRepair.Migrations
                     b.ToTable("Emoji");
                 });
 
-            modelBuilder.Entity("RestoreCord.Database.Models.BackupModels.GuildUser", b =>
+            modelBuilder.Entity("Discord.Repair.Database.Models.BackupModels.GuildUser", b =>
                 {
                     b.Property<Guid>("key")
                         .ValueGeneratedOnAdd()
@@ -309,7 +309,7 @@ namespace DiscordRepair.Migrations
                     b.ToTable("GuildUser");
                 });
 
-            modelBuilder.Entity("RestoreCord.Database.Models.BackupModels.Message", b =>
+            modelBuilder.Entity("Discord.Repair.Database.Models.BackupModels.Message", b =>
                 {
                     b.Property<Guid>("key")
                         .ValueGeneratedOnAdd()
@@ -343,7 +343,7 @@ namespace DiscordRepair.Migrations
                     b.ToTable("Message");
                 });
 
-            modelBuilder.Entity("RestoreCord.Database.Models.BackupModels.Permissions.ChannelPermissions", b =>
+            modelBuilder.Entity("Discord.Repair.Database.Models.BackupModels.Permissions.ChannelPermissions", b =>
                 {
                     b.Property<Guid>("key")
                         .ValueGeneratedOnAdd()
@@ -474,7 +474,7 @@ namespace DiscordRepair.Migrations
                     b.ToTable("ChannelPermissions");
                 });
 
-            modelBuilder.Entity("RestoreCord.Database.Models.BackupModels.Permissions.RolePermissions", b =>
+            modelBuilder.Entity("Discord.Repair.Database.Models.BackupModels.Permissions.RolePermissions", b =>
                 {
                     b.Property<Guid>("key")
                         .ValueGeneratedOnAdd()
@@ -611,7 +611,7 @@ namespace DiscordRepair.Migrations
                     b.ToTable("RolePermissions");
                 });
 
-            modelBuilder.Entity("RestoreCord.Database.Models.BackupModels.Role", b =>
+            modelBuilder.Entity("Discord.Repair.Database.Models.BackupModels.Role", b =>
                 {
                     b.Property<Guid>("key")
                         .ValueGeneratedOnAdd()
@@ -666,7 +666,7 @@ namespace DiscordRepair.Migrations
                     b.ToTable("Role");
                 });
 
-            modelBuilder.Entity("RestoreCord.Database.Models.BackupModels.Sticker", b =>
+            modelBuilder.Entity("Discord.Repair.Database.Models.BackupModels.Sticker", b =>
                 {
                     b.Property<Guid>("key")
                         .ValueGeneratedOnAdd()
@@ -682,7 +682,7 @@ namespace DiscordRepair.Migrations
                     b.ToTable("Sticker");
                 });
 
-            modelBuilder.Entity("RestoreCord.Database.Models.Blacklist", b =>
+            modelBuilder.Entity("Discord.Repair.Database.Models.Blacklist", b =>
                 {
                     b.Property<Guid>("key")
                         .ValueGeneratedOnAdd()
@@ -714,7 +714,7 @@ namespace DiscordRepair.Migrations
                     b.ToTable("Blacklist");
                 });
 
-            modelBuilder.Entity("RestoreCord.Database.Models.CustomBot", b =>
+            modelBuilder.Entity("Discord.Repair.Database.Models.CustomBot", b =>
                 {
                     b.Property<Guid>("key")
                         .ValueGeneratedOnAdd()
@@ -753,7 +753,7 @@ namespace DiscordRepair.Migrations
                     b.ToTable("CustomBot");
                 });
 
-            modelBuilder.Entity("RestoreCord.Database.Models.LogModels.Errors", b =>
+            modelBuilder.Entity("Discord.Repair.Database.Models.LogModels.Errors", b =>
                 {
                     b.Property<Guid>("key")
                         .ValueGeneratedOnAdd()
@@ -783,7 +783,7 @@ namespace DiscordRepair.Migrations
                     b.ToTable("errors");
                 });
 
-            modelBuilder.Entity("RestoreCord.Database.Models.LogModels.Statistics", b =>
+            modelBuilder.Entity("Discord.Repair.Database.Models.LogModels.Statistics", b =>
                 {
                     b.Property<Guid>("key")
                         .ValueGeneratedOnAdd()
@@ -826,7 +826,7 @@ namespace DiscordRepair.Migrations
                     b.ToTable("statistics");
                 });
 
-            modelBuilder.Entity("RestoreCord.Database.Models.Member", b =>
+            modelBuilder.Entity("Discord.Repair.Database.Models.Member", b =>
                 {
                     b.Property<Guid>("key")
                         .ValueGeneratedOnAdd()
@@ -874,7 +874,7 @@ namespace DiscordRepair.Migrations
                     b.ToTable("members");
                 });
 
-            modelBuilder.Entity("RestoreCord.Database.Models.Server", b =>
+            modelBuilder.Entity("Discord.Repair.Database.Models.Server", b =>
                 {
                     b.Property<Guid>("key")
                         .ValueGeneratedOnAdd()
@@ -909,7 +909,7 @@ namespace DiscordRepair.Migrations
                     b.ToTable("servers");
                 });
 
-            modelBuilder.Entity("RestoreCord.Database.Models.ServerSettings", b =>
+            modelBuilder.Entity("Discord.Repair.Database.Models.ServerSettings", b =>
                 {
                     b.Property<Guid>("key")
                         .ValueGeneratedOnAdd()
@@ -952,7 +952,7 @@ namespace DiscordRepair.Migrations
                     b.ToTable("ServerSettings");
                 });
 
-            modelBuilder.Entity("RestoreCord.Database.Models.Statistics.GuildMigration", b =>
+            modelBuilder.Entity("Discord.Repair.Database.Models.Statistics.GuildMigration", b =>
                 {
                     b.Property<Guid>("key")
                         .ValueGeneratedOnAdd()
@@ -969,7 +969,7 @@ namespace DiscordRepair.Migrations
                     b.ToTable("GuildMigration");
                 });
 
-            modelBuilder.Entity("RestoreCord.Database.Models.Statistics.MemberMigration", b =>
+            modelBuilder.Entity("Discord.Repair.Database.Models.Statistics.MemberMigration", b =>
                 {
                     b.Property<Guid>("key")
                         .ValueGeneratedOnAdd()
@@ -1013,7 +1013,7 @@ namespace DiscordRepair.Migrations
                     b.ToTable("MemberMigration");
                 });
 
-            modelBuilder.Entity("RestoreCord.Database.Models.User", b =>
+            modelBuilder.Entity("Discord.Repair.Database.Models.User", b =>
                 {
                     b.Property<Guid>("key")
                         .ValueGeneratedOnAdd()
@@ -1068,33 +1068,33 @@ namespace DiscordRepair.Migrations
                     b.ToTable("users");
                 });
 
-            modelBuilder.Entity("RestoreCord.Database.Models.BackupModels.Backup", b =>
+            modelBuilder.Entity("Discord.Repair.Database.Models.BackupModels.Backup", b =>
                 {
-                    b.HasOne("RestoreCord.Database.Models.User", null)
+                    b.HasOne("Discord.Repair.Database.Models.User", null)
                         .WithMany("backups")
                         .HasForeignKey("Userkey");
 
-                    b.HasOne("RestoreCord.Database.Models.BackupModels.Channel.VoiceChannel", "afkChannel")
+                    b.HasOne("Discord.Repair.Database.Models.BackupModels.Channel.VoiceChannel", "afkChannel")
                         .WithMany()
                         .HasForeignKey("afkChannelkey");
 
-                    b.HasOne("RestoreCord.Database.Models.BackupModels.Channel.TextChannel", "defaultChannel")
+                    b.HasOne("Discord.Repair.Database.Models.BackupModels.Channel.TextChannel", "defaultChannel")
                         .WithMany()
                         .HasForeignKey("defaultChannelkey");
 
-                    b.HasOne("RestoreCord.Database.Models.BackupModels.Channel.TextChannel", "publicUpdatesChannel")
+                    b.HasOne("Discord.Repair.Database.Models.BackupModels.Channel.TextChannel", "publicUpdatesChannel")
                         .WithMany()
                         .HasForeignKey("publicUpdatesChannelkey");
 
-                    b.HasOne("RestoreCord.Database.Models.BackupModels.Channel.TextChannel", "rulesChannel")
+                    b.HasOne("Discord.Repair.Database.Models.BackupModels.Channel.TextChannel", "rulesChannel")
                         .WithMany()
                         .HasForeignKey("rulesChannelkey");
 
-                    b.HasOne("RestoreCord.Database.Models.BackupModels.Channel.TextChannel", "systemChannel")
+                    b.HasOne("Discord.Repair.Database.Models.BackupModels.Channel.TextChannel", "systemChannel")
                         .WithMany()
                         .HasForeignKey("systemChannelkey");
 
-                    b.HasOne("RestoreCord.Database.Models.BackupModels.Channel.TextChannel", "widgetChannel")
+                    b.HasOne("Discord.Repair.Database.Models.BackupModels.Channel.TextChannel", "widgetChannel")
                         .WithMany()
                         .HasForeignKey("widgetChannelkey");
 
@@ -1111,132 +1111,132 @@ namespace DiscordRepair.Migrations
                     b.Navigation("widgetChannel");
                 });
 
-            modelBuilder.Entity("RestoreCord.Database.Models.BackupModels.Channel.CategoryChannel", b =>
+            modelBuilder.Entity("Discord.Repair.Database.Models.BackupModels.Channel.CategoryChannel", b =>
                 {
-                    b.HasOne("RestoreCord.Database.Models.BackupModels.Backup", null)
+                    b.HasOne("Discord.Repair.Database.Models.BackupModels.Backup", null)
                         .WithMany("catgeoryChannels")
                         .HasForeignKey("Backupkey");
                 });
 
-            modelBuilder.Entity("RestoreCord.Database.Models.BackupModels.Channel.TextChannel", b =>
+            modelBuilder.Entity("Discord.Repair.Database.Models.BackupModels.Channel.TextChannel", b =>
                 {
-                    b.HasOne("RestoreCord.Database.Models.BackupModels.Backup", null)
+                    b.HasOne("Discord.Repair.Database.Models.BackupModels.Backup", null)
                         .WithMany("textChannels")
                         .HasForeignKey("Backupkey");
 
-                    b.HasOne("RestoreCord.Database.Models.BackupModels.Channel.CategoryChannel", "category")
+                    b.HasOne("Discord.Repair.Database.Models.BackupModels.Channel.CategoryChannel", "category")
                         .WithMany()
                         .HasForeignKey("categorykey");
 
                     b.Navigation("category");
                 });
 
-            modelBuilder.Entity("RestoreCord.Database.Models.BackupModels.Channel.VoiceChannel", b =>
+            modelBuilder.Entity("Discord.Repair.Database.Models.BackupModels.Channel.VoiceChannel", b =>
                 {
-                    b.HasOne("RestoreCord.Database.Models.BackupModels.Backup", null)
+                    b.HasOne("Discord.Repair.Database.Models.BackupModels.Backup", null)
                         .WithMany("voiceChannels")
                         .HasForeignKey("Backupkey");
 
-                    b.HasOne("RestoreCord.Database.Models.BackupModels.Channel.CategoryChannel", "category")
+                    b.HasOne("Discord.Repair.Database.Models.BackupModels.Channel.CategoryChannel", "category")
                         .WithMany()
                         .HasForeignKey("categorykey");
 
                     b.Navigation("category");
                 });
 
-            modelBuilder.Entity("RestoreCord.Database.Models.BackupModels.Emoji", b =>
+            modelBuilder.Entity("Discord.Repair.Database.Models.BackupModels.Emoji", b =>
                 {
-                    b.HasOne("RestoreCord.Database.Models.BackupModels.Backup", null)
+                    b.HasOne("Discord.Repair.Database.Models.BackupModels.Backup", null)
                         .WithMany("emojis")
                         .HasForeignKey("Backupkey");
                 });
 
-            modelBuilder.Entity("RestoreCord.Database.Models.BackupModels.GuildUser", b =>
+            modelBuilder.Entity("Discord.Repair.Database.Models.BackupModels.GuildUser", b =>
                 {
-                    b.HasOne("RestoreCord.Database.Models.BackupModels.Backup", null)
+                    b.HasOne("Discord.Repair.Database.Models.BackupModels.Backup", null)
                         .WithMany("users")
                         .HasForeignKey("Backupkey");
                 });
 
-            modelBuilder.Entity("RestoreCord.Database.Models.BackupModels.Message", b =>
+            modelBuilder.Entity("Discord.Repair.Database.Models.BackupModels.Message", b =>
                 {
-                    b.HasOne("RestoreCord.Database.Models.BackupModels.Channel.TextChannel", null)
+                    b.HasOne("Discord.Repair.Database.Models.BackupModels.Channel.TextChannel", null)
                         .WithMany("messages")
                         .HasForeignKey("TextChannelkey");
                 });
 
-            modelBuilder.Entity("RestoreCord.Database.Models.BackupModels.Permissions.ChannelPermissions", b =>
+            modelBuilder.Entity("Discord.Repair.Database.Models.BackupModels.Permissions.ChannelPermissions", b =>
                 {
-                    b.HasOne("RestoreCord.Database.Models.BackupModels.Channel.CategoryChannel", null)
+                    b.HasOne("Discord.Repair.Database.Models.BackupModels.Channel.CategoryChannel", null)
                         .WithMany("permissions")
                         .HasForeignKey("CategoryChannelkey");
 
-                    b.HasOne("RestoreCord.Database.Models.BackupModels.Channel.TextChannel", null)
+                    b.HasOne("Discord.Repair.Database.Models.BackupModels.Channel.TextChannel", null)
                         .WithMany("permissions")
                         .HasForeignKey("TextChannelkey");
 
-                    b.HasOne("RestoreCord.Database.Models.BackupModels.Channel.VoiceChannel", null)
+                    b.HasOne("Discord.Repair.Database.Models.BackupModels.Channel.VoiceChannel", null)
                         .WithMany("permissions")
                         .HasForeignKey("VoiceChannelkey");
                 });
 
-            modelBuilder.Entity("RestoreCord.Database.Models.BackupModels.Role", b =>
+            modelBuilder.Entity("Discord.Repair.Database.Models.BackupModels.Role", b =>
                 {
-                    b.HasOne("RestoreCord.Database.Models.BackupModels.Backup", null)
+                    b.HasOne("Discord.Repair.Database.Models.BackupModels.Backup", null)
                         .WithMany("roles")
                         .HasForeignKey("Backupkey");
 
-                    b.HasOne("RestoreCord.Database.Models.BackupModels.GuildUser", null)
+                    b.HasOne("Discord.Repair.Database.Models.BackupModels.GuildUser", null)
                         .WithMany("assignedRoles")
                         .HasForeignKey("GuildUserkey");
 
-                    b.HasOne("RestoreCord.Database.Models.BackupModels.Permissions.RolePermissions", "permissions")
+                    b.HasOne("Discord.Repair.Database.Models.BackupModels.Permissions.RolePermissions", "permissions")
                         .WithMany()
                         .HasForeignKey("permissionskey");
 
                     b.Navigation("permissions");
                 });
 
-            modelBuilder.Entity("RestoreCord.Database.Models.BackupModels.Sticker", b =>
+            modelBuilder.Entity("Discord.Repair.Database.Models.BackupModels.Sticker", b =>
                 {
-                    b.HasOne("RestoreCord.Database.Models.BackupModels.Backup", null)
+                    b.HasOne("Discord.Repair.Database.Models.BackupModels.Backup", null)
                         .WithMany("stickers")
                         .HasForeignKey("Backupkey");
                 });
 
-            modelBuilder.Entity("RestoreCord.Database.Models.Blacklist", b =>
+            modelBuilder.Entity("Discord.Repair.Database.Models.Blacklist", b =>
                 {
-                    b.HasOne("RestoreCord.Database.Models.ServerSettings", null)
+                    b.HasOne("Discord.Repair.Database.Models.ServerSettings", null)
                         .WithMany("blacklist")
                         .HasForeignKey("ServerSettingskey");
 
-                    b.HasOne("RestoreCord.Database.Models.User", null)
+                    b.HasOne("Discord.Repair.Database.Models.User", null)
                         .WithMany("globalBlacklist")
                         .HasForeignKey("Userkey");
                 });
 
-            modelBuilder.Entity("RestoreCord.Database.Models.CustomBot", b =>
+            modelBuilder.Entity("Discord.Repair.Database.Models.CustomBot", b =>
                 {
-                    b.HasOne("RestoreCord.Database.Models.User", null)
+                    b.HasOne("Discord.Repair.Database.Models.User", null)
                         .WithMany("bots")
                         .HasForeignKey("Userkey");
                 });
 
-            modelBuilder.Entity("RestoreCord.Database.Models.LogModels.Statistics", b =>
+            modelBuilder.Entity("Discord.Repair.Database.Models.LogModels.Statistics", b =>
                 {
-                    b.HasOne("RestoreCord.Database.Models.User", "MigratedBy")
+                    b.HasOne("Discord.Repair.Database.Models.User", "MigratedBy")
                         .WithMany()
                         .HasForeignKey("MigratedBykey");
 
-                    b.HasOne("RestoreCord.Database.Models.Statistics.GuildMigration", "guildStats")
+                    b.HasOne("Discord.Repair.Database.Models.Statistics.GuildMigration", "guildStats")
                         .WithMany()
                         .HasForeignKey("guildStatskey");
 
-                    b.HasOne("RestoreCord.Database.Models.Statistics.MemberMigration", "memberStats")
+                    b.HasOne("Discord.Repair.Database.Models.Statistics.MemberMigration", "memberStats")
                         .WithMany()
                         .HasForeignKey("memberStatskey");
 
-                    b.HasOne("RestoreCord.Database.Models.Server", "server")
+                    b.HasOne("Discord.Repair.Database.Models.Server", "server")
                         .WithMany()
                         .HasForeignKey("serverkey");
 
@@ -1249,15 +1249,15 @@ namespace DiscordRepair.Migrations
                     b.Navigation("server");
                 });
 
-            modelBuilder.Entity("RestoreCord.Database.Models.Member", b =>
+            modelBuilder.Entity("Discord.Repair.Database.Models.Member", b =>
                 {
-                    b.HasOne("RestoreCord.Database.Models.CustomBot", "botUsed")
+                    b.HasOne("Discord.Repair.Database.Models.CustomBot", "botUsed")
                         .WithMany()
                         .HasForeignKey("botUsedkey")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("RestoreCord.Database.Models.Server", "server")
+                    b.HasOne("Discord.Repair.Database.Models.Server", "server")
                         .WithMany()
                         .HasForeignKey("serverkey")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1268,15 +1268,15 @@ namespace DiscordRepair.Migrations
                     b.Navigation("server");
                 });
 
-            modelBuilder.Entity("RestoreCord.Database.Models.Server", b =>
+            modelBuilder.Entity("Discord.Repair.Database.Models.Server", b =>
                 {
-                    b.HasOne("RestoreCord.Database.Models.User", "owner")
+                    b.HasOne("Discord.Repair.Database.Models.User", "owner")
                         .WithMany()
                         .HasForeignKey("ownerkey")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("RestoreCord.Database.Models.ServerSettings", "settings")
+                    b.HasOne("Discord.Repair.Database.Models.ServerSettings", "settings")
                         .WithMany()
                         .HasForeignKey("settingskey")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1287,9 +1287,9 @@ namespace DiscordRepair.Migrations
                     b.Navigation("settings");
                 });
 
-            modelBuilder.Entity("RestoreCord.Database.Models.ServerSettings", b =>
+            modelBuilder.Entity("Discord.Repair.Database.Models.ServerSettings", b =>
                 {
-                    b.HasOne("RestoreCord.Database.Models.CustomBot", "mainBot")
+                    b.HasOne("Discord.Repair.Database.Models.CustomBot", "mainBot")
                         .WithMany()
                         .HasForeignKey("mainBotkey")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1298,7 +1298,7 @@ namespace DiscordRepair.Migrations
                     b.Navigation("mainBot");
                 });
 
-            modelBuilder.Entity("RestoreCord.Database.Models.BackupModels.Backup", b =>
+            modelBuilder.Entity("Discord.Repair.Database.Models.BackupModels.Backup", b =>
                 {
                     b.Navigation("catgeoryChannels");
 
@@ -1315,34 +1315,34 @@ namespace DiscordRepair.Migrations
                     b.Navigation("voiceChannels");
                 });
 
-            modelBuilder.Entity("RestoreCord.Database.Models.BackupModels.Channel.CategoryChannel", b =>
+            modelBuilder.Entity("Discord.Repair.Database.Models.BackupModels.Channel.CategoryChannel", b =>
                 {
                     b.Navigation("permissions");
                 });
 
-            modelBuilder.Entity("RestoreCord.Database.Models.BackupModels.Channel.TextChannel", b =>
+            modelBuilder.Entity("Discord.Repair.Database.Models.BackupModels.Channel.TextChannel", b =>
                 {
                     b.Navigation("messages");
 
                     b.Navigation("permissions");
                 });
 
-            modelBuilder.Entity("RestoreCord.Database.Models.BackupModels.Channel.VoiceChannel", b =>
+            modelBuilder.Entity("Discord.Repair.Database.Models.BackupModels.Channel.VoiceChannel", b =>
                 {
                     b.Navigation("permissions");
                 });
 
-            modelBuilder.Entity("RestoreCord.Database.Models.BackupModels.GuildUser", b =>
+            modelBuilder.Entity("Discord.Repair.Database.Models.BackupModels.GuildUser", b =>
                 {
                     b.Navigation("assignedRoles");
                 });
 
-            modelBuilder.Entity("RestoreCord.Database.Models.ServerSettings", b =>
+            modelBuilder.Entity("Discord.Repair.Database.Models.ServerSettings", b =>
                 {
                     b.Navigation("blacklist");
                 });
 
-            modelBuilder.Entity("RestoreCord.Database.Models.User", b =>
+            modelBuilder.Entity("Discord.Repair.Database.Models.User", b =>
                 {
                     b.Navigation("backups");
 

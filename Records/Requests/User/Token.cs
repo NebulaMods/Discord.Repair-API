@@ -21,7 +21,7 @@ public record TokenRequest
     /// </summary>
     [Required]
     [StringLength(100)]
-    [DataType(DataType.Password)]
+    //[DataType(DataType.Password)]
     public string password { get; set; }
 
     /// <summary>

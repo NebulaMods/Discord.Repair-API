@@ -18,6 +18,7 @@ public class Backup : ControllerBase
     /// 
     /// </summary>
     /// <param name="guildId"></param>
+    /// <param name="backupName"></param>
     /// <returns></returns>
     [HttpPost("{guildId}/backup")]
     [Consumes("plain/text")]
@@ -25,7 +26,7 @@ public class Backup : ControllerBase
     [ProducesResponseType(typeof(Generic), 200)]
     [ProducesResponseType(typeof(Generic), 404)]
     [ProducesResponseType(typeof(Generic), 400)]
-    public async Task<ActionResult> HandleAsync(ulong guildId)
+    public async Task<ActionResult> HandleAsync([FromRoute] ulong guildId, [FromQuery] string backupName)
     {
         if (guildId is 0)
         {
@@ -35,13 +36,28 @@ public class Backup : ControllerBase
                 details = "invalid guild id"
             });
         }
+        if (string.IsNullOrWhiteSpace(backupName))
+        {
+            return BadRequest(new Generic()
+            {
+                success = false,
+                details = "invalid backup name"
+            });
+        }
+        //check amount of backups
 
 
-        _ = Task.Run(async () => await BackupGuildAsync(guildId));
+        _ = Task.Run(async () => await BackupGuildAsync(guildId, backupName));
         return Ok();
     }
     
-    private async Task BackupGuildAsync(ulong guildId)
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="guildId"></param>
+    /// <param name="backupNmae"></param>
+    /// <returns></returns>
+    private async Task BackupGuildAsync(ulong guildId, string backupNmae)
     {
 
     }

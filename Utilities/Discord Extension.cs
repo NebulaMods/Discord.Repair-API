@@ -26,9 +26,9 @@ internal static class DiscordExtensions
                 Color = Miscallenous.RandomDiscordColour(),
                 Author = new EmbedAuthorBuilder
                 {
-                    Url = "https://restorecord.com",
-                    Name = "RestoreCord",
-                    IconUrl = "https://i.imgur.com/Nfy4OoG.png"
+                    Url = "https://discord.repair",
+                    Name = "Discord.Repair",
+                    IconUrl = "https://discord.repair/favicon.ico"
                 },
                 Footer = new EmbedFooterBuilder
                 {
@@ -73,8 +73,8 @@ internal static class DiscordExtensions
             Color = Miscallenous.RandomDiscordColour(),
             Author = new EmbedAuthorBuilder
             {
-                Url = "https://restorecord.com",
-                Name = "RestoreCord",
+                Url = "https://discord.repair",
+                Name = "Discord.Repair",
                 IconUrl = "https://i.imgur.com/Nfy4OoG.png"
             },
             Footer = new EmbedFooterBuilder
@@ -104,7 +104,7 @@ internal static class DiscordExtensions
         catch { }
     }
 
-    internal static async ValueTask<(ActionResult?, Server?)> VerifyServer(this ControllerBase @base, ulong guildId, ulong userId, DatabaseContext database, string? token = null, bool useToken = true)
+    internal static async ValueTask<(ActionResult? action, Server? server)> VerifyServer(this ControllerBase @base, ulong guildId, ulong userId, DatabaseContext database, string? token = null, bool useToken = true)
     {
         if (userId is 0 || guildId is 0)
         {
@@ -121,12 +121,12 @@ internal static class DiscordExtensions
             }
             if (server.owner.apiToken != token)
             {
-                return (@base.BadRequest(new Generic() { success = false, details = "user does not own this server." }), null);
+                return (@base.Unauthorized(new Generic() { success = false, details = "user does not own this server." }), null);
 
             }
         }
         return server.banned
-            ? (@base.BadRequest(new Generic() { success = false, details = "guild is banned." }), null)
+            ? (@base.Unauthorized(new Generic() { success = false, details = "guild is banned." }), null)
             : ((ActionResult?, Server?))(null, server);
     }
     internal static async ValueTask<(ActionResult?, Server?)> VerifyServer(this ControllerBase @base, ulong guildId, DatabaseContext database, string? token = null, bool useToken = true)

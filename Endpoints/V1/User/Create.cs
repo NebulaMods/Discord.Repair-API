@@ -1,15 +1,13 @@
-﻿
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-
-using Newtonsoft.Json;
-
+﻿using Newtonsoft.Json;
 using DiscordRepair.Database;
 using DiscordRepair.Records.Requests.User;
 using DiscordRepair.Records.Responses;
 using DiscordRepair.Services;
-using Microsoft.AspNetCore.DataProtection;
+using DiscordRepair.Utilities;
+
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace DiscordRepair.Endpoints.V1.User;
 
@@ -53,6 +51,8 @@ public class Create : ControllerBase
                 details = "invalid paramaters, please try again."
             });
         }
+#if !DEBUG
+
         using var http = new HttpClient();
         //var formContent = new Dictionary<string, string>
         //{
@@ -87,7 +87,9 @@ public class Create : ControllerBase
                 details = "invalid captcha, please try again."
             });
         }
+#endif
         await using var database = new DatabaseContext();
+        var tokenLoader = _tokenLoader;
         var user = await database.users.FirstOrDefaultAsync(x => x.username == userRequest.username || x.email == userRequest.email);
         if (user is not null)
         {
@@ -100,12 +102,13 @@ public class Create : ControllerBase
         var newUser = new Database.Models.User()
         {
             email = userRequest.email,
-            password = await Utilities.Miscallenous.HashPassword(userRequest.password),
+            password = await Miscallenous.HashPassword(userRequest.password),
             username = userRequest.username,
+            lastIP = HttpContext.GetIPAddress()
         };
         await database.users.AddAsync(newUser);
         await database.ApplyChangesAsync();
-        _tokenLoader.APITokens.TryAdd(newUser.apiToken, newUser.username);
+        tokenLoader.APITokens.TryAdd(newUser.apiToken, newUser.username);
         return Created($"https://api.discord.repair/v1/user/{userRequest.username}", newUser.apiToken);
     }
 }

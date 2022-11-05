@@ -61,6 +61,15 @@ namespace DiscordRepair.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to eRk6Uf6XmTlDqdaYAd3q+df/f4nErdka8jcmCDJWVQZxrPaE3/CMdNQDuksmRlOPPZVAkU+430/sHA0IsXbwQ8FRPLJjCfCUlVD2boetxEDFVtdbB1vV4SegxX9yb6EKV8rU/zktIhNOjGSdTrCD3w0xYOA8rnPQdh25UNiQ94QXISJHUJMuyaVzd9/iDt9mJw5+9M18CjDvHUgnx7zszOSRNBOMooShpHzYTS7iYyYUu/sgQUEtvozLZiIAFMD7Pi0sZ/8U1Nt/NrW/WftcFw==.
+        /// </summary>
+        internal static string APIToken {
+            get {
+                return ResourceManager.GetString("APIToken", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to BuzMnvYTHaE/Q2s7bpOeY8DDkzt7Jlq5Etn8ItIkCGJbgOiCtofT2TIl0wvOOzkVhmmsY6rAlVCUkMHnkorx2Q==.
         /// </summary>
         internal static string Argon2Salt {

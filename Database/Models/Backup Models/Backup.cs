@@ -20,7 +20,7 @@ public record Backup
     /// </summary>
     [Required]
     [StringLength(100)]
-    public string? name { get; set; }
+    public string name { get; set; }
 
     /// <summary>
     /// 

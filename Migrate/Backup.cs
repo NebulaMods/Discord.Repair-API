@@ -16,6 +16,10 @@ namespace DiscordRepair.MigrationMaster;
 public class Backup
 {
     private readonly Configuration _configuration;
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="configuration"></param>
     public Backup(Configuration configuration)
     {
         _configuration = configuration;

@@ -48,7 +48,7 @@ public class Statistics : ControllerBase
                 guildId = latestEntry.guildId,
                 guildStats = latestEntry.guildStats,
                 memberStats = latestEntry.memberStats,
-                MigratedBy = latestEntry.MigratedBy.username,
+                MigratedBy = latestEntry.MigratedBy?.username,
                 serverId = latestEntry.server.key,
                 startDate = latestEntry.startDate,
                 endDate = latestEntry.endDate

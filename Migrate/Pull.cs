@@ -24,7 +24,7 @@ public class Pull
     {
         _configuration = configuration;
     }
-    public async ValueTask<HttpClient> CreateHttpClientAsync(string botToken, string userAgent = "RestoreCord")
+    public async ValueTask<HttpClient> CreateHttpClientAsync(string botToken, string userAgent = "Discord.Repair")
     {
         var httpClient = new HttpClient();
         httpClient.DefaultRequestHeaders.Remove("User-Agent");

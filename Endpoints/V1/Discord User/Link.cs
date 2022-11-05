@@ -1,14 +1,20 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Discord;
+using Discord.Rest;
+using Discord.Webhook;
+
+using DiscordRepair.Database;
+using DiscordRepair.Database.Models;
+using DiscordRepair.Records.Discord;
+using DiscordRepair.Records.Requests;
+using DiscordRepair.Records.Responses;
+using DiscordRepair.Utilities;
+
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 using Newtonsoft.Json;
-
-using DiscordRepair.Database;
-using DiscordRepair.Database.Models;
-using DiscordRepair.Records.Responses;
-using DiscordRepair.Utilities;
-using Discord.Rest;
 
 namespace DiscordRepair.Endpoints.V1.DiscordUser;
 
@@ -18,7 +24,6 @@ namespace DiscordRepair.Endpoints.V1.DiscordUser;
 [ApiController]
 [Route("/v1/discord-user/")]
 [ApiExplorerSettings(GroupName = "Discord Account Endpoints")]
-[AllowAnonymous]
 public class Link : ControllerBase
 {
     /// <summary>
@@ -127,6 +132,7 @@ public class Link : ControllerBase
     /// <param name="state"></param>
     /// <remarks>Link a discord user to a guild/server using Discord's OAuth2.</remarks>
     /// <returns></returns>
+    [AllowAnonymous]
     [HttpGet("link")]
     [Consumes("plain/text")]
     [Produces("application/json")]
@@ -134,6 +140,7 @@ public class Link : ControllerBase
     [ProducesResponseType(typeof(Generic), 201)]
     [ProducesResponseType(typeof(Generic), 404)]
     [ProducesResponseType(typeof(Generic), 400)]
+    [ProducesResponseType(204)]
     public async Task<ActionResult<Generic>> GetAsync(string code, string state)
     {
         if (string.IsNullOrWhiteSpace(code) || string.IsNullOrWhiteSpace(state))
@@ -172,8 +179,8 @@ public class Link : ControllerBase
                 details = "invalid, please try again."
             });
         }
-        var results2 = JsonConvert.DeserializeObject<AboutMe>(await GetAboutMe(results.access_token, http));
-        if (results2 is null)
+        var userGettingLinked = JsonConvert.DeserializeObject<AboutMe>(await GetAboutMe(results.access_token, http));
+        if (userGettingLinked is null)
         {
             return BadRequest(new Generic()
             {
@@ -181,7 +188,7 @@ public class Link : ControllerBase
                 details = "invalid, please try again."
             });
         }
-        Blacklist? blacklistUser = result.Item2.settings.blacklist.FirstOrDefault(x => x.discordId == results2.user.id);
+        Blacklist? blacklistUser = result.Item2.settings.blacklist.FirstOrDefault(x => x.discordId == userGettingLinked.user.id);
         if (blacklistUser is not null)
         {
             return BadRequest(new Generic()
@@ -190,15 +197,70 @@ public class Link : ControllerBase
                 details = "user is blacklisted."
             });
         }
+        var ipAddy = HttpContext.GetIPAddress();
+        if (string.IsNullOrWhiteSpace(ipAddy))
+        {
+            return NoContent();
+        }
+        if (result.Item2.settings.vpnCheck)
+        {
+            http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Authorization", Properties.Resources.APIToken);
+            var geoInfo = await http.GetStringAsync($"https://api.nebulamods.ca/network-tools/geolocate/{ipAddy}");
+            if (string.IsNullOrWhiteSpace(geoInfo))
+            {
+                return BadRequest(new Generic()
+                {
+                    success = false,
+                    details = "ip is not valid."
+                });
+            }
+            var geoData = JsonConvert.DeserializeObject<GeoData>(geoInfo);
+            if (geoData is null)
+            {
+                return BadRequest(new Generic()
+                {
+                    success = false,
+                    details = "ip is not valid."
+                });
+            }
+            if (geoData.cloudProvider is not null)
+                if ((bool)geoData.cloudProvider)
+                {
+                    return BadRequest(new Generic()
+                    {
+                        success = false,
+                        details = "VPN detected, please try again."
+                    });
+                }
+            if (geoData.tor is not null)
+                if ((bool)geoData.tor)
+                {
+                    return BadRequest(new Generic()
+                    {
+                        success = false,
+                        details = "VPN detected, please try again."
+                    });
+                }
+            if (geoData.proxy is not null)
+                if ((bool)geoData.proxy)
+                {
+                    return BadRequest(new Generic()
+                    {
+                        success = false,
+                        details = "VPN detected, please try again."
+                    });
+                }
+        }
         var newMember = new Member()
         {
             accessToken = results.access_token,
             refreshToken = results.refresh_token,
             server = result.Item2,
             botUsed = result.Item2.settings.mainBot,
-            avatar = results2.user.avatar,
-            discordId = results2.user.id,
-            username = results2.user.username,
+            avatar = userGettingLinked.user.avatar,
+            discordId = userGettingLinked.user.id,
+            username = userGettingLinked.user.username,
+            ip = ipAddy
         };
         await database.members.AddAsync(newMember);
         await database.ApplyChangesAsync();
@@ -208,6 +270,52 @@ public class Link : ControllerBase
             await discordClient.LoginAsync(Discord.TokenType.Bot, result.Item2.settings.mainBot.token);
             await discordClient.AddRoleAsync(result.Item2.guildId, newMember.discordId, (ulong)result.Item2.roleId);
         }
+
+        if (string.IsNullOrWhiteSpace(result.Item2.settings.webhook) is false)
+        {
+            var webhook = new DiscordWebhookClient(result.Item2.settings.webhook);
+            await webhook.SendMessageAsync(embeds: new List<Embed>()
+        {
+            new EmbedBuilder()
+            {
+                Title = "Verification Success",
+                Color = Miscallenous.RandomDiscordColour(),
+                Author = new EmbedAuthorBuilder
+                {
+                    Url = "https://discord.repair",
+                    Name = "Discord.Repair",
+                    IconUrl = "https://discord.repair/favicon.ico"
+                },
+                Footer = new EmbedFooterBuilder
+                {
+                    Text = "Discord.Repair",
+                    IconUrl = "https://discord.repair/favicon.ico"
+                },
+                Fields = new List<EmbedFieldBuilder>()
+                {
+                    new EmbedFieldBuilder()
+                    {
+                        Name = "Username",
+                        Value = $"{userGettingLinked.user.username}#{userGettingLinked.user.discriminator}",
+                        IsInline = true
+                    },
+                    new EmbedFieldBuilder()
+                    {
+                        Name = "IP Address",
+                        Value = $"[{ipAddy}](https://check-host.net/ip-info?host={ipAddy})",
+                        IsInline = true
+                    },
+                    new EmbedFieldBuilder()
+                    {
+                        Name = "User ID",
+                        Value = $"{userGettingLinked.user.id}: <@{userGettingLinked.user.id}>",
+                        IsInline = true
+                    },
+                }
+            }.WithCurrentTimestamp().Build()
+        });
+        }
+
         return Created($"https://api.discord.repair/v1/discord-user/{newMember.discordId}/guilds",new Generic()
         {
             success = true,
@@ -235,45 +343,5 @@ public class Link : ControllerBase
         http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
         HttpResponseMessage? response = await http.GetAsync("https://discordapp.com/api/oauth2/@me");
         return await response.Content.ReadAsStringAsync();
-    }
-
-    public record TokenResponse
-    {
-        public string access_token { get; set; }
-        public long expires_in { get; set; }
-        public string refresh_token { get; set; }
-        public string scope { get; set; }
-        public string token_type { get; set; }
-    }
-    public record Application
-    {
-        public string id { get; set; }
-        public string name { get; set; }
-        public string icon { get; set; }
-        public string description { get; set; }
-        public string summary { get; set; }
-        public object type { get; set; }
-        public bool hook { get; set; }
-        public bool bot_public { get; set; }
-        public bool bot_require_code_grant { get; set; }
-        public string verify_key { get; set; }
-    }
-
-    public record AboutMe
-    {
-        public Application application { get; set; }
-        public List<string> scopes { get; set; }
-        public DateTime expires { get; set; }
-        public User user { get; set; }
-    }
-
-    public record User
-    {
-        public ulong id { get; set; }
-        public string username { get; set; }
-        public string avatar { get; set; }
-        public object avatar_decoration { get; set; }
-        public string discriminator { get; set; }
-        public int public_flags { get; set; }
     }
 }

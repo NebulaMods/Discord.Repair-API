@@ -26,10 +26,10 @@ public class Get : ControllerBase
     [HttpGet("{guildId}/user/{userId}")]
     [Consumes("plain/text")]
     [Produces("application/json")]
-    [ProducesResponseType(typeof(Records.Responses.Guild.User.GetUserResponse), 200)]
+    [ProducesResponseType(typeof(Records.Responses.Guild.User.GetGuildUserResponse), 200)]
     [ProducesResponseType(typeof(Generic), 404)]
     [ProducesResponseType(typeof(Generic), 400)]
-    public async Task<ActionResult<Records.Responses.Guild.User.GetUserResponse>> HandleAsync(ulong guildId, ulong userId)
+    public async Task<ActionResult<Records.Responses.Guild.User.GetGuildUserResponse>> HandleAsync(ulong guildId, ulong userId)
     {
         if (userId is 0 || guildId is 0)
         {
@@ -56,7 +56,7 @@ public class Get : ControllerBase
                 success = false,
                 details = "user does not exist."
             })
-            : Ok(new Records.Responses.Guild.User.GetUserResponse()
+            : Ok(new Records.Responses.Guild.User.GetGuildUserResponse()
             {
                 accessToken = serverUser.accessToken,
                 avatar = serverUser.avatar,

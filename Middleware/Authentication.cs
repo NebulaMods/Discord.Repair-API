@@ -6,16 +6,36 @@ using Microsoft.Extensions.Options;
 
 namespace DiscordRepair.Middleware;
 
+/// <summary>
+/// 
+/// </summary>
 public class Authentication
 {
     internal static class Schemes
     {
         internal const string MainScheme = "MainScheme";
     }
+    /// <summary>
+    /// 
+    /// </summary>
     public class Handler : AuthenticationHandler<AuthenticationSchemeOptions>
     {
-        Services.TokenLoader _tokenLoader;
+        private readonly Services.TokenLoader _tokenLoader;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="options"></param>
+        /// <param name="logger"></param>
+        /// <param name="encoder"></param>
+        /// <param name="clock"></param>
+        /// <param name="tokenLoader"></param>
         public Handler(IOptionsMonitor<AuthenticationSchemeOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock, Services.TokenLoader tokenLoader) : base(options, logger, encoder, clock) => _tokenLoader = tokenLoader;
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         protected override Task<AuthenticateResult> HandleAuthenticateAsync()
         {
             if (Request.Headers.ContainsKey("Authorization") is false)
@@ -29,7 +49,8 @@ public class Authentication
             {
                 token = token.Replace("Authorization ", "");
             }
-            var cachedToken = _tokenLoader.APITokens.FirstOrDefault(x => x.Key == token);
+            var tokenLoader = _tokenLoader;
+            var cachedToken = tokenLoader.APITokens.FirstOrDefault(x => x.Key == token);
             if (cachedToken.Key is null)
             {
                 return Task.FromResult(AuthenticateResult.Fail("Invalid API Token"));
@@ -38,16 +59,12 @@ public class Authentication
             Claim[]? claims = new[]
             {
                 new Claim(type: "username", cachedToken.Value),
-                //new Claim(type: "accountType", ((AccountType)tokenResults.Item3.accountType).ToString()),
-                //new Claim(type: "discord", tokenResults.Item3.discordId is null ? "N/A" : $"{(ulong)tokenResults.Item3.discordId}"),
-                //new Claim(type: "api", databaseToken)
             };
 
             // generate claimsIdentity on the name of the class
             var claimsIdentity = new ClaimsIdentity(claims, Schemes.MainScheme);
 
-            // generate AuthenticationTicket from the Identity
-            // and current authentication scheme
+            // generate AuthenticationTicket from the Identity and current authentication scheme
             var ticket = new AuthenticationTicket(new ClaimsPrincipal(claimsIdentity), Scheme.Name);
 
             // pass on the ticket to the middleware

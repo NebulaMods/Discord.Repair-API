@@ -524,8 +524,8 @@ public class Restore
     //        Color = Miscallenous.RandomDiscordColour(),
     //        Author = new EmbedAuthorBuilder
     //        {
-    //            Url = "https://restorecord.com",
-    //            Name = "RestoreCord",
+    //            Url = "https://discord.repair",
+    //            Name = "Discord.Repair",
     //            IconUrl = "https://i.imgur.com/Nfy4OoG.png"
     //        },
     //        Footer = new EmbedFooterBuilder

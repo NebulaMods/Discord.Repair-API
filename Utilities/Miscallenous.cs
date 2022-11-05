@@ -4,6 +4,8 @@ using Discord;
 
 using Konscious.Security.Cryptography;
 
+using Microsoft.Extensions.Primitives;
+
 namespace DiscordRepair.Utilities;
 
 internal static class Miscallenous
@@ -16,6 +18,15 @@ internal static class Miscallenous
         byte[] tokenBuffer = new byte[64];
         cryptRNG.GetBytes(tokenBuffer);
         return Convert.ToBase64String(tokenBuffer);
+    }
+
+    internal static string? GetIPAddress(this HttpContext context)
+    {
+        return context.Request.Headers.TryGetValue("X-Real-IP", out StringValues xRealIp)
+            ? xRealIp
+            : context.Request.Headers.TryGetValue("X-Forwarded-For", out StringValues xForwardedIp)
+            ? xForwardedIp
+            : context.Connection.RemoteIpAddress?.ToString();
     }
 
     internal static string WhoAmI(this HttpContext httpContext)

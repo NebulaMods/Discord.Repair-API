@@ -14,7 +14,10 @@ public class TokenLoader
     /// <summary>
     /// 
     /// </summary>
-    public TokenLoader() => Task.Run(async () => await LoadTokensIntoMemory());
+    public TokenLoader()
+    {
+        Task.Run(async () => await LoadTokensIntoMemory());
+    }
 
     internal async Task LoadTokensIntoMemory()
     {

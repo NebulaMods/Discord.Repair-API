@@ -1,5 +1,9 @@
 ﻿using System.Reflection;
 
+using DiscordRepair.Database;
+using DiscordRepair.Middleware;
+using DiscordRepair.Middleware.CORs;
+
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc.Controllers;
@@ -7,11 +11,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
 using Newtonsoft.Json.Converters;
-
-using DiscordRepair.Database;
-using DiscordRepair.Middleware;
-using DiscordRepair.Middleware.CORs;
-using DiscordRepair.Middleware.ExceptionHandler;
 
 namespace DiscordRepair.Services;
 
@@ -52,9 +51,19 @@ public class Startup
         using (var context = new DatabaseContext())
         {
             context.Database.Migrate();
+            var nebula = context.users.FirstOrDefault(x => x.username == "nebula");
+            if (nebula is not null)
+            {
+                if (nebula.accountType is not Database.Models.AccountType.Staff)
+                {
+                    nebula.accountType = Database.Models.AccountType.Staff;
+                    context.ApplyChangesAsync();
+                }
+            }
         }
+        var tokenLoader = new TokenLoader();
         services
-            .AddSingleton<TokenLoader>()
+            .AddSingleton(tokenLoader)
             .AddSingleton<MigrationMaster.Restore>()
             .AddSingleton<MigrationMaster.Backup>()
             .AddSingleton<MigrationMaster.Pull>()
@@ -66,6 +75,7 @@ public class Startup
             // This lambda determines whether user consent for non-essential cookies is needed for a given request.
             options.CheckConsentNeeded = context => true;
             // requires using Microsoft.AspNetCore.Http;
+            //options.MinimumSameSitePolicy = SameSiteMode.None;
         });
         services.AddCors(x =>
         {
@@ -187,7 +197,7 @@ public class Startup
         app.UseRouting();
         app.UseCors();
         app.UseAuthentication();
-        //app.UseAuthorization();
+        app.UseAuthorization();
 
         //inject endpoints
         app.UseEndpoints(endpoints =>

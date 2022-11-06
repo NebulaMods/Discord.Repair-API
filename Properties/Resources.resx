@@ -139,6 +139,6 @@
     <value>http://localhost:420/v1/discord-user/link</value>
   </data>
   <data name="UrlRedirect" xml:space="preserve">
-    <value>https://api.api.discord.repair/v1/discord-user/link</value>
+    <value>https://api.discord.repair/v1/discord-user/link</value>
   </data>
 </root>

@@ -10,7 +10,6 @@ using DiscordRepair.Records.Responses;
 using DiscordRepair.Utilities;
 
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -170,8 +169,12 @@ public class Link : ControllerBase
                 success = false,
                 details = "invalid paramaters, please try again."
             });
+#if DEBUG
+        var results = JsonConvert.DeserializeObject<TokenResponse>(await GetInfo(code, http, result.Item2.settings.mainBot.clientId, result.Item2.settings.mainBot.clientSecret, Properties.Resources.TestUrlRedirect));
+#else
         var results = JsonConvert.DeserializeObject<TokenResponse>(await GetInfo(code, http, result.Item2.settings.mainBot.clientId, result.Item2.settings.mainBot.clientSecret, Properties.Resources.UrlRedirect));
-        if (results is null)
+#endif
+        if (results?.access_token is null)
         {
             return BadRequest(new Generic()
             {
@@ -180,7 +183,7 @@ public class Link : ControllerBase
             });
         }
         var userGettingLinked = JsonConvert.DeserializeObject<AboutMe>(await GetAboutMe(results.access_token, http));
-        if (userGettingLinked is null)
+        if (userGettingLinked?.user is null)
         {
             return BadRequest(new Generic()
             {
@@ -205,7 +208,7 @@ public class Link : ControllerBase
         if (result.Item2.settings.vpnCheck)
         {
             http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Authorization", Properties.Resources.APIToken);
-            var geoInfo = await http.GetStringAsync($"https://api.nebulamods.ca/network-tools/geolocate/{ipAddy}");
+            var geoInfo = await http.GetStringAsync($"https://api.nebulamods.ca/network/geolocation/{ipAddy}");
             if (string.IsNullOrWhiteSpace(geoInfo))
             {
                 return BadRequest(new Generic()

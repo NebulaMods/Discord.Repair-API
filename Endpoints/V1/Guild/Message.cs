@@ -118,7 +118,7 @@ public class Message : ControllerBase
                 discordColour = new Discord.Color(color.R, color.G, color.B);
                 break;
             default:
-                if (string.IsNullOrEmpty(message.verifyMessage.embedColour))
+                if (string.IsNullOrEmpty(message.verifyMessage.embedColour) || message.verifyMessage.embedColour is "string")
                 {
                     discordColour = Miscallenous.RandomDiscordColour();
                     break;
@@ -140,7 +140,11 @@ public class Message : ControllerBase
                         {
                             Style = ButtonStyle.Link,
                             Label = "Verify",
+#if DEBUG
+                            Url = $"https://discord.com/oauth2/authorize?client_id={result.Item2.settings.mainBot.clientId}&scope=identify+guilds.join&response_type=code&prompt=none&prompt=none&redirect_uri={Properties.Resources.TestUrlRedirect}&state={guildId}",
+#else
                             Url = $"https://discord.com/oauth2/authorize?client_id={result.Item2.settings.mainBot.clientId}&scope=identify+guilds.join&response_type=code&prompt=none&prompt=none&redirect_uri={Properties.Resources.UrlRedirect}&state={guildId}",
+#endif
                         }.Build(),
                     }
                 }

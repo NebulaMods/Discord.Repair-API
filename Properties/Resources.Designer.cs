@@ -124,7 +124,7 @@ namespace DiscordRepair.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to https://api.api.discord.repair/v1/discord-user/link.
+        ///   Looks up a localized string similar to https://api.discord.repair/v1/discord-user/link.
         /// </summary>
         internal static string UrlRedirect {
             get {

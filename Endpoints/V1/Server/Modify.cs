@@ -75,6 +75,14 @@ public class Modify : ControllerBase
             serverEntry.settings.webhook = serverRequest.webhook;
         if (serverRequest.webhookLogType is not null)
         serverEntry.settings.webhookLogType = (int)serverRequest.webhookLogType;
+        if (string.IsNullOrWhiteSpace(serverRequest.mainBot) is false)
+        {
+            var bot = user.bots.FirstOrDefault(x => x.name == serverRequest.mainBot || x.key.ToString() == serverRequest.mainBot);
+            if (bot is not null)
+            {
+                serverEntry.settings.mainBot = bot;
+            }
+        }
         await database.ApplyChangesAsync(serverEntry);
         return Ok(new Generic()
         {

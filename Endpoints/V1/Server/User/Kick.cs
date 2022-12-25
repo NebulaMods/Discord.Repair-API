@@ -1,57 +1,53 @@
 ﻿using Discord;
 using Discord.Rest;
 
+using DiscordRepair.Api.Database;
+using DiscordRepair.Api.Records.Responses;
+using DiscordRepair.Api.Utilities;
+
 using Microsoft.AspNetCore.Mvc;
 
-using DiscordRepair.Records.Responses;
-using DiscordRepair.Utilities;
-
-namespace DiscordRepair.Endpoints.V1.Guild.User;
+namespace DiscordRepair.Api.Endpoints.V1.Server.User;
 
 /// <summary>
 /// 
 /// </summary>
 [ApiController]
-[Route("/v1/guild/")]
-[ApiExplorerSettings(GroupName = "Guild User Endpoints")]
+[Route("/v1/server/")]
+[ApiExplorerSettings(GroupName = "Server User Endpoints")]
 public class Kick : ControllerBase
 {
     /// <summary>
     /// Kick a specific user or all unverified users.
     /// </summary>
-    /// <param name="guildId"></param>
+    /// <param name="server"></param>
     /// <param name="userId"></param>
     /// <remarks>Kick a specific user or all unverified users.</remarks>
     /// <returns></returns>
-    [HttpPost("{guildId}/kick")]
+    [HttpPost("{server}/kick")]
     [Consumes("plain/text")]
     [Produces("application/json")]
     [ProducesResponseType(typeof(Generic), 200)]
     [ProducesResponseType(typeof(Generic), 404)]
     [ProducesResponseType(typeof(Generic), 400)]
-    public async Task<ActionResult<Generic>> HandleAsync(ulong guildId, ulong? userId = null)
+    public async Task<ActionResult<Generic>> HandleAsync(string server, ulong? userId = null)
     {
-        if (guildId is 0)
-        {
+        var verifyResult = this.VerifyServer(server, HttpContext.WhatIsMyToken());
+        if (verifyResult is not null)
+            return verifyResult;
+        await using var database = new DatabaseContext();
+        var (httpResult, serverEntry) = await this.VerifyServer(database, server, HttpContext.WhatIsMyToken());
+        if (httpResult is not null)
+            return httpResult;
+        if (serverEntry is null)
             return BadRequest(new Generic()
             {
                 success = false,
                 details = "invalid paramaters, please try again."
             });
-        }
-        await using var database = new Database.DatabaseContext();
         await using var client = new DiscordRestClient();
-        var result = await this.VerifyServer(guildId, database, HttpContext.Request.Headers["Authorization"]);
-        if (result.Item1 is not null)
-            return result.Item1;
-        if (result.Item2 is null)
-            return BadRequest(new Generic()
-            {
-                success = false,
-                details = "invalid paramaters, please try again."
-            });
-        await client.LoginAsync(TokenType.Bot, result.Item2.settings.mainBot.token);
-        var guild = await client.GetGuildAsync(guildId);
+        await client.LoginAsync(TokenType.Bot, serverEntry.settings.mainBot.token);
+        var guild = await client.GetGuildAsync(serverEntry.guildId);
         if (guild is null)
         {
             return BadRequest(new Generic()
@@ -62,7 +58,7 @@ public class Kick : ControllerBase
         }
         if (userId is null)
         {
-            if (result.Item2.roleId is null)
+            if (serverEntry.roleId is null)
             {
                 return BadRequest(new Generic()
                 {
@@ -79,7 +75,7 @@ public class Kick : ControllerBase
                 bool hasRole = false;
                 foreach (var role in user.RoleIds)
                 {
-                    if (role == result.Item2.roleId)
+                    if (role == serverEntry.roleId)
                     {
                         hasRole = true;
                         break;

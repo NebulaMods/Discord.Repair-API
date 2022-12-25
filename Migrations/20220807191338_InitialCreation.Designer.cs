@@ -5,11 +5,11 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using DiscordRepair.Database;
+using DiscordRepair.Api.Database;
 
 #nullable disable
 
-namespace DiscordRepair.Migrations
+namespace DiscordRepair.Api.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
     [Migration("20220807191338_InitialCreation")]

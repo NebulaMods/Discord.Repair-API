@@ -1,13 +1,12 @@
-﻿
+﻿using DiscordRepair.Api.Database;
+using DiscordRepair.Api.Records.Requests.CustomBot;
+using DiscordRepair.Api.Records.Responses;
+using DiscordRepair.Api.Utilities;
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-using DiscordRepair.Database;
-using DiscordRepair.Records.Requests.CustomBot;
-using DiscordRepair.Records.Responses;
-using DiscordRepair.Utilities;
-
-namespace DiscordRepair.Endpoints.V1.CustomBot;
+namespace DiscordRepair.Api.Endpoints.V1.CustomBot;
 
 /// <summary>
 /// 
@@ -40,12 +39,29 @@ public class Create : ControllerBase
         }
         await using var database = new DatabaseContext();
         var user = await database.users.FirstAsync(x => x.username == HttpContext.WhoAmI());
+        if (user.accountType is not Database.Models.AccountType.Staff or Database.Models.AccountType.Premium)
+            if (user.bots.Count >= int.Parse(Properties.Resources.FreeBotLimit))
+            {
+                return BadRequest(new Generic()
+                {
+                    success = false,
+                    details = "please upgrade in order to create another bot"
+                });
+            }
         if (user.bots.FirstOrDefault(x => x.name == bot.name) is not null)
         {
             return BadRequest(new Generic()
             {
                 success = false,
                 details = "bot already exists with that name, please try again."
+            });
+        }
+        if (user.bots.FirstOrDefault(x => x.token == bot.token) is not null)
+        {
+            return BadRequest(new Generic()
+            {
+                success = false,
+                details = "bot already exists with that token, please try again."
             });
         }
         var newBot = new Database.Models.CustomBot()

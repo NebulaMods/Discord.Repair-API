@@ -2,18 +2,17 @@
 
 #nullable disable
 
-namespace DiscordRepair.Migrations
+namespace DiscordRepair.Api.Migrations;
+
+public partial class SmallTweaks1 : Migration
 {
-    public partial class SmallTweaks1 : Migration
+    protected override void Up(MigrationBuilder migrationBuilder)
     {
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
 
-        }
+    }
 
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
+    protected override void Down(MigrationBuilder migrationBuilder)
+    {
 
-        }
     }
 }

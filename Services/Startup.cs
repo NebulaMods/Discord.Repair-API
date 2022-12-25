@@ -1,8 +1,9 @@
 ﻿using System.Reflection;
 
-using DiscordRepair.Database;
-using DiscordRepair.Middleware;
-using DiscordRepair.Middleware.CORs;
+using DiscordRepair.Api.Database;
+using DiscordRepair.Api.Middleware;
+using DiscordRepair.Api.Middleware.CORs;
+using DiscordRepair.Api.Middleware.Error;
 
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -12,7 +13,7 @@ using Microsoft.OpenApi.Models;
 
 using Newtonsoft.Json.Converters;
 
-namespace DiscordRepair.Services;
+namespace DiscordRepair.Api.Services;
 
 /// <summary>
 /// 
@@ -51,23 +52,15 @@ public class Startup
         using (var context = new DatabaseContext())
         {
             context.Database.Migrate();
-            var nebula = context.users.FirstOrDefault(x => x.username == "nebula");
-            if (nebula is not null)
-            {
-                if (nebula.accountType is not Database.Models.AccountType.Staff)
-                {
-                    nebula.accountType = Database.Models.AccountType.Staff;
-                    context.ApplyChangesAsync();
-                }
-            }
         }
         var tokenLoader = new TokenLoader();
         services
-            .AddSingleton(tokenLoader)
-            .AddSingleton<MigrationMaster.Restore>()
-            .AddSingleton<MigrationMaster.Backup>()
-            .AddSingleton<MigrationMaster.Pull>()
-            .AddSingleton<MigrationMaster.Configuration>();
+            .AddSingleton(tokenLoader);
+        //.AddSingleton<MigrationMaster.Restore>()
+        //.AddSingleton<MigrationMaster.Backup>()
+        //.AddSingleton<MigrationMaster.Pull>()
+        //.AddSingleton<MigrationMaster.Configuration>();
+
         //add other endpoints
         //configure cookie policy
         services.Configure<CookiePolicyOptions>(options =>
@@ -167,17 +160,18 @@ public class Startup
     /// <param name="app"></param>
     public void Configure(IApplicationBuilder app)
     {
-        #if DEBUG
+#if DEBUG
         app.UseDeveloperExceptionPage();
-        #endif
+#endif
         app.UseForwardedHeaders(new ForwardedHeadersOptions
         {
             ForwardedHeaders = ForwardedHeaders.All
         });
+
         //inject swagger
         app.UseSwagger();
         app.UseCORsOptions();
-        //app.UseErrorHandler();
+        app.UseErrorHandler();
         //config for swagger ui
         app.UseSwaggerUI(swaggerOptions =>
         {

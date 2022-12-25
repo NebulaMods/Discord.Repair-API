@@ -1,11 +1,11 @@
-﻿namespace DiscordRepair.Records.Responses.Guild;
+﻿namespace DiscordRepair.Api.Records.Responses.Server;
 
 /// <summary>
 /// 
 /// </summary>
 public record Statistics
 {
-    public Guid serverId { get; set; }
+    public string? server { get; set; }
     public ulong guildId { get; set; }
     public string? MigratedBy { get; set; }
     public bool active { get; set; }

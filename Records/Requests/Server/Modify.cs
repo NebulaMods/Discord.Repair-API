@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace DiscordRepair.Records.Requests.Server;
+namespace DiscordRepair.Api.Records.Requests.Server;
 public record ModifyServerRequest
 {
     /// <summary>
@@ -53,7 +53,7 @@ public record ModifyServerRequest
     /// 
     [StringLength(150)]
     [DataType(DataType.Url)]
-    public string? verifyBackgroundImage { get; set; }
+    public string? verifyBGImage { get; set; }
 
     /// <summary>
     /// 
@@ -73,5 +73,10 @@ public record ModifyServerRequest
     /// </summary>
     /// 
     public string? mainBot { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public bool? captchaCheck { get; set; }
 }
 

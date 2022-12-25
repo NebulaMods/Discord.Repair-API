@@ -1,14 +1,14 @@
 ﻿
+using DiscordRepair.Api.Database;
+using DiscordRepair.Api.Database.Models;
+using DiscordRepair.Api.Records.Responses;
+using DiscordRepair.Api.Utilities;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-using DiscordRepair.Database;
-using DiscordRepair.Database.Models;
-using DiscordRepair.Records.Responses;
-using DiscordRepair.Utilities;
-
-namespace DiscordRepair.Endpoints.V1.DiscordUser;
+namespace DiscordRepair.Api.Endpoints.V1.DiscordUser;
 
 /// <summary>
 /// 
@@ -24,18 +24,18 @@ public class UnlinkAccount : ControllerBase
     /// Unlink a discord user from a guild/server.
     /// </summary>
     /// <param name="userId"></param>
-    /// <param name="guildId"></param>
+    /// <param name="serverKey"></param>
     /// <remarks>Unlink a discord user from a guild/server.</remarks>
     /// <returns></returns>
-    [HttpPost("{userId}/unlink/{guildId}")]
+    [HttpPost("{userId}/unlink/{serverKey}")]
     [Consumes("plain/text")]
     [Produces("application/json")]
     [ProducesResponseType(typeof(Generic), 200)]
     [ProducesResponseType(typeof(Generic), 404)]
     [ProducesResponseType(typeof(Generic), 400)]
-    public async Task<ActionResult<Generic>> HandleAsync(ulong userId, ulong guildId)
+    public async Task<ActionResult<Generic>> HandleAsync(ulong userId, string serverKey)
     {
-        if (userId == 0 || guildId == 0)
+        if (userId == 0 || string.IsNullOrWhiteSpace(serverKey))
         {
             return BadRequest(new Generic()
             {
@@ -44,18 +44,14 @@ public class UnlinkAccount : ControllerBase
             });
         }
         await using var database = new DatabaseContext();
-        var result = await this.VerifyServer(guildId, userId, database);
-        if (result.Item1 is not null)
-            return result.Item1;
-        if (result.Item2 is null)
+        var server = await database.servers.FirstOrDefaultAsync(x => x.key.ToString() == serverKey);
+        if (server is null)
             return BadRequest(new Generic()
             {
                 success = false,
                 details = "invalid paramaters, please try again."
             });
-        Database.Models.Server serverEntry = await database.servers.FirstAsync(x => x.guildId == guildId);
-
-        Member? userEntry = await database.members.FirstOrDefaultAsync(x => x.discordId == userId && x.server.guildId == guildId);
+        Member? userEntry = await database.members.FirstOrDefaultAsync(x => x.discordId == userId && x.server == server);
         if (userEntry is null)
         {
             return NotFound(new Generic()
@@ -69,7 +65,7 @@ public class UnlinkAccount : ControllerBase
         return Ok(new Generic()
         {
             success = true,
-            details = $"Successfully unlinked {userId} from {guildId}."
+            details = $"Successfully unlinked {userId} from {serverKey}."
         });
     }
 }

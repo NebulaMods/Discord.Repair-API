@@ -1,4 +1,4 @@
-﻿namespace DiscordRepair.MigrationMaster.Models;
+﻿namespace DiscordRepair.Api.MigrationMaster.Models;
 
 internal record ErrorResponse
 {

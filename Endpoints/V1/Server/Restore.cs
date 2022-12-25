@@ -1,16 +1,16 @@
 ﻿
+using DiscordRepair.Api.Records.Responses;
+
 using Microsoft.AspNetCore.Mvc;
 
-using DiscordRepair.Records.Responses;
-
-namespace DiscordRepair.Endpoints.V1.Guild;
+namespace DiscordRepair.Api.Endpoints.V1.Server;
 
 /// <summary>
 /// 
 /// </summary>
 [ApiController]
-[Route("/v1/guild/")]
-[ApiExplorerSettings(GroupName = "Guild Endpoints")]
+[Route("/v1/server/")]
+[ApiExplorerSettings(GroupName = "Server Endpoints")]
 public class Restore : ControllerBase
 {
     private readonly MigrationMaster.Restore _restore;
@@ -18,7 +18,7 @@ public class Restore : ControllerBase
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="client"></param>
+    /// <param name="restore"></param>
     public Restore(MigrationMaster.Restore restore)
     {
         _restore = restore;
@@ -27,17 +27,17 @@ public class Restore : ControllerBase
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="guildId"></param>
+    /// <param name="server"></param>
     /// <returns></returns>
-    [HttpPost("{guildId}/restore")]
+    [HttpPost("{server}/restore")]
     [Consumes("plain/text")]
     [Produces("application/json")]
     [ProducesResponseType(typeof(Generic), 200)]
     [ProducesResponseType(typeof(Generic), 404)]
     [ProducesResponseType(typeof(Generic), 400)]
-    public async Task<ActionResult> HandleAsync(ulong guildId)
+    public async Task<ActionResult> HandleAsync(string server)
     {
-        if (guildId is 0)
+        if (string.IsNullOrWhiteSpace(server))
         {
             return BadRequest(new Generic()
             {
@@ -45,11 +45,11 @@ public class Restore : ControllerBase
                 details = "invalid guild id"
             });
         }
-        _ = Task.Run(async () => await RestoreGuildAsync(guildId));
+        _ = Task.Run(async () => await RestoreGuildAsync(server));
         return Ok();
     }
 
-    private async Task RestoreGuildAsync(ulong guildId)
+    private async Task RestoreGuildAsync(string serverName)
     {
         MigrationMaster.Restore? restore = _restore;
     }

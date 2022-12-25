@@ -1,11 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using DiscordRepair.Api.Database;
+using DiscordRepair.Api.Records.Responses;
+using DiscordRepair.Api.Utilities;
+
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-using DiscordRepair.Database;
-using DiscordRepair.Records.Responses;
-using DiscordRepair.Utilities;
-
-namespace DiscordRepair.Endpoints.V1.CustomBot;
+namespace DiscordRepair.Api.Endpoints.V1.CustomBot;
 
 /// <summary>
 /// 
@@ -36,7 +36,7 @@ public class Get : ControllerBase
                 details = "inalivd paramater, please try again."
             });
         }
-        if (bot.Length > 50)
+        if (bot.Length > 64)
         {
             return BadRequest(new Generic()
             {
@@ -47,15 +47,13 @@ public class Get : ControllerBase
         await using var database = new DatabaseContext();
         var user = await database.users.FirstAsync(x => x.username == HttpContext.WhoAmI());
         var customBot = user.bots.FirstOrDefault(x => x.name == bot || x.key.ToString() == bot);
-        if (customBot is null)
-        {
-            return BadRequest(new Generic()
+        return customBot is null
+            ? BadRequest(new Generic()
             {
                 success = false,
                 details = "bot doesn't exist with that name/guid, please try again."
-            });
-        }
-        return Ok(customBot);
+            })
+            : Ok(customBot);
     }
 
     /// <summary>
@@ -66,7 +64,7 @@ public class Get : ControllerBase
     [HttpGet]
     [Consumes("plain/text")]
     [Produces("application/json")]
-    [ProducesResponseType(typeof(Generic), 200)]
+    [ProducesResponseType(typeof(Database.Models.CustomBot[]), 200)]
     [ProducesResponseType(typeof(Generic), 400)]
     public async Task<ActionResult<Database.Models.CustomBot[]>> HandleGetAllAsync()
     {

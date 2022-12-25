@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace DiscordRepair.Records.Requests.Guild.User;
+namespace DiscordRepair.Api.Records.Requests.Server.User;
 
 public record Link
 {
@@ -13,7 +13,6 @@ public record Link
     public string? ip { get; set; }
     public string? avatar { get; set; }
     public string? username { get; set; }
-    public ulong? creationDate { get; set; }
     [Required]
     [StringLength(100)]
     public string bot { get; set; }

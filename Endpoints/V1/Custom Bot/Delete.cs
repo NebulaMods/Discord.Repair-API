@@ -1,12 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using DiscordRepair.Api.Database;
+using DiscordRepair.Api.Database.Models;
+using DiscordRepair.Api.Records.Responses;
+using DiscordRepair.Api.Utilities;
+
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-using DiscordRepair.Database;
-using DiscordRepair.Database.Models;
-using DiscordRepair.Records.Responses;
-using DiscordRepair.Utilities;
-
-namespace DiscordRepair.Endpoints.V1.CustomBot;
+namespace DiscordRepair.Api.Endpoints.V1.CustomBot;
 
 /// <summary>
 /// 
@@ -17,10 +17,10 @@ namespace DiscordRepair.Endpoints.V1.CustomBot;
 public class Delete : ControllerBase
 {
     /// <summary>
-    /// Delete a custom using the GUID or name.
+    /// Delete a custom bot using the GUID or name.
     /// </summary>
     /// <param name="bot"></param>
-    /// <remarks>Delete a custom using the GUID or name.</remarks>
+    /// <remarks>Delete a custom bot using the GUID or name.</remarks>
     /// <returns></returns>
     [HttpDelete("{bot}")]
     [Consumes("plain/text")]
@@ -28,7 +28,7 @@ public class Delete : ControllerBase
     [ProducesResponseType(typeof(Generic), 200)]
     [ProducesResponseType(typeof(Generic), 400)]
     public async Task<ActionResult> HandlesAsync(string bot)
-{
+    {
         if (string.IsNullOrWhiteSpace(bot))
         {
             return BadRequest(new Generic()
@@ -37,7 +37,7 @@ public class Delete : ControllerBase
                 details = "inalivd paramater, please try again."
             });
         }
-        if (bot.Length > 50)
+        if (bot.Length > 64)
         {
             return BadRequest(new Generic()
             {
@@ -65,7 +65,7 @@ public class Delete : ControllerBase
         {
             var servers = await database.servers.Where(x => x.settings.mainBot == customBot).ToListAsync();
             List<ServerSettings> serverSettingsList = new();
-            foreach(var server in servers)
+            foreach (var server in servers)
             {
                 serverSettingsList.Add(server.settings);
             }

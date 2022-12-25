@@ -1,14 +1,14 @@
 ﻿using Discord;
 
+using DiscordRepair.Api.Database;
+using DiscordRepair.Api.Database.Models;
+using DiscordRepair.Api.Database.Models.BackupModels;
+using DiscordRepair.Api.Database.Models.BackupModels.Channel;
+using DiscordRepair.Api.Database.Models.BackupModels.Permissions;
+
 using Microsoft.EntityFrameworkCore;
 
-using DiscordRepair.Database;
-using DiscordRepair.Database.Models;
-using DiscordRepair.Database.Models.BackupModels;
-using DiscordRepair.Database.Models.BackupModels.Channel;
-using DiscordRepair.Database.Models.BackupModels.Permissions;
-
-namespace DiscordRepair.MigrationMaster;
+namespace DiscordRepair.Api.MigrationMaster;
 
 /// <summary>
 /// 
@@ -54,7 +54,7 @@ public class Backup
         backupEntry.catgeoryChannels = await BackupCategories(backupEntry, guild);
         backupEntry.textChannels = await BackupTextChannels(backupEntry, guild);
         backupEntry.voiceChannels = await BackupVoiceChannels(backupEntry, guild);
-        backupEntry.emojis = await BackupEmojisAsync(backupEntry,guild);
+        backupEntry.emojis = await BackupEmojisAsync(backupEntry, guild);
 
         //
         //if (guild.AFKChannel is not null)

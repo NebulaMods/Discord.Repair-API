@@ -1,13 +1,13 @@
 ﻿using Discord;
 
+using DiscordRepair.Api.Database;
+using DiscordRepair.Api.Database.Models;
+using DiscordRepair.Api.Records.Responses;
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-using DiscordRepair.Database;
-using DiscordRepair.Database.Models;
-using DiscordRepair.Records.Responses;
-
-namespace DiscordRepair.Utilities;
+namespace DiscordRepair.Api.Utilities;
 
 internal static class DiscordExtensions
 {
@@ -104,57 +104,75 @@ internal static class DiscordExtensions
         catch { }
     }
 
-    internal static async ValueTask<(ActionResult? action, Server? server)> VerifyServer(this ControllerBase @base, ulong guildId, ulong userId, DatabaseContext database, string? token = null, bool useToken = true)
+    internal static ActionResult? VerifyServer(this ControllerBase @base, ulong guildId, ulong userId, string token)
     {
         if (userId is 0 || guildId is 0)
         {
-            return (@base.BadRequest(new Generic() { success = false, details = "invalid parameters, please try again." }), null);
+            return @base.BadRequest(new Generic() { success = false, details = "invalid parameters, please try again." });
         }
-        Server? server = await database.servers.FirstOrDefaultAsync(x => x.guildId == guildId);
-        if (server is null)
-            return (@base.BadRequest(new Generic() { success = false, details = "guild does not exist, please try again." }), null);
-        if (useToken)
+        if (string.IsNullOrWhiteSpace(token))
         {
-            if (string.IsNullOrWhiteSpace(token))
-            {
-                return (@base.BadRequest(new Generic() { success = false, details = "invalid token." }), null);
-            }
-            if (server.owner.apiToken != token)
-            {
-                return (@base.Unauthorized(new Generic() { success = false, details = "user does not own this server." }), null);
-
-            }
+            return @base.BadRequest(new Generic() { success = false, details = "invalid token." });
         }
-        return server.banned
-            ? (@base.Unauthorized(new Generic() { success = false, details = "guild is banned." }), null)
-            : ((ActionResult?, Server?))(null, server);
+        return null;
     }
-    internal static async ValueTask<(ActionResult?, Server?)> VerifyServer(this ControllerBase @base, ulong guildId, DatabaseContext database, string? token = null, bool useToken = true)
+    internal static ActionResult? VerifyServer(this ControllerBase @base, ulong guildId, string token)
     {
         if (guildId is 0)
         {
-            return (@base.BadRequest(new Generic() { success = false, details = "invalid parameters, please try again." }), null);
+            return @base.BadRequest(new Generic() { success = false, details = "invalid parameters, please try again." });
         }
-        Server? server = await database.servers.FirstOrDefaultAsync(x => x.guildId == guildId);
-        if (server is null)
-            return (@base.BadRequest(new Generic() { success = false, details = "guild does not exist, please try again." }), null);
-        if (useToken)
+        if (string.IsNullOrWhiteSpace(token))
         {
-            if (string.IsNullOrWhiteSpace(token))
-            {
-                return (@base.BadRequest(new Generic() { success = false, details = "invalid token." }), null);
-            }
-            if (server.owner.apiToken != token)
-            {
-                return (@base.BadRequest(new Generic() { success = false, details = "user does not own this server." }), null);
-
-            }
+            return @base.BadRequest(new Generic() { success = false, details = "invalid token." });
         }
-        return server.banned
-            ? (@base.BadRequest(new Generic() { success = false, details = "guild is banned." }), null)
-            : ((ActionResult?, Server?))(null, server);
+        return null;
     }
-    
+    internal static async ValueTask<(ActionResult? httpResult, Server? server)> VerifyServer(this ControllerBase @base, DatabaseContext database, ulong guildId, string token)
+    {
+        Server? server = await database.servers.FirstOrDefaultAsync(x => x.guildId == guildId && x.owner.apiToken == token);
+        if (server is null)
+            return (@base.BadRequest(new Generic() { success = false, details = "server does not exist, please try again." }), null);
+        return server.banned
+            ? (@base.BadRequest(new Generic() { success = false, details = "server is banned." }), null)
+            : (null, server);
+    }
+
+    internal static ActionResult? VerifyServer(this ControllerBase @base, string? serverName, ulong userId, string token)
+    {
+        return (string.IsNullOrWhiteSpace(serverName) || userId is 0)
+            ? @base.BadRequest(new Generic() { success = false, details = "invalid parameters, please try again." })
+            : serverName.Length > 64
+            ? @base.BadRequest(new Generic()
+            {
+                success = false,
+                details = "inalivd paramater, please try again."
+            })
+            : string.IsNullOrWhiteSpace(token) ? @base.BadRequest(new Generic() { success = false, details = "invalid token." }) : (ActionResult?)null;
+    }
+    internal static ActionResult? VerifyServer(this ControllerBase @base, string? serverName, string token)
+    {
+        return string.IsNullOrWhiteSpace(serverName)
+            ? @base.BadRequest(new Generic() { success = false, details = "invalid parameters, please try again." })
+            : serverName.Length > 64
+            ? @base.BadRequest(new Generic()
+            {
+                success = false,
+                details = "inalivd paramater, please try again."
+            })
+            : string.IsNullOrWhiteSpace(token) ? @base.BadRequest(new Generic() { success = false, details = "invalid token." }) : (ActionResult?)null;
+    }
+
+    internal static async ValueTask<(ActionResult? httpResult, Server? server)> VerifyServer(this ControllerBase @base, DatabaseContext database, string serverName, string token)
+    {
+        Server? server = await database.servers.FirstOrDefaultAsync(x => (x.name == serverName || x.key.ToString() == serverName) && x.owner.apiToken == token);
+        if (server is null)
+            return (@base.BadRequest(new Generic() { success = false, details = "server does not exist, please try again." }), null);
+        return server.banned
+            ? (@base.BadRequest(new Generic() { success = false, details = "server is banned." }), null)
+            : (null, server);
+    }
+
     internal static async ValueTask<bool> IsGuildBusy(ulong guildId)
     {
         try
@@ -195,7 +213,7 @@ internal static class DiscordExtensions
     //    return true;
     //}
 
-    internal static bool IsVerifyServerOkay(this Server server) => server is null ? false : server.banned is false;
+    internal static bool IsVerifyServerOkay(this Server server) => server is not null && server.banned is false;
 
     internal static async ValueTask<bool> IsTopRoleServerOkay(Server server, Discord.Rest.RestInteractionContext context)
     {

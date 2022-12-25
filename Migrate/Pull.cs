@@ -4,15 +4,15 @@ using System.Reflection;
 using Discord;
 using Discord.Net;
 
+using DiscordRepair.Api.Database;
+using DiscordRepair.Api.Database.Models;
+using DiscordRepair.Api.MigrationMaster.Models;
+
 using Microsoft.EntityFrameworkCore;
 
 using Newtonsoft.Json;
 
-using DiscordRepair.Database;
-using DiscordRepair.Database.Models;
-using DiscordRepair.MigrationMaster.Models;
-
-namespace DiscordRepair.MigrationMaster;
+namespace DiscordRepair.Api.MigrationMaster;
 
 /// <summary>
 /// 
@@ -36,7 +36,7 @@ public class Pull
         return httpClient;
     }
 
-    internal async ValueTask<bool> JoinUsersToGuild(DatabaseContext database, Server server, HttpClient http, Database.Models.Statistics.MemberMigration statisitics, ulong guildId)
+    internal async ValueTask<bool> JoinUsersToGuild(DatabaseContext database, Server server, ulong guildId, ulong? roleId, HttpClient http, Database.Models.Statistics.MemberMigration statisitics)
     {
         await using Discord.Rest.DiscordRestClient client = new(new Discord.Rest.DiscordRestConfig()
         {
@@ -84,7 +84,9 @@ public class Pull
                 continue;
             }
             //try to join the user to the guild
-            ResponseTypes addUserRequest = await AddUserFunction(member, server, database, http);
+            ResponseTypes? addUserRequest = roleId is not null
+                ? await AddUserFunction(member, server, guildId, (ulong)roleId, database, http)
+                : await AddUserFunction(member, server, guildId, server.roleId, database, http);
             switch (addUserRequest)
             {
                 case ResponseTypes.Success:
@@ -114,7 +116,7 @@ public class Pull
         databaseMembers.Clear();
         return true;
     }
-    internal async ValueTask<ResponseTypes> AddUserFunction(Member member, Server server, DatabaseContext database, HttpClient http)
+    internal async ValueTask<ResponseTypes> AddUserFunction(Member member, Server server, ulong guildId, ulong? roleId, DatabaseContext database, HttpClient http)
     {
         //var handler = new HttpClientHandler()
         //{
@@ -123,7 +125,7 @@ public class Pull
         //    UseDefaultCredentials = false,
         //    UseProxy = true
         //};
-        ResponseTypes addUserRequest = await AddUserToGuildViaHttp(member, server, http);
+        ResponseTypes addUserRequest = await AddUserToGuildViaHttp(member, server, guildId, roleId, http);
         switch (addUserRequest)
         {
             case ResponseTypes.InvalidAuthToken:
@@ -132,7 +134,7 @@ public class Pull
                 {
                     member.accessToken = refreshTokenRequest.Item2;
                     //
-                    return await AddUserToGuildViaHttp(member, server, http);
+                    return await AddUserToGuildViaHttp(member, server, guildId, roleId, http);
                     //goto case ResponseTypes.GenericErrorRetryAttempt;
                 }
                 return addUserRequest;
@@ -178,10 +180,7 @@ public class Pull
                 string? discordResponse = await response.Content.ReadAsStringAsync();
                 if (discordResponse.Contains("\"error\": \"invalid_grant\""))
                 {
-                    await database.BatchUpdate<Member>()
-                    .Set(x => x.accessToken, x => "broken")
-                    .Where(x => x.discordId == member.discordId)
-                    .ExecuteAsync();
+                    await database.members.Where(x => x.discordId == member.discordId).ExecuteUpdateAsync(x => x.SetProperty(x => x.accessToken, x => "broken"));
                 }
                 return (false, null);
             default:
@@ -201,11 +200,9 @@ public class Pull
             return null;
         try
         {
-            await database.BatchUpdate<Member>()
-            .Set(x => x.accessToken, x => result.access_token)
-            .Set(x => x.refreshToken, x => result.refresh_token)
-            .Where(x => x.discordId == member.discordId && x.botUsed == member.server.settings.mainBot)
-            .ExecuteAsync();
+            await database.members.Where(x => x.discordId == member.discordId && x.botUsed == member.server.settings.mainBot).ExecuteUpdateAsync(x =>
+            x.SetProperty(x => x.accessToken, x => result.access_token)
+            .SetProperty(x => x.refreshToken, x => result.refresh_token));
         }
         catch (Exception e)
         {
@@ -223,8 +220,8 @@ public class Pull
         }
         var content = new FormUrlEncodedContent(new Dictionary<string, string>
         {
-            ["client_id"] = _configuration._clientId,
-            ["client_secret"] = _configuration._clientSecret,
+            ["client_id"] = member.server.settings.mainBot.clientId,
+            ["client_secret"] = member.server.settings.mainBot.clientSecret,
             ["grant_type"] = "refresh_token",
             ["refresh_token"] = member.refreshToken,
         });
@@ -234,15 +231,15 @@ public class Pull
 
 
 
-    internal async ValueTask<ResponseTypes> AddUserToGuildViaHttp(Member user, Server server, HttpClient http)
+    internal async ValueTask<ResponseTypes> AddUserToGuildViaHttp(Member user, Server server, ulong guildId, ulong? roleId, HttpClient http)
     {
         if (string.IsNullOrWhiteSpace(user.accessToken) && string.IsNullOrWhiteSpace(user.refreshToken) is false)
             return ResponseTypes.InvalidAuthToken;
-        HttpResponseMessage? response = await AddUserToGuildRequest(user, server, http);
-        return await HandleGuildRequestCode(user, server, http, response);
+        HttpResponseMessage? response = await AddUserToGuildRequest(user, guildId, roleId, http);
+        return await HandleGuildRequestCode(user, server, guildId, roleId, http, response);
     }
 
-    private async ValueTask<ResponseTypes> HandleGuildRequestCode(Member user, Server server, HttpClient http, HttpResponseMessage response)
+    private async ValueTask<ResponseTypes> HandleGuildRequestCode(Member user, Server server, ulong guildId, ulong? roleId, HttpClient http, HttpResponseMessage response)
     {
         switch (response.StatusCode)
         {
@@ -258,12 +255,12 @@ public class Pull
                         await Task.Delay(TimeSpan.FromMilliseconds(headervalue.Delta.Value.TotalSeconds));
                     else
                         await Task.Delay(TimeSpan.FromSeconds(10));
-                    HttpResponseMessage? newRequest = await AddUserToGuildRequest(user, server, http);
+                    HttpResponseMessage? newRequest = await AddUserToGuildRequest(user, guildId, roleId, http);
                     if (newRequest is not null)
                     {
                         return newRequest.IsSuccessStatusCode is false
                             ? ResponseTypes.GenericError
-                            : await HandleGuildRequestCode(user, server, http, newRequest);
+                            : await HandleGuildRequestCode(user, server, guildId, roleId, http, newRequest);
                     }
                 }
                 return ResponseTypes.TooManyRequests;
@@ -298,16 +295,16 @@ public class Pull
         }
     }
 
-    private static async ValueTask<HttpResponseMessage> AddUserToGuildRequest(Member user, Server server, HttpClient http)
+    private static async ValueTask<HttpResponseMessage> AddUserToGuildRequest(Member user, ulong guildId, ulong? roleId, HttpClient http)
     {
 
         var content = new StringContent(JsonConvert.SerializeObject(new test()
         {
             access_token = user.accessToken,
-            roles = server.roleId is not null ? new ulong[] { (ulong)server.roleId } : null,
+            roles = roleId is not null ? new ulong[] { (ulong)roleId } : null,
         }));
         content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
-        return await http.PutAsync($"https://discord.com/api/guilds/{server.guildId}/members/{user.discordId}", content);
+        return await http.PutAsync($"https://discord.com/api/guilds/{guildId}/members/{user.discordId}", content);
     }
     private record test
     {

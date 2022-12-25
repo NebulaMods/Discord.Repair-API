@@ -1,15 +1,18 @@
-﻿using Newtonsoft.Json;
-using DiscordRepair.Database;
-using DiscordRepair.Records.Requests.User;
-using DiscordRepair.Records.Responses;
-using DiscordRepair.Services;
-using DiscordRepair.Utilities;
+﻿using DiscordRepair.Api.Database;
+using DiscordRepair.Api.Records.Requests.User;
+using DiscordRepair.Api.Records.Responses;
+using DiscordRepair.Api.Services;
+using DiscordRepair.Api.Utilities;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace DiscordRepair.Endpoints.V1.User;
+#if !DEBUG
+using Newtonsoft.Json;
+#endif
+
+namespace DiscordRepair.Api.Endpoints.V1.User;
 
 /// <summary>
 /// 

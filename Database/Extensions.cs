@@ -2,11 +2,11 @@
 
 using Discord.Net;
 
-namespace DiscordRepair.Database;
+namespace DiscordRepair.Api.Database;
 
 internal static class DatabaseContextExtension
 {
-    internal static async ValueTask<int> ApplyChangesAsync(this DatabaseContext database, object? entity = null)
+    internal static async ValueTask<int> ApplyChangesAsync(this DatabaseContext database, object? entity = null, bool dispose = false)
     {
         try
         {
@@ -14,11 +14,18 @@ internal static class DatabaseContextExtension
             {
                 database.Update(entity);
             }
-            return await database.SaveChangesAsync();
+            var result = await database.SaveChangesAsync();
+            if (dispose)
+                await database.DisposeAsync();
+            return result;
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            await ex.LogErrorAsync();
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine(e.Source);
+            Console.WriteLine(e.StackTrace);
+            Console.WriteLine(e.Message);
+            Console.ForegroundColor = ConsoleColor.White;
             return 0;
         }
     }
@@ -62,6 +69,7 @@ internal static class DatabaseContextExtension
         }
         catch (Exception ex)
         {
+            Console.WriteLine(e.Message);
             Console.WriteLine(ex.Message);
         }
     }

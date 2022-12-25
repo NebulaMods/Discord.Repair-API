@@ -6,7 +6,7 @@ using Konscious.Security.Cryptography;
 
 using Microsoft.Extensions.Primitives;
 
-namespace DiscordRepair.Utilities;
+namespace DiscordRepair.Api.Utilities;
 
 internal static class Miscallenous
 {
@@ -32,6 +32,11 @@ internal static class Miscallenous
     internal static string WhoAmI(this HttpContext httpContext)
     {
         return httpContext.User.Claims.First(x => x.Type == "username").Value;
+    }
+
+    internal static string WhatIsMyToken(this HttpContext httpContext)
+    {
+        return httpContext.User.Claims.First(x => x.Type == "accountToken").Value;
     }
 
     internal static async ValueTask<string> HashPassword(string password)

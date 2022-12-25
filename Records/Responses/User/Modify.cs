@@ -1,6 +1,6 @@
-﻿using DiscordRepair.Database.Models;
+﻿using DiscordRepair.Api.Database.Models;
 
-namespace DiscordRepair.Records.Responses.User;
+namespace DiscordRepair.Api.Records.Responses.User;
 
 public record ModifyUserRequest
 {

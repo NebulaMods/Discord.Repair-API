@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace DiscordRepair.Records.Responses;
+namespace DiscordRepair.Api.Records.Responses;
 
 public record HCaptchaResponse
 {

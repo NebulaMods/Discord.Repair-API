@@ -1,4 +1,4 @@
-﻿namespace DiscordRepair.Middleware.CORs;
+﻿namespace DiscordRepair.Api.Middleware.CORs;
 
 /// <summary>
 /// 
@@ -23,9 +23,13 @@ public class Handler
     {
         if (context.Request.Method == "OPTIONS")
         {
+#if DEBUG
             context.Response.Headers.Add("Access-Control-Allow-Origin", new[] { "*" });
+#else
+            context.Response.Headers.Add("Access-Control-Allow-Origin", new[] { "*" });
+#endif
             context.Response.Headers.Add("Access-Control-Allow-Headers", new[] { "*" });
-            context.Response.Headers.Add("Access-Control-Allow-Methods", new[] { "GET, POST, PUT, DELETE, OPTIONS" });
+            context.Response.Headers.Add("Access-Control-Allow-Methods", new[] { "*" });
             context.Response.StatusCode = 200;
             return context.Response.WriteAsync("OK");
         }

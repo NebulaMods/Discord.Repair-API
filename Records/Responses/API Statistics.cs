@@ -1,6 +1,6 @@
-﻿namespace DiscordRepair.Records.Responses;
+﻿namespace DiscordRepair.Api.Records.Responses;
 
-public record StatsResponse
+public record APIStatsResponse
 {
     public int serverCount { get; set; }
     public int userCount { get; set; }

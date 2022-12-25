@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace DiscordRepair.Records.Requests.Server;
+namespace DiscordRepair.Api.Records.Requests.Server;
 
 public record CreateServerRequest
 {
@@ -23,13 +23,6 @@ public record CreateServerRequest
     /// 
     /// </summary>
     public ulong? roleId { get; set; }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// 
-    [StringLength(150)]
-    public string? vanityUrl { get; set; }
 
     /// <summary>
     /// 
@@ -57,12 +50,17 @@ public record CreateServerRequest
     /// 
     [StringLength(150)]
     [DataType(DataType.Url)]
-    public string? verifyBackgroundImage { get; set; }
+    public string? verifyBGImage { get; set; }
 
     /// <summary>
     /// 
     /// </summary>
-    public bool vpnCheck { get; set; }
+    public bool vpnCheck { get; set; } = true;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public bool captchaCheck { get; set; } = true;
 
     /// <summary>
     /// 

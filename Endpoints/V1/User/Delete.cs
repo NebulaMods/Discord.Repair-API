@@ -1,11 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using DiscordRepair.Api.Database;
+using DiscordRepair.Api.Records.Responses;
+using DiscordRepair.Api.Utilities;
+
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-using DiscordRepair.Database;
-using DiscordRepair.Records.Responses;
-using DiscordRepair.Utilities;
-
-namespace DiscordRepair.Endpoints.V1.User;
+namespace DiscordRepair.Api.Endpoints.V1.User;
 
 /// <summary>
 /// 
@@ -16,10 +16,11 @@ namespace DiscordRepair.Endpoints.V1.User;
 public class Delete : ControllerBase
 {
     /// <summary>
-    /// 
+    /// Delete a user using their username or email.
     /// </summary>
     /// <param name="user"></param>
     /// <returns></returns>
+    /// <remarks>Delete a user using their username or email.</remarks>
     [HttpDelete("{user}")]
     [Consumes("plain/text")]
     [Produces("application/json")]
@@ -58,21 +59,21 @@ public class Delete : ControllerBase
         }
         database.RemoveRange(userToRemove.globalBlacklist);
         database.RemoveRange(userToRemove.bots);
-        foreach(var backup in userToRemove.backups)
+        foreach (var backup in userToRemove.backups)
         {
-            foreach(var catChannel in backup.catgeoryChannels)
+            foreach (var catChannel in backup.catgeoryChannels)
             {
                 database.RemoveRange(catChannel.permissions);
             }
-            foreach(var txtChannel in backup.textChannels)
+            foreach (var txtChannel in backup.textChannels)
             {
                 database.RemoveRange(txtChannel.permissions);
             }
-            foreach(var vipChannel in backup.voiceChannels)
+            foreach (var vipChannel in backup.voiceChannels)
             {
                 database.RemoveRange(vipChannel.permissions);
             }
-            foreach(var guildUser in backup.users)
+            foreach (var guildUser in backup.users)
             {
                 database.RemoveRange(guildUser.assignedRoles);
             }

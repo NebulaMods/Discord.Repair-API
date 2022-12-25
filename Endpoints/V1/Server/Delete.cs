@@ -1,11 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using DiscordRepair.Api.Database;
+using DiscordRepair.Api.Records.Responses;
+using DiscordRepair.Api.Utilities;
+
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-using DiscordRepair.Database;
-using DiscordRepair.Records.Responses;
-using DiscordRepair.Utilities;
-
-namespace DiscordRepair.Endpoints.V1.Server;
+namespace DiscordRepair.Api.Endpoints.V1.Server;
 
 /// <summary>
 /// 
@@ -28,36 +28,24 @@ public class Delete : ControllerBase
     [ProducesResponseType(typeof(Generic), 400)]
     public async Task<ActionResult<Generic>> HandlesAsync(string server)
     {
-        if (string.IsNullOrWhiteSpace(server))
-        {
-            return BadRequest(new Generic()
-            {
-                success = false,
-                details = "inalivd paramater, please try again."
-            });
-        }
-        if (server.Length > 50)
-        {
-            return BadRequest(new Generic()
-            {
-                success = false,
-                details = "inalivd paramater, please try again."
-            });
-        }
+        var verifyResult = this.VerifyServer(server, HttpContext.WhatIsMyToken());
+        if (verifyResult is not null)
+            return verifyResult;
         await using var database = new DatabaseContext();
-        var user = await database.users.FirstAsync(x => x.username == HttpContext.WhoAmI());
-        var serverEntry = await database.servers.FirstOrDefaultAsync(x => x.owner == user && (x.name == server || x.key.ToString() == server));
+        var (httpResult, serverEntry) = await this.VerifyServer(database, server, HttpContext.WhatIsMyToken());
+        if (httpResult is not null)
+            return httpResult;
         if (serverEntry is null)
-        {
             return BadRequest(new Generic()
             {
                 success = false,
-                details = "server doesn't exist with the used name, please try again."
+                details = "invalid paramaters, please try again."
             });
-        }
+        var user = await database.users.FirstAsync(x => x.username == HttpContext.WhoAmI());
         serverEntry.settings.blacklist.Clear();
         database.servers.Remove(serverEntry);
         await database.ApplyChangesAsync();
+        await database.DisposeAsync();
         return Ok(new Generic()
         {
             success = true,

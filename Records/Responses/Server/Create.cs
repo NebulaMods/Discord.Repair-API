@@ -1,4 +1,4 @@
-﻿namespace DiscordRepair.Records.Responses.Server;
+﻿namespace DiscordRepair.Api.Records.Responses.Server;
 
 public record CreateServerResponse
 {

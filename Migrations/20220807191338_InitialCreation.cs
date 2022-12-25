@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace DiscordRepair.Migrations;
+namespace DiscordRepair.Api.Migrations;
 
 public partial class InitialCreation : Migration
 {

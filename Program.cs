@@ -1,4 +1,4 @@
-using DiscordRepair.Services;
+using DiscordRepair.Api.Services;
 
 IHostBuilder? builder = Host.CreateDefaultBuilder(args);
 IHost? app = builder.ConfigureWebHostDefaults(x =>

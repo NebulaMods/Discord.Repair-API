@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace DiscordRepair.Database.Models.BackupModels.Channel;
+namespace DiscordRepair.Api.Database.Models.BackupModels.Channel;
 
 /// <summary>
 /// 

@@ -1,13 +1,13 @@
-﻿using DiscordRepair.Database;
-using DiscordRepair.Database.Models;
-using DiscordRepair.Records.Responses;
-using DiscordRepair.Records.Responses.User;
-using DiscordRepair.Utilities;
+﻿using DiscordRepair.Api.Database;
+using DiscordRepair.Api.Database.Models;
+using DiscordRepair.Api.Records.Responses;
+using DiscordRepair.Api.Records.Responses.User;
+using DiscordRepair.Api.Utilities;
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace DiscordRepair.Endpoints.V1.User;
+namespace DiscordRepair.Api.Endpoints.V1.User;
 
 /// <summary>
 /// 
@@ -18,11 +18,12 @@ namespace DiscordRepair.Endpoints.V1.User;
 public class Modify : ControllerBase
 {
     /// <summary>
-    /// 
+    /// Modify a specific user using their username or email.
     /// </summary>
     /// <param name="user"></param>
     /// <param name="modifyRequest"></param>
     /// <returns></returns>
+    /// <remarks>Modify a specific user using their username or email.</remarks>
     [HttpPatch("{user}")]
     [Consumes("application/json")]
     [Produces("application/json")]
@@ -97,7 +98,16 @@ public class Modify : ControllerBase
                 userEntry.accountType = (AccountType)modifyRequest.accountType;
             userEntry.lastIP = modifyRequest.lastIP;
         }
-        userEntry.apiToken = Miscallenous.GenerateApiToken();
+        if (changeToken)
+        {
+            userEntry.apiToken = Miscallenous.GenerateApiToken();
+            await database.ApplyChangesAsync(userEntry);
+            return Ok(new Generic()
+            {
+                success = true,
+                details = userEntry.apiToken
+            });
+        }
         await database.ApplyChangesAsync(userEntry);
         return Ok(new Generic()
         {

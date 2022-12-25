@@ -1,39 +1,39 @@
 ﻿
+using DiscordRepair.Api.Records.Responses;
+
 using Microsoft.AspNetCore.Mvc;
 
-using DiscordRepair.Records.Responses;
-
-namespace DiscordRepair.Endpoints.V1.Guild;
+namespace DiscordRepair.Api.Endpoints.V1.Server;
 
 /// <summary>
 /// 
 /// </summary>
 [ApiController]
-[Route("/v1/guild/")]
-[ApiExplorerSettings(GroupName = "Guild Endpoints")]
+[Route("/v1/server/")]
+[ApiExplorerSettings(GroupName = "Server Endpoints")]
 public class Backup : ControllerBase
 {
 
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="guildId"></param>
+    /// <param name="server"></param>
     /// <param name="backupName"></param>
     /// <returns></returns>
-    [HttpPost("{guildId}/backup")]
+    [HttpPost("{server}/backup")]
     [Consumes("plain/text")]
     [Produces("application/json")]
     [ProducesResponseType(typeof(Generic), 200)]
     [ProducesResponseType(typeof(Generic), 404)]
     [ProducesResponseType(typeof(Generic), 400)]
-    public async Task<ActionResult> HandleAsync([FromRoute] ulong guildId, [FromQuery] string backupName)
+    public async Task<ActionResult> HandleAsync([FromRoute] string server, [FromQuery] string backupName)
     {
-        if (guildId is 0)
+        if (string.IsNullOrWhiteSpace(server))
         {
             return BadRequest(new Generic()
             {
                 success = false,
-                details = "invalid guild id"
+                details = "invalid parameters"
             });
         }
         if (string.IsNullOrWhiteSpace(backupName))
@@ -47,17 +47,17 @@ public class Backup : ControllerBase
         //check amount of backups
 
 
-        _ = Task.Run(async () => await BackupGuildAsync(guildId, backupName));
+        _ = Task.Run(async () => await BackupGuildAsync(server, backupName));
         return Ok();
     }
-    
+
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="guildId"></param>
+    /// <param name="serverName"></param>
     /// <param name="backupNmae"></param>
     /// <returns></returns>
-    private async Task BackupGuildAsync(ulong guildId, string backupNmae)
+    private async Task BackupGuildAsync(string serverName, string backupNmae)
     {
 
     }

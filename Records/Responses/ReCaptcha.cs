@@ -1,4 +1,4 @@
-﻿namespace DiscordRepair.Records.Responses;
+﻿namespace DiscordRepair.Api.Records.Responses;
 
 public record ReCaptchaResponse
 {

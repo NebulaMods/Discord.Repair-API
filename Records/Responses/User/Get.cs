@@ -1,6 +1,6 @@
-﻿using DiscordRepair.Database.Models;
+﻿using DiscordRepair.Api.Database.Models;
 
-namespace DiscordRepair.Records.Responses.User;
+namespace DiscordRepair.Api.Records.Responses.User;
 
 public record GetUserResponse
 {
@@ -60,3 +60,15 @@ public record GetUserResponse
     /// 
     public string apiToken { get; set; }
 }
+
+public record GetAllUsersResponse
+{
+    public string username { get; set; }
+    public string email { get; set; }
+    public ulong? discordId { get; set; }
+    public virtual AccountType accountType { get; set; }
+    public DateTime creationDate { get; set; }
+    public string? lastIp { get; set; }
+    public DateOnly? expiry { get; set; }
+}
+

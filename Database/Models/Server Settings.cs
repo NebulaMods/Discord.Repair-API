@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace DiscordRepair.Database.Models;
+namespace DiscordRepair.Api.Database.Models;
 
 /// <summary>
 /// 
@@ -56,6 +56,11 @@ public record ServerSettings
     /// <summary>
     /// 
     /// </summary>
+    public bool captcha { get; set; } = true;
+
+    /// <summary>
+    /// 
+    /// </summary>
     /// 
     [StringLength(150)]
     public string? webhook { get; set; }
@@ -72,4 +77,24 @@ public record ServerSettings
     /// 
     /// </summary>
     public virtual ICollection<Blacklist> blacklist { get; set; } = new HashSet<Blacklist>();
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public virtual SuccessVerifyEmbedSettings? verifyEmbedSettings { get; set; } = new();
+}
+
+/// <summary>
+/// 
+/// </summary>
+public record SuccessVerifyEmbedSettings
+{
+    [Key]
+    public Guid key { get; init; } = new();
+    public string authorName { get; set; } = "Discord.Repair";
+    public string iconUrl { get; set; } = "https://discord.repair/content/images/logo.png";
+    public string footerIconUrl { get; set; } = "https://discord.repair/content/images/logo.png";
+    public string footerText { get; set; } = "Discord.Repair";
+    public string title { get; set; } = "Verification Success";
+    public bool geoData { get; set; } = true;
 }

@@ -4,7 +4,7 @@ using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
 
-namespace DiscordRepair.Middleware;
+namespace DiscordRepair.Api.Middleware;
 
 /// <summary>
 /// 
@@ -31,7 +31,7 @@ public class Authentication
         /// <param name="clock"></param>
         /// <param name="tokenLoader"></param>
         public Handler(IOptionsMonitor<AuthenticationSchemeOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock, Services.TokenLoader tokenLoader) : base(options, logger, encoder, clock) => _tokenLoader = tokenLoader;
-        
+
         /// <summary>
         /// 
         /// </summary>
@@ -59,6 +59,7 @@ public class Authentication
             Claim[]? claims = new[]
             {
                 new Claim(type: "username", cachedToken.Value),
+                new Claim(type: "accountToken", cachedToken.Key),
             };
 
             // generate claimsIdentity on the name of the class

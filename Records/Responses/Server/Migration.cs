@@ -1,4 +1,4 @@
-﻿namespace DiscordRepair.Records.Responses.Guild;
+﻿namespace DiscordRepair.Api.Records.Responses.Server;
 
 /// <summary>
 /// 

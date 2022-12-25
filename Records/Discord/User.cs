@@ -1,4 +1,4 @@
-﻿namespace DiscordRepair.Records.Discord;
+﻿namespace DiscordRepair.Api.Records.Discord;
 
 public record User
 {

@@ -1,4 +1,4 @@
-﻿namespace DiscordRepair.Records.Requests;
+﻿namespace DiscordRepair.Api.Records.Requests;
 
 public record GeoData
 {

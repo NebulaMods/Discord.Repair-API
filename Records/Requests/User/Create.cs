@@ -2,7 +2,7 @@
 
 using Newtonsoft.Json;
 
-namespace DiscordRepair.Records.Requests.User;
+namespace DiscordRepair.Api.Records.Requests.User;
 
 public record CreateUserRequest
 {

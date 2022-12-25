@@ -1,13 +1,13 @@
-﻿using DiscordRepair.Database;
-using DiscordRepair.Database.Models;
-using DiscordRepair.Records.Responses;
-using DiscordRepair.Records.Responses.User;
-using DiscordRepair.Utilities;
+﻿using DiscordRepair.Api.Database;
+using DiscordRepair.Api.Database.Models;
+using DiscordRepair.Api.Records.Responses;
+using DiscordRepair.Api.Records.Responses.User;
+using DiscordRepair.Api.Utilities;
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace DiscordRepair.Endpoints.V1.User;
+namespace DiscordRepair.Api.Endpoints.V1.User;
 
 /// <summary>
 /// 
@@ -18,10 +18,11 @@ namespace DiscordRepair.Endpoints.V1.User;
 public class Get : ControllerBase
 {
     /// <summary>
-    /// 
+    /// Get a specific user using their username or email.
     /// </summary>
     /// <param name="user"></param>
     /// <returns></returns>
+    /// <remarks>Get a specific user using their username or email.</remarks>
     [HttpGet("{user}")]
     [Consumes("plain/text")]
     [Produces("application/json")]
@@ -56,30 +57,31 @@ public class Get : ControllerBase
                 });
             }
         }
-        var userLookedUp = await database.users.FirstOrDefaultAsync(x => x.username == user || x.email == user);
+        var userLookedUp = await database.users.FirstAsync(x => x.username == user || x.email == user);
         return Ok(new GetUserResponse()
         {
-            accountType = userEntry.accountType,
-            createdAt = userEntry.createdAt,
-            apiToken = userEntry.apiToken,
-            banned = userEntry.banned,
-            discordId = userEntry.discordId,
-            email = userEntry.email,
-            expiry = userEntry.expiry,
-            lastIP = userEntry.lastIP,
-            pfp = userEntry.pfp,
-            username = username,
+            accountType = userLookedUp.accountType,
+            createdAt = userLookedUp.createdAt,
+            apiToken = userLookedUp.apiToken,
+            banned = userLookedUp.banned,
+            discordId = userLookedUp.discordId,
+            email = userLookedUp.email,
+            expiry = userLookedUp.expiry,
+            lastIP = userLookedUp.lastIP,
+            pfp = userLookedUp.pfp,
+            username = userLookedUp.username,
         });
     }
 
     /// <summary>
-    /// 
+    /// Get a list of all users usernames.
     /// </summary>
     /// <returns></returns>
+    /// <remarks>Get a list of all users usernames.</remarks>
     [HttpGet]
     [Consumes("plain/text")]
     [Produces("application/json")]
-    [ProducesResponseType(typeof(List<string>), 200)]
+    [ProducesResponseType(typeof(List<GetAllUsersResponse>), 200)]
     [ProducesResponseType(typeof(Generic), 400)]
     [ProducesResponseType(typeof(Generic), 404)]
     public async Task<ActionResult> HandleGetAllAsync()
@@ -103,7 +105,22 @@ public class Get : ControllerBase
                 details = "user doesn't have access to this resource."
             });
         }
-        var users = await database.users.Select(x => x.username).ToListAsync();
-        return Ok(users);
+        var users = await database.users.ToListAsync();
+        List<GetAllUsersResponse> allUsers = new();
+        foreach(var user in users)
+        {
+            allUsers.Add(new GetAllUsersResponse
+            {
+                accountType = user.accountType,
+                creationDate = user.createdAt,
+                discordId = user.discordId,
+                email = user.email,
+                lastIp = user.lastIP,
+                expiry = user.expiry,
+                username = user.username,
+            });
+        }
+        return Ok(allUsers);
     }
+
 }

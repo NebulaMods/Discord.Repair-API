@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace DiscordRepair.Database.Models.LogModels;
+namespace DiscordRepair.Api.Database.Models.LogModels;
 
 /// <summary>
 /// 

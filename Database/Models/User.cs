@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-using DiscordRepair.Database.Models.BackupModels;
+using DiscordRepair.Api.Database.Models.BackupModels;
 
-namespace DiscordRepair.Database.Models;
+namespace DiscordRepair.Api.Database.Models;
 
 /// <summary>
 /// 
@@ -43,7 +43,7 @@ public record User
     /// 
     [Required]
     [EnumDataType(typeof(AccountType))]
-    public virtual AccountType accountType{ get; set; } = AccountType.Free;
+    public virtual AccountType accountType { get; set; } = AccountType.Free;
 
     /// <summary>
     /// 

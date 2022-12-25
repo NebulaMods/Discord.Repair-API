@@ -1,6 +1,6 @@
 ﻿using System.Collections.Concurrent;
 
-namespace DiscordRepair.MigrationMaster;
+namespace DiscordRepair.Api.MigrationMaster;
 
 /// <summary>
 /// 

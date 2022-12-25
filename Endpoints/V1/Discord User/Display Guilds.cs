@@ -1,11 +1,11 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using DiscordRepair.Api.Database;
+using DiscordRepair.Api.Records.Responses;
+
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-using DiscordRepair.Database;
-using DiscordRepair.Records.Responses;
-
-namespace DiscordRepair.Endpoints.V1.DiscordUser;
+namespace DiscordRepair.Api.Endpoints.V1.DiscordUser;
 
 /// <summary>
 /// 
@@ -25,7 +25,7 @@ public class LinkedGuilds : ControllerBase
     [HttpGet("{userId}/guilds")]
     [Consumes("plain/text")]
     [Produces("application/json")]
-    [ProducesResponseType(typeof(List<ulong>), 200)]
+    [ProducesResponseType(typeof(ulong[]), 200)]
     [ProducesResponseType(typeof(Generic), 404)]
     [ProducesResponseType(typeof(Generic), 400)]
     public async Task<ActionResult<List<ulong>>> HandleAsync(ulong userId)
@@ -39,8 +39,8 @@ public class LinkedGuilds : ControllerBase
             });
         }
         await using var database = new DatabaseContext();
-        var userEntries = await database.members.Where(x => x.discordId == userId).Select(x => x.server.guildId).ToListAsync();
-        return userEntries.Any() is false
+        var userEntries = await database.members.Where(x => x.discordId == userId).Select(x => x.server.guildId).ToArrayAsync();
+        return userEntries.Length is 0
             ? NotFound(new Generic()
             {
                 success = false,

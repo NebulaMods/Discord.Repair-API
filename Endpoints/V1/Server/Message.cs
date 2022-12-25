@@ -3,59 +3,65 @@
 using Discord;
 using Discord.Rest;
 
+using DiscordRepair.Api.Database;
+using DiscordRepair.Api.Database.Models;
+using DiscordRepair.Api.Records.Discord;
+using DiscordRepair.Api.Records.Responses;
+using DiscordRepair.Api.Utilities;
+
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
-using DiscordRepair.Database;
-using DiscordRepair.Records.Responses;
-using DiscordRepair.Utilities;
-
-namespace DiscordRepair.Endpoints.V1.Guild;
+namespace DiscordRepair.Api.Endpoints.V1.Server;
 
 /// <summary>
 /// 
 /// </summary>
 [ApiController]
-[Route("/v1/guild/")]
-[ApiExplorerSettings(GroupName = "Guild Endpoints")]
+[Route("/v1/server/")]
+[ApiExplorerSettings(GroupName = "Server Endpoints")]
 public class Message : ControllerBase
 {
     /// <summary>
-    /// Send a message to a discord channel using the defaault bot for the server/guild.
+    /// Send a message to a discord channel using the defaault bot for the server.
     /// </summary>
-    /// <param name="guildId"></param>
+    /// <param name="server"></param>
     /// <param name="channelId"></param>
     /// <param name="message"></param>
-    /// <remarks>Send a message to a discord channel using the defaault bot for the server/guild.</remarks>
+    /// <remarks>Send a message to a discord channel using the defaault bot for the server.</remarks>
     /// <returns></returns>
-    [HttpPost("{guildId}/{channelId}/message")]
+    [HttpPost("{server}/{channelId}/message")]
     [Consumes("application/json")]
     [Produces("application/json")]
     [ProducesResponseType(typeof(Generic), 200)]
     [ProducesResponseType(typeof(Generic), 404)]
     [ProducesResponseType(typeof(Generic), 400)]
-    public async Task<ActionResult<Generic>> HandleAsync(ulong guildId, ulong channelId, Records.Requests.Guild.Message message)
+    public async Task<ActionResult<Generic>> HandleAsync(string server, ulong channelId, Records.Requests.Server.Message message)
     {
-        if (message is null || guildId is 0 || channelId is 0)
+        if (message is null || string.IsNullOrWhiteSpace(server) || channelId is 0)
+            return BadRequest(new Generic()
+            {
+                success = false,
+                details = "invalid paramaters, please try again."
+            });
+        var verifyResult = this.VerifyServer(server, HttpContext.WhatIsMyToken());
+        if (verifyResult is not null)
+            return verifyResult;
+        await using var database = new DatabaseContext();
+        var (httpResult, serverEntry) = await this.VerifyServer(database, server, HttpContext.WhatIsMyToken());
+        if (httpResult is not null)
+            return httpResult;
+        if (serverEntry is null)
             return BadRequest(new Generic()
             {
                 success = false,
                 details = "invalid paramaters, please try again."
             });
         await using var client = new DiscordRestClient();
-        await using var database = new DatabaseContext();
-        var result = await this.VerifyServer(guildId, database, HttpContext.Request.Headers["Authorization"]);
-        if (result.Item1 is not null)
-            return result.Item1;
-        if (result.Item2 is null)
-            return BadRequest(new Generic()
-            {
-                success = false,
-                details = "invalid paramaters, please try again."
-            });
-        await client.LoginAsync(TokenType.Bot, result.Item2.settings.mainBot.token);
+        await client.LoginAsync(TokenType.Bot, serverEntry.settings.mainBot.token);
         //login
-        var guild = await client.GetGuildAsync(guildId);
-        if (guild == null) 
+        var guild = await client.GetGuildAsync(serverEntry.guildId);
+        if (guild == null)
             return BadRequest(new Generic()
             {
                 success = false,
@@ -64,7 +70,7 @@ public class Message : ControllerBase
         var channel = await guild.GetTextChannelAsync(channelId);
         var discordColour = new Discord.Color();
         System.Drawing.Color color = new();
-        switch (message.verifyMessage.embedColour)
+        switch (message.verifyMessage.embedColour?.ToLower())
         {
             case "random":
                 discordColour = Miscallenous.RandomDiscordColour();
@@ -141,9 +147,9 @@ public class Message : ControllerBase
                             Style = ButtonStyle.Link,
                             Label = "Verify",
 #if DEBUG
-                            Url = $"https://discord.com/oauth2/authorize?client_id={result.Item2.settings.mainBot.clientId}&scope=identify+guilds.join&response_type=code&prompt=none&prompt=none&redirect_uri={Properties.Resources.TestUrlRedirect}&state={guildId}",
+                            Url = $"https://discord.com/oauth2/authorize?client_id={serverEntry.settings.mainBot.clientId}&scope=identify+guilds.join&response_type=code&prompt=none&prompt=none&redirect_uri={Properties.Resources.TestUrlRedirect}&state={serverEntry.key}",
 #else
-                            Url = $"https://discord.com/oauth2/authorize?client_id={result.Item2.settings.mainBot.clientId}&scope=identify+guilds.join&response_type=code&prompt=none&prompt=none&redirect_uri={Properties.Resources.UrlRedirect}&state={guildId}",
+                            Url = $"https://discord.com/oauth2/authorize?client_id={serverEntry.settings.mainBot.clientId}&scope=identify+guilds.join&response_type=code&prompt=none&prompt=none&redirect_uri={Properties.Resources.UrlRedirect}&state={serverEntry.key}",
 #endif
                         }.Build(),
                     }
@@ -152,7 +158,7 @@ public class Message : ControllerBase
         }.Build();
         Embed? embed = new EmbedBuilder()
         {
-            Title = "Verification",
+            Title = message.verifyMessage.title,
             Color = discordColour,
             Author = new EmbedAuthorBuilder
             {
@@ -162,11 +168,11 @@ public class Message : ControllerBase
             },
             Footer = new EmbedFooterBuilder
             {
-                Text = "Discord Repair",
-                IconUrl = "https://discord.repair/content/logo.png"
+                Text = message.verifyMessage.footerText,
+                IconUrl = message.verifyMessage.footerIconUrl
             },
             ImageUrl = message.verifyMessage.imageUrl,
-            Description = string.IsNullOrWhiteSpace(message.verifyMessage.embedDescription) is false ? message.verifyMessage.embedDescription : "Click the \"Verify\" button and press Authorize to view the rest of the server",
+            Description = message.verifyMessage.embedDescription,
         }.Build();
         await channel.SendMessageAsync(embed: embed, components: msg);
         return Ok(new Generic()

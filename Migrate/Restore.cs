@@ -1,4 +1,4 @@
-﻿namespace DiscordRepair.MigrationMaster;
+﻿namespace DiscordRepair.Api.MigrationMaster;
 
 /// <summary>
 /// 

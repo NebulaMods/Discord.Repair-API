@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace DiscordRepair.Database.Models.BackupModels.Permissions;
+namespace DiscordRepair.Api.Database.Models.BackupModels.Permissions;
 
 /// <summary>
 /// 
@@ -43,7 +43,7 @@ public record ChannelPermissions
     /// 
     [EnumDataType(typeof(PermissionValue))]
     public PermissionValue MuteMembers { get; set; }
-    
+
     /// <summary>
     /// 
     /// </summary>
@@ -222,7 +222,7 @@ public record ChannelPermissions
     /// 
     [EnumDataType(typeof(PermissionValue))]
     public PermissionValue SendMessagesInThreads { get; set; }
-    
+
     /// <summary>
     /// 
     /// </summary>
@@ -255,17 +255,17 @@ public record ChannelPermissions
 /// </summary>
 public enum PermissionValue
 {
-    
+
     /// <summary>
     /// 
     /// </summary>
     Allow = 0,
-    
+
     /// <summary>
     /// 
     /// </summary>
     Deny = 1,
-   
+
     /// <summary>
     /// 
     /// </summary>

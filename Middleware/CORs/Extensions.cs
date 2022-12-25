@@ -1,4 +1,4 @@
-﻿namespace DiscordRepair.Middleware.CORs;
+﻿namespace DiscordRepair.Api.Middleware.CORs;
 
 public static class Extensions
 {

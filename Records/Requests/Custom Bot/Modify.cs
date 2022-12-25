@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-using DiscordRepair.Database.Models;
+using DiscordRepair.Api.Database.Models;
 
-namespace DiscordRepair.Records.Requests.CustomBot;
+namespace DiscordRepair.Api.Records.Requests.CustomBot;
 
 public record ModifyCustomBotRequest
 {

@@ -1,14 +1,13 @@
-﻿
+﻿using DiscordRepair.Api.Database;
+using DiscordRepair.Api.Database.Models;
+using DiscordRepair.Api.Records.Requests.CustomBot;
+using DiscordRepair.Api.Records.Responses;
+using DiscordRepair.Api.Utilities;
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-using DiscordRepair.Database;
-using DiscordRepair.Database.Models;
-using DiscordRepair.Records.Requests.CustomBot;
-using DiscordRepair.Records.Responses;
-using DiscordRepair.Utilities;
-
-namespace DiscordRepair.Endpoints.V1.CustomBot;
+namespace DiscordRepair.Api.Endpoints.V1.CustomBot;
 
 /// <summary>
 /// 
@@ -22,6 +21,7 @@ public class Modify : ControllerBase
     /// Modify a custom bot using the GUID or name.
     /// </summary>
     /// <param name="bot"></param>
+    /// <param name="botRequest"></param>
     /// <remarks>Modify a custom bot using the GUID or name.</remarks>
     /// <returns></returns>
     [HttpPatch("{bot}")]
@@ -30,21 +30,29 @@ public class Modify : ControllerBase
     [ProducesResponseType(typeof(Generic), 200)]
     [ProducesResponseType(typeof(Generic), 400)]
     public async Task<ActionResult> HandlesAsync(string bot, ModifyCustomBotRequest botRequest)
-{
+    {
         if (string.IsNullOrWhiteSpace(bot))
         {
             return BadRequest(new Generic()
             {
                 success = false,
-                details = "server does not exist."
+                details = "bot does not exist."
             });
         }
-        if (bot.Length > 50)
+        if (bot.Length > 64)
         {
             return BadRequest(new Generic()
             {
                 success = false,
-                details = "server does not exist."
+                details = "bot does not exist."
+            });
+        }
+        if (botRequest is null)
+        {
+            return BadRequest(new Generic()
+            {
+                success = false,
+                details = "invalid parameters, please try again."
             });
         }
         await using var database = new DatabaseContext();
@@ -59,21 +67,47 @@ public class Modify : ControllerBase
             });
         }
         if (string.IsNullOrWhiteSpace(botRequest.name) is false)
-            customBot.name = botRequest.name;
+        {
+            if (botRequest.name != customBot.name)
+            {
+                if (user.bots.FirstOrDefault(x => x.name == botRequest.name) is not null)
+                {
+                    return BadRequest(new Generic()
+                    {
+                        success = false,
+                        details = "bot already exists with that name, please try again."
+                    });
+                }
+                customBot.name = botRequest.name;
+            }
+        }
         if (string.IsNullOrWhiteSpace(botRequest.clientSecret) is false)
             customBot.clientSecret = botRequest.clientSecret;
         if (string.IsNullOrWhiteSpace(botRequest.token) is false)
-            customBot.token = botRequest.token;
+        {
+            if (customBot.token!= botRequest.token)
+            {
+                if (user.bots.FirstOrDefault(x => x.token == botRequest.token) is not null)
+                {
+                    return BadRequest(new Generic()
+                    {
+                        success = false,
+                        details = "bot already exists with that token, please try again."
+                    });
+                }
+                customBot.token = botRequest.token;
+            }
+        }
         if (string.IsNullOrWhiteSpace(botRequest.clientId) is false)
             customBot.clientId = botRequest.clientId;
         if (botRequest.botType is not null)
             customBot.botType = (BotType)botRequest.botType;
         await database.ApplyChangesAsync(user);
-            return Ok(new Generic()
-            {
-                success = true,
-                details = "successfully updated bot."
-            });
+        return Ok(new Generic()
+        {
+            success = true,
+            details = "successfully updated bot."
+        });
     }
 
 }

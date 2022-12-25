@@ -1,9 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using DiscordRepair.Api.Database.Models;
+using DiscordRepair.Api.Database.Models.LogModels;
 
-using DiscordRepair.Database.Models;
-using DiscordRepair.Database.Models.LogModels;
+using Microsoft.EntityFrameworkCore;
 
-namespace DiscordRepair.Database;
+namespace DiscordRepair.Api.Database;
 
 /// <summary>
 /// 
@@ -12,14 +12,14 @@ public class DatabaseContext : DbContext
 {
 
 #if (DEBUG)
-    private readonly string _connectionString = $"host=localhost;user id=discord_db;database=discord.repair_db;password=Test1234";
+    private readonly string _connectionString = $"host=chicago-database-node-1.nebulamods.ca;user id=bot;database=discord_repair_api;password={Properties.Resources.MySQLPass}";
 #else
-private readonly string _connectionString = $"Host=localhost;Database=discord.repair_db;User ID=bot;Password={Properties.Resources.MySQLPass}";
+private readonly string _connectionString = $"host=chicago-database-node-1.nebulamods.ca;user id=bot;database=discord_repair_api;password={Properties.Resources.MySQLPass}";
 #endif
-    protected override void OnConfiguring(DbContextOptionsBuilder options) => options.UseNpgsql(_connectionString,x =>
+    protected override void OnConfiguring(DbContextOptionsBuilder options) => options.UseNpgsql(_connectionString, x =>
     {
-        
-    }).UseBatchEF_Npgsql().UseLazyLoadingProxies();//_connectionString, ServerVersion.AutoDetect(_connectionString)).UseLazyLoadingProxies().UseBatchEF_MySQLPomelo();
+
+    }).UseLazyLoadingProxies();
 
     public DbSet<Errors> errors { get; set; }
     public DbSet<Member> members { get; set; }

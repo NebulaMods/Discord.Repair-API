@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace DiscordRepair.Database.Models;
+namespace DiscordRepair.Api.Database.Models;
 
 /// <summary>
 /// 
@@ -25,8 +25,7 @@ public record Member
     /// </summary>
     /// 
     [DataType(DataType.Custom)]
-    [Required]
-    public virtual Server server { get; set; }
+    public virtual Server? server { get; set; }
 
     /// <summary>
     /// 
@@ -67,7 +66,7 @@ public record Member
     /// <summary>
     /// 
     /// </summary>
-    public ulong? creationDate { get; set; }
+    public DateTime linkDate { get; init; } = DateTime.UtcNow;
 
     /// <summary>
     /// 

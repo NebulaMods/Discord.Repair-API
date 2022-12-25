@@ -1,14 +1,14 @@
 ﻿
+using DiscordRepair.Api.Database;
+using DiscordRepair.Api.Records.Requests.Server;
+using DiscordRepair.Api.Records.Responses;
+using DiscordRepair.Api.Records.Responses.Server;
+using DiscordRepair.Api.Utilities;
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-using DiscordRepair.Database;
-using DiscordRepair.Records.Requests.Server;
-using DiscordRepair.Records.Responses;
-using DiscordRepair.Records.Responses.Server;
-using DiscordRepair.Utilities;
-
-namespace DiscordRepair.Endpoints.V1.Server;
+namespace DiscordRepair.Api.Endpoints.V1.Server;
 
 /// <summary>
 /// 
@@ -19,7 +19,7 @@ namespace DiscordRepair.Endpoints.V1.Server;
 public class Create : ControllerBase
 {
     /// <summary>
-    /// Create a new server
+    /// Create a new server.
     /// </summary>
     /// <param name="serverRequest"></param>
     /// <remarks>Create a new server.</remarks>
@@ -41,6 +41,15 @@ public class Create : ControllerBase
         }
         await using var database = new DatabaseContext();
         var user = await database.users.FirstAsync(x => x.username == HttpContext.WhoAmI());
+        if (user.accountType is not Database.Models.AccountType.Staff or Database.Models.AccountType.Premium)
+            if (await database.servers.Where(x => x.owner == user).CountAsync() >= int.Parse(Properties.Resources.FreeServerLimit))
+            {
+                return BadRequest(new Generic()
+                {
+                    success = false,
+                    details = "please upgrade in order to create another server"
+                });
+            }
         var server = await database.servers.FirstOrDefaultAsync(x => x.owner == user && x.name == serverRequest.name);
         if (server is not null)
         {
@@ -50,7 +59,14 @@ public class Create : ControllerBase
                 details = "server already exists with the used name, please try again."
             });
         }
-
+        if ((await database.servers.FirstOrDefaultAsync(x => x.guildId == serverRequest.guildId && x.owner == user)) is not null)
+        {
+            return BadRequest(new Generic()
+            {
+                success = false,
+                details = "server already exists with guild ID."
+            });
+        }
         var customBot = user.bots.FirstOrDefault(x => x.name == serverRequest.mainBot || x.key.ToString() == serverRequest.mainBot);
         if (customBot is null)
         {
@@ -68,15 +84,16 @@ public class Create : ControllerBase
             roleId = serverRequest.roleId,
             settings = new()
             {
-                backgroundImage = serverRequest.verifyBackgroundImage,
+                backgroundImage = serverRequest.verifyBGImage,
                 webhook = serverRequest.webhook,
                 vpnCheck = serverRequest.vpnCheck,
                 pic = serverRequest.pic,
-                vanityUrl = serverRequest.vanityUrl,
                 redirectUrl = serverRequest.redirectUrl,
-                mainBot = customBot
+                mainBot = customBot,
+                captcha = serverRequest.captchaCheck
             }
         };
+        newServer.settings.vanityUrl = $"https://discord.repair/server/{newServer.key}";
         await database.servers.AddAsync(newServer);
         await database.ApplyChangesAsync();
         return Created($"https://api.discord.repair/v1/server/{newServer.key}", new CreateServerResponse()

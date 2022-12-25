@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace DiscordRepair.Properties {
+namespace DiscordRepair.Api.Properties {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace DiscordRepair.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("DiscordRepair.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("DiscordRepair.Api.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -79,6 +79,33 @@ namespace DiscordRepair.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 2.
+        /// </summary>
+        internal static string FreeBotLimit {
+            get {
+                return ResourceManager.GetString("FreeBotLimit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 2.
+        /// </summary>
+        internal static string FreeServerLimit {
+            get {
+                return ResourceManager.GetString("FreeServerLimit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 1000.
+        /// </summary>
+        internal static string FreeUserLimit {
+            get {
+                return ResourceManager.GetString("FreeUserLimit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to 0x5265636983aD665417634717B30a062940eb1400.
         /// </summary>
         internal static string HCaptchaKey {
@@ -93,6 +120,15 @@ namespace DiscordRepair.Properties {
         internal static string MySQLPass {
             get {
                 return ResourceManager.GetString("MySQLPass", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to QU20Sk89P94.
+        /// </summary>
+        internal static string ProxyPassword {
+            get {
+                return ResourceManager.GetString("ProxyPassword", resourceCulture);
             }
         }
         
@@ -124,7 +160,7 @@ namespace DiscordRepair.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to https://api.discord.repair/v1/discord-user/link.
+        ///   Looks up a localized string similar to https://discord.repair/verify.
         /// </summary>
         internal static string UrlRedirect {
             get {

@@ -1,4 +1,4 @@
-﻿namespace DiscordRepair.Records.Requests.Guild.User;
+﻿namespace DiscordRepair.Api.Records.Requests.Server.User;
 
 /// <summary>
 /// 

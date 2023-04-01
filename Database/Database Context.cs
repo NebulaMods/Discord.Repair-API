@@ -11,7 +11,7 @@ namespace DiscordRepair.Api.Database;
 public class DatabaseContext : DbContext
 {
 
-#if (DEBUG)
+#if DEBUG
     private readonly string _connectionString = $"host=chicago-database-node-1.nebulamods.ca;user id=bot;database=discord_repair_api;password={Properties.Resources.MySQLPass}";
 #else
 private readonly string _connectionString = $"host=chicago-database-node-1.nebulamods.ca;user id=bot;database=discord_repair_api;password={Properties.Resources.MySQLPass}";

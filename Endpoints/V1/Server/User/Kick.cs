@@ -34,17 +34,26 @@ public class Kick : ControllerBase
     {
         var verifyResult = this.VerifyServer(server, HttpContext.WhatIsMyToken());
         if (verifyResult is not null)
+        {
             return verifyResult;
+        }
+
         await using var database = new DatabaseContext();
         var (httpResult, serverEntry) = await this.VerifyServer(database, server, HttpContext.WhatIsMyToken());
         if (httpResult is not null)
+        {
             return httpResult;
+        }
+
         if (serverEntry is null)
+        {
             return BadRequest(new Generic()
             {
                 success = false,
                 details = "invalid paramaters, please try again."
             });
+        }
+
         await using var client = new DiscordRestClient();
         await client.LoginAsync(TokenType.Bot, serverEntry.settings.mainBot.token);
         var guild = await client.GetGuildAsync(serverEntry.guildId);
@@ -71,7 +80,10 @@ public class Kick : ControllerBase
             foreach (var user in users)
             {
                 if (user.IsBot)
+                {
                     continue;
+                }
+
                 bool hasRole = false;
                 foreach (var role in user.RoleIds)
                 {

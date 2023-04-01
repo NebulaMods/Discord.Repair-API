@@ -39,7 +39,7 @@ internal static class Miscallenous
         return httpContext.User.Claims.First(x => x.Type == "accountToken").Value;
     }
 
-    internal static async ValueTask<string> HashPassword(string password)
+    internal static async ValueTask<string> HashPasswordAsync(string password)
     {
         using Argon2id argon2 = new(Convert.FromBase64String(password))
         {
@@ -51,5 +51,5 @@ internal static class Miscallenous
         byte[]? hashed = await argon2.GetBytesAsync(128);
         return Convert.ToBase64String(hashed);
     }
-    internal static async ValueTask<bool> VerifyHash(string password, string hashedPassword) => await HashPassword(password) == hashedPassword;
+    internal static async ValueTask<bool> VerifyHash(string password, string hashedPassword) => await HashPasswordAsync(password) == hashedPassword;
 }

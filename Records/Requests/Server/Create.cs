@@ -76,4 +76,8 @@ public record CreateServerRequest
     /// 
     [Required]
     public string mainBot { get; set; }
+
+    [StringLength(200)]
+    [DataType(DataType.Url)]
+    public string? vanityURL { get; set; }
 }

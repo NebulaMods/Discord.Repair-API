@@ -30,17 +30,26 @@ public class Delete : ControllerBase
     {
         var verifyResult = this.VerifyServer(server, HttpContext.WhatIsMyToken());
         if (verifyResult is not null)
+        {
             return verifyResult;
+        }
+
         await using var database = new DatabaseContext();
         var (httpResult, serverEntry) = await this.VerifyServer(database, server, HttpContext.WhatIsMyToken());
         if (httpResult is not null)
+        {
             return httpResult;
+        }
+
         if (serverEntry is null)
+        {
             return BadRequest(new Generic()
             {
                 success = false,
                 details = "invalid paramaters, please try again."
             });
+        }
+
         var user = await database.users.FirstAsync(x => x.username == HttpContext.WhoAmI());
         serverEntry.settings.blacklist.Clear();
         database.servers.Remove(serverEntry);

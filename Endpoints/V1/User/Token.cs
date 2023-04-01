@@ -5,9 +5,8 @@ using DiscordRepair.Api.Records.Responses;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-#if !DEBUG
+
 using Newtonsoft.Json;
-#endif
 namespace DiscordRepair.Api.Endpoints.V1.User;
 
 /// <summary>
@@ -42,7 +41,6 @@ public class Token : ControllerBase
             });
         }
 
-#if !DEBUG
         using var http = new HttpClient();
         //var formContent = new Dictionary<string, string>
         //{
@@ -77,7 +75,6 @@ public class Token : ControllerBase
                 details = "invalid captcha, please try again."
             });
         }
-#endif
         await using var database = new DatabaseContext();
         var user = await database.users.FirstOrDefaultAsync(x => x.username == tokenRequest.user || x.email == tokenRequest.user);
         return user is null

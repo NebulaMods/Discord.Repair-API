@@ -82,10 +82,13 @@ public class Modify : ControllerBase
             }
         }
         if (string.IsNullOrWhiteSpace(botRequest.clientSecret) is false)
+        {
             customBot.clientSecret = botRequest.clientSecret;
+        }
+
         if (string.IsNullOrWhiteSpace(botRequest.token) is false)
         {
-            if (customBot.token!= botRequest.token)
+            if (customBot.token != botRequest.token)
             {
                 if (user.bots.FirstOrDefault(x => x.token == botRequest.token) is not null)
                 {
@@ -99,9 +102,15 @@ public class Modify : ControllerBase
             }
         }
         if (string.IsNullOrWhiteSpace(botRequest.clientId) is false)
+        {
             customBot.clientId = botRequest.clientId;
+        }
+
         if (botRequest.botType is not null)
+        {
             customBot.botType = (BotType)botRequest.botType;
+        }
+
         await database.ApplyChangesAsync(user);
         return Ok(new Generic()
         {

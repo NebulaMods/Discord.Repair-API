@@ -39,11 +39,15 @@ public class Authentication
         protected override Task<AuthenticateResult> HandleAuthenticateAsync()
         {
             if (Request.Headers.ContainsKey("Authorization") is false)
+            {
                 return Task.FromResult(AuthenticateResult.NoResult());
+            }
 
             string? token = Request.Headers["Authorization"].ToString();
             if (string.IsNullOrEmpty(token))
+            {
                 return Task.FromResult(AuthenticateResult.Fail("Invalid API Token"));
+            }
 
             if (token.Contains("Authorization "))
             {

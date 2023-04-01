@@ -17,8 +17,8 @@ namespace DiscordRepair.Api.Endpoints.V1;
 /// <summary>
 /// 
 /// </summary>
-[ApiController]
-[Route("/v1/")]
+//[ApiController]
+//[Route("/v1/")]
 public class Migrate : ControllerBase
 {
     private readonly MigrationMaster.Pull _migration;
@@ -42,12 +42,12 @@ public class Migrate : ControllerBase
     /// <param name="migrationRequest"></param>
     /// <remarks>Migrate/Pull users to your server using the guild ID.</remarks>
     /// <returns></returns>
-    [HttpPost("migrate/{guildId}")]
-    [Consumes("application/json")]
-    [Produces("application/json")]
-    [ProducesResponseType(typeof(Generic), 200)]
-    [ProducesResponseType(typeof(Generic), 404)]
-    [ProducesResponseType(typeof(Generic), 400)]
+    //[HttpPost("migrate/{guildId}")]
+    //[Consumes("application/json")]
+    //[Produces("application/json")]
+    //[ProducesResponseType(typeof(Generic), 200)]
+    //[ProducesResponseType(typeof(Generic), 404)]
+    //[ProducesResponseType(typeof(Generic), 400)]
     public async Task<ActionResult> HandleAsync(ulong guildId, MigrationRequest migrationRequest)
     {
         if (guildId is 0 || migrationRequest is null)
@@ -69,11 +69,17 @@ public class Migrate : ControllerBase
 
         var verifyResult = this.VerifyServer(guildId, HttpContext.WhatIsMyToken());
         if (verifyResult is not null)
+        {
             return verifyResult;
+        }
+
         await using var database = new DatabaseContext();
         var (httpResult, serverEntry) = await this.VerifyServer(database, guildId, HttpContext.WhatIsMyToken());
         if (httpResult is not null)
+        {
             return httpResult;
+        }
+
         if (serverEntry is null)
         {
             var user = await database.users.FirstAsync(x => x.apiToken == HttpContext.WhatIsMyToken());
@@ -175,7 +181,10 @@ public class Migrate : ControllerBase
                 return;
             }
             if (amount is null or 0)
+            {
                 amount = members.Length;
+            }
+
             for (var i = 0; i < amount; i++)
             {
                 var member = members[i];
@@ -197,7 +206,7 @@ public class Migrate : ControllerBase
             }
             return;
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             await ex.LogErrorAsync();
         }

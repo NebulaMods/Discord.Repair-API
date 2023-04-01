@@ -25,8 +25,9 @@ public record ModifyServerRequest
     /// 
     /// </summary>
     /// 
-    [StringLength(150)]
-    public string? vanityUrl { get; set; }
+    [StringLength(200)]
+    [DataType(DataType.Url)]
+    public string? vanityURL { get; set; }
 
     /// <summary>
     /// 

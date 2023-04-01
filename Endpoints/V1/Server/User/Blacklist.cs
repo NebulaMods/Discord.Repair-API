@@ -38,17 +38,26 @@ public class Blacklist : ControllerBase
     {
         var verifyResult = this.VerifyServer(server, userId, HttpContext.WhatIsMyToken());
         if (verifyResult is not null)
+        {
             return verifyResult;
+        }
+
         await using var database = new DatabaseContext();
         var (httpResult, serverEntry) = await this.VerifyServer(database, server, HttpContext.WhatIsMyToken());
         if (httpResult is not null)
+        {
             return httpResult;
+        }
+
         if (serverEntry is null)
+        {
             return BadRequest(new Generic()
             {
                 success = false,
                 details = "invalid paramaters, please try again."
             });
+        }
+
         Database.Models.Blacklist? blacklistUser = serverEntry.settings.blacklist.FirstOrDefault(x => x.discordId == userId);
         if (blacklistUser is not null)
         {
@@ -59,8 +68,7 @@ public class Blacklist : ControllerBase
             });
         }
         Member? userEntry = await database.members.FirstOrDefaultAsync(x => x.discordId == userId && x.server == serverEntry);
-        if (request is null)
-            request = new();
+        request ??= new();
         serverEntry.settings.blacklist.Add(new Database.Models.Blacklist()
         {
             ip = userEntry?.ip,
@@ -80,7 +88,9 @@ public class Blacklist : ControllerBase
                 {
                     RestGuildUser? guildUser = await guildSocket.GetUserAsync(userId);
                     if (guildUser is not null)
+                    {
                         await guildSocket.AddBanAsync(guildUser, request.banPruneDays, request.reason);
+                    }
                 }
             }
         }

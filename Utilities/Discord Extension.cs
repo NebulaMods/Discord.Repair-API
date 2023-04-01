@@ -89,7 +89,7 @@ internal static class DiscordExtensions
             embed = embed.ToEmbedBuilder().WithFields(embeds).Build();
         }
 
-        IUserMessage msg = (channel as ITextChannel) is not null ? await (channel as ITextChannel).SendMessageAsync(embed: embed) : await (channel as IDMChannel).SendMessageAsync(embed: embed);
+        IUserMessage msg = channel as ITextChannel is not null ? await (channel as ITextChannel).SendMessageAsync(embed: embed) : await (channel as IDMChannel).SendMessageAsync(embed: embed);
         try
         {
             if (deleteTimer is not null && msg is not null)
@@ -106,34 +106,22 @@ internal static class DiscordExtensions
 
     internal static ActionResult? VerifyServer(this ControllerBase @base, ulong guildId, ulong userId, string token)
     {
-        if (userId is 0 || guildId is 0)
-        {
-            return @base.BadRequest(new Generic() { success = false, details = "invalid parameters, please try again." });
-        }
-        if (string.IsNullOrWhiteSpace(token))
-        {
-            return @base.BadRequest(new Generic() { success = false, details = "invalid token." });
-        }
-        return null;
+        return userId is 0 || guildId is 0
+            ? @base.BadRequest(new Generic() { success = false, details = "invalid parameters, please try again." })
+            : string.IsNullOrWhiteSpace(token) ? @base.BadRequest(new Generic() { success = false, details = "invalid token." }) : (ActionResult?)null;
     }
     internal static ActionResult? VerifyServer(this ControllerBase @base, ulong guildId, string token)
     {
-        if (guildId is 0)
-        {
-            return @base.BadRequest(new Generic() { success = false, details = "invalid parameters, please try again." });
-        }
-        if (string.IsNullOrWhiteSpace(token))
-        {
-            return @base.BadRequest(new Generic() { success = false, details = "invalid token." });
-        }
-        return null;
+        return guildId is 0
+            ? @base.BadRequest(new Generic() { success = false, details = "invalid parameters, please try again." })
+            : string.IsNullOrWhiteSpace(token) ? @base.BadRequest(new Generic() { success = false, details = "invalid token." }) : (ActionResult?)null;
     }
     internal static async ValueTask<(ActionResult? httpResult, Server? server)> VerifyServer(this ControllerBase @base, DatabaseContext database, ulong guildId, string token)
     {
         Server? server = await database.servers.FirstOrDefaultAsync(x => x.guildId == guildId && x.owner.apiToken == token);
-        if (server is null)
-            return (@base.BadRequest(new Generic() { success = false, details = "server does not exist, please try again." }), null);
-        return server.banned
+        return server is null
+            ? ((ActionResult? httpResult, Server? server))(@base.BadRequest(new Generic() { success = false, details = "server does not exist, please try again." }), null)
+            : server.banned
             ? (@base.BadRequest(new Generic() { success = false, details = "server is banned." }), null)
             : (null, server);
     }
@@ -166,9 +154,9 @@ internal static class DiscordExtensions
     internal static async ValueTask<(ActionResult? httpResult, Server? server)> VerifyServer(this ControllerBase @base, DatabaseContext database, string serverName, string token)
     {
         Server? server = await database.servers.FirstOrDefaultAsync(x => (x.name == serverName || x.key.ToString() == serverName) && x.owner.apiToken == token);
-        if (server is null)
-            return (@base.BadRequest(new Generic() { success = false, details = "server does not exist, please try again." }), null);
-        return server.banned
+        return server is null
+            ? ((ActionResult? httpResult, Server? server))(@base.BadRequest(new Generic() { success = false, details = "server does not exist, please try again." }), null)
+            : server.banned
             ? (@base.BadRequest(new Generic() { success = false, details = "server is banned." }), null)
             : (null, server);
     }

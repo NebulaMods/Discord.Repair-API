@@ -2,7 +2,6 @@
 using DiscordRepair.Api.Database;
 using DiscordRepair.Api.Database.Models;
 using DiscordRepair.Api.Records.Responses;
-using DiscordRepair.Api.Utilities;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -46,11 +45,14 @@ public class UnlinkAccount : ControllerBase
         await using var database = new DatabaseContext();
         var server = await database.servers.FirstOrDefaultAsync(x => x.key.ToString() == serverKey);
         if (server is null)
+        {
             return BadRequest(new Generic()
             {
                 success = false,
                 details = "invalid paramaters, please try again."
             });
+        }
+
         Member? userEntry = await database.members.FirstOrDefaultAsync(x => x.discordId == userId && x.server == server);
         if (userEntry is null)
         {

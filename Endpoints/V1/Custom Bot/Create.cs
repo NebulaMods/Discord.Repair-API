@@ -40,6 +40,7 @@ public class Create : ControllerBase
         await using var database = new DatabaseContext();
         var user = await database.users.FirstAsync(x => x.username == HttpContext.WhoAmI());
         if (user.accountType is not Database.Models.AccountType.Staff or Database.Models.AccountType.Premium)
+        {
             if (user.bots.Count >= int.Parse(Properties.Resources.FreeBotLimit))
             {
                 return BadRequest(new Generic()
@@ -48,6 +49,8 @@ public class Create : ControllerBase
                     details = "please upgrade in order to create another bot"
                 });
             }
+        }
+
         if (user.bots.FirstOrDefault(x => x.name == bot.name) is not null)
         {
             return BadRequest(new Generic()

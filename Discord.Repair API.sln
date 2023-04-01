@@ -5,6 +5,14 @@ VisualStudioVersion = 17.1.32319.34
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Discord.Repair API", "Discord.Repair API.csproj", "{73592C01-2F75-4516-826E-61D010C92844}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Discord.Net Mod", "Discord.Net Mod", "{623263C9-9B1F-45A4-9452-8C008089AB9B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Discord.Net.Core", "..\Discord.Net-dev\Discord.Net-dev\src\Discord.Net.Core\Discord.Net.Core.csproj", "{34268CA4-0FDC-4C31-B3D8-F53A5D3C6287}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Discord.Net.Rest", "..\Discord.Net-dev\Discord.Net-dev\src\Discord.Net.Rest\Discord.Net.Rest.csproj", "{0C6138ED-FF14-4524-8995-FF7119028AA0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Discord.Net.Webhook", "..\Discord.Net-dev\Discord.Net-dev\src\Discord.Net.Webhook\Discord.Net.Webhook.csproj", "{1DBE7EA7-C319-460D-A70F-01356B2490C0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,9 +23,26 @@ Global
 		{73592C01-2F75-4516-826E-61D010C92844}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{73592C01-2F75-4516-826E-61D010C92844}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{73592C01-2F75-4516-826E-61D010C92844}.Release|Any CPU.Build.0 = Release|Any CPU
+		{34268CA4-0FDC-4C31-B3D8-F53A5D3C6287}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{34268CA4-0FDC-4C31-B3D8-F53A5D3C6287}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{34268CA4-0FDC-4C31-B3D8-F53A5D3C6287}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{34268CA4-0FDC-4C31-B3D8-F53A5D3C6287}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0C6138ED-FF14-4524-8995-FF7119028AA0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0C6138ED-FF14-4524-8995-FF7119028AA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0C6138ED-FF14-4524-8995-FF7119028AA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0C6138ED-FF14-4524-8995-FF7119028AA0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1DBE7EA7-C319-460D-A70F-01356B2490C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1DBE7EA7-C319-460D-A70F-01356B2490C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1DBE7EA7-C319-460D-A70F-01356B2490C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1DBE7EA7-C319-460D-A70F-01356B2490C0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{34268CA4-0FDC-4C31-B3D8-F53A5D3C6287} = {623263C9-9B1F-45A4-9452-8C008089AB9B}
+		{0C6138ED-FF14-4524-8995-FF7119028AA0} = {623263C9-9B1F-45A4-9452-8C008089AB9B}
+		{1DBE7EA7-C319-460D-A70F-01356B2490C0} = {623263C9-9B1F-45A4-9452-8C008089AB9B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1A5EDFA5-E0C1-43EE-8EA8-13DD1F3CD7FF}

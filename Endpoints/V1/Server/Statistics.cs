@@ -10,9 +10,9 @@ namespace DiscordRepair.Api.Endpoints.V1.Server;
 /// <summary>
 /// 
 /// </summary>
-[ApiController]
-[Route("/v1/server/")]
-[ApiExplorerSettings(GroupName = "Server Endpoints")]
+//[ApiController]
+//[Route("/v1/server/")]
+//[ApiExplorerSettings(GroupName = "Server Endpoints")]
 public class Statistics : ControllerBase
 {
 
@@ -32,17 +32,26 @@ public class Statistics : ControllerBase
     {
         var verifyResult = this.VerifyServer(server, HttpContext.WhatIsMyToken());
         if (verifyResult is not null)
+        {
             return verifyResult;
+        }
+
         await using var database = new DatabaseContext();
         var (httpResult, serverEntry) = await this.VerifyServer(database, server, HttpContext.WhatIsMyToken());
         if (httpResult is not null)
+        {
             return httpResult;
+        }
+
         if (serverEntry is null)
+        {
             return BadRequest(new Generic()
             {
                 success = false,
                 details = "invalid paramaters, please try again."
             });
+        }
+
         Database.Models.LogModels.Statistics? latestEntry = await database.statistics.OrderBy(x => x.key).LastOrDefaultAsync(x => x.server == serverEntry);
         return latestEntry is null
             ? NotFound(new Generic()

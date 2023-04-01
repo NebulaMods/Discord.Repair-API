@@ -1,4 +1,6 @@
 ﻿
+using System.Web;
+
 using DiscordRepair.Api.Database;
 using DiscordRepair.Api.Records.Requests.Server;
 using DiscordRepair.Api.Records.Responses;
@@ -35,17 +37,26 @@ public class Modify : ControllerBase
         {
             var verifyResult = this.VerifyServer(server, HttpContext.WhatIsMyToken());
             if (verifyResult is not null)
+            {
                 return verifyResult;
+            }
+
             await using var database = new DatabaseContext();
             var (httpResult, serverEntry) = await this.VerifyServer(database, server, HttpContext.WhatIsMyToken());
             if (httpResult is not null)
+            {
                 return httpResult;
+            }
+
             if (serverEntry is null)
+            {
                 return BadRequest(new Generic()
                 {
                     success = false,
                     details = "invalid paramaters, please try again."
                 });
+            }
+
             var user = await database.users.FirstAsync(x => x.username == HttpContext.WhoAmI());
             if (string.IsNullOrWhiteSpace(serverRequest.name) is false)
             {
@@ -55,13 +66,15 @@ public class Modify : ControllerBase
                     if (idk is not null)
                     {
                         if (idk != serverEntry)
-                        return BadRequest(new Generic()
                         {
-                            success = false,
-                            details = "server already exists with that name"
-                        });
+                            return BadRequest(new Generic()
+                            {
+                                success = false,
+                                details = "server already exists with that name"
+                            });
+                        }
                     }
-                        serverEntry.name = serverRequest.name;
+                    serverEntry.name = serverRequest.name;
                 }
             }
             if (serverRequest.guildId is not null)
@@ -72,11 +85,13 @@ public class Modify : ControllerBase
                     if (idk is not null)
                     {
                         if (idk != serverEntry)
-                        return BadRequest(new Generic()
                         {
-                            success = false,
-                            details = "server already exists with guild ID"
-                        });
+                            return BadRequest(new Generic()
+                            {
+                                success = false,
+                                details = "server already exists with guild ID"
+                            });
+                        }
                     }
                     serverEntry.guildId = (ulong)serverRequest.guildId;
                 }
@@ -120,6 +135,19 @@ public class Modify : ControllerBase
                         serverEntry.settings.mainBot = bot;
                     }
                 }
+            }
+            if (string.IsNullOrWhiteSpace(serverRequest.vanityURL) is false)
+            {
+                var vanityServer = await database.servers.FirstOrDefaultAsync(x => x.settings.vanityUrl == (serverRequest.vanityURL.Contains("https://discord.repair/server/") ? HttpUtility.UrlEncode(serverRequest.vanityURL) : HttpUtility.UrlEncode($"https://discord.repair/server/{serverRequest.vanityURL}")));
+                if (vanityServer is not null)
+                {
+                    return BadRequest(new Generic()
+                    {
+                        success = false,
+                        details = "Vanity URL is already is in use, please try again."
+                    });
+                }
+                serverEntry.settings.vanityUrl = HttpUtility.UrlEncode(serverRequest.vanityURL.Contains("https://discord.repair/server/") ? serverRequest.vanityURL : $"https://discord.repair/server/{serverRequest.vanityURL}");
             }
             await database.ApplyChangesAsync(serverEntry);
             return Ok(new Generic()

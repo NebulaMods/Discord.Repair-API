@@ -34,17 +34,26 @@ public class Get : ControllerBase
     {
         var verifyResult = this.VerifyServer(server, userId, HttpContext.WhatIsMyToken());
         if (verifyResult is not null)
+        {
             return verifyResult;
+        }
+
         await using var database = new DatabaseContext();
         var (httpResult, serverEntry) = await this.VerifyServer(database, server, HttpContext.WhatIsMyToken());
         if (httpResult is not null)
+        {
             return httpResult;
+        }
+
         if (serverEntry is null)
+        {
             return BadRequest(new Generic()
             {
                 success = false,
                 details = "invalid paramaters, please try again."
             });
+        }
+
         Member? serverUser = await database.members.FirstOrDefaultAsync(x => x.discordId == userId && x.server == serverEntry);
         await database.DisposeAsync();
         return serverUser is null
@@ -134,7 +143,7 @@ public class Get : ControllerBase
                 details = "invalid paramaters, please try again."
             });
         }
-        var server = await database.servers.FirstOrDefaultAsync(x => x.owner.apiToken == HttpContext.WhatIsMyToken() && x.key.ToString() == serverName || x.name == serverName);
+        var server = await database.servers.FirstOrDefaultAsync(x => (x.owner.apiToken == HttpContext.WhatIsMyToken() && x.key.ToString() == serverName) || x.name == serverName);
         if (serverName is null)
         {
             BadRequest(new Generic()

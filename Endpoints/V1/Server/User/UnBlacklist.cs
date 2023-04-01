@@ -33,17 +33,26 @@ public class UnBlacklist : ControllerBase
     {
         var verifyResult = this.VerifyServer(server, userId, HttpContext.WhatIsMyToken());
         if (verifyResult is not null)
+        {
             return verifyResult;
+        }
+
         await using var database = new DatabaseContext();
         var (httpResult, serverEntry) = await this.VerifyServer(database, server, HttpContext.WhatIsMyToken());
         if (httpResult is not null)
+        {
             return httpResult;
+        }
+
         if (serverEntry is null)
+        {
             return BadRequest(new Generic()
             {
                 success = false,
                 details = "invalid paramaters, please try again."
             });
+        }
+
         Database.Models.Blacklist? blacklistUser = serverEntry.settings.blacklist.FirstOrDefault(x => x.discordId == userId);
         if (blacklistUser is null)
         {
@@ -63,7 +72,9 @@ public class UnBlacklist : ControllerBase
             RestGuild? guildSocket = await client.GetGuildAsync(serverEntry.guildId);
 
             if (guildSocket is not null)
+            {
                 await guildSocket.RemoveBanAsync(userId);
+            }
         }
         catch { }
         return Ok(new Generic()

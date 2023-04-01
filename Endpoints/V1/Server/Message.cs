@@ -4,13 +4,10 @@ using Discord;
 using Discord.Rest;
 
 using DiscordRepair.Api.Database;
-using DiscordRepair.Api.Database.Models;
-using DiscordRepair.Api.Records.Discord;
 using DiscordRepair.Api.Records.Responses;
 using DiscordRepair.Api.Utilities;
 
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace DiscordRepair.Api.Endpoints.V1.Server;
 
@@ -39,34 +36,48 @@ public class Message : ControllerBase
     public async Task<ActionResult<Generic>> HandleAsync(string server, ulong channelId, Records.Requests.Server.Message message)
     {
         if (message is null || string.IsNullOrWhiteSpace(server) || channelId is 0)
+        {
             return BadRequest(new Generic()
             {
                 success = false,
                 details = "invalid paramaters, please try again."
             });
+        }
+
         var verifyResult = this.VerifyServer(server, HttpContext.WhatIsMyToken());
         if (verifyResult is not null)
+        {
             return verifyResult;
+        }
+
         await using var database = new DatabaseContext();
         var (httpResult, serverEntry) = await this.VerifyServer(database, server, HttpContext.WhatIsMyToken());
         if (httpResult is not null)
+        {
             return httpResult;
+        }
+
         if (serverEntry is null)
+        {
             return BadRequest(new Generic()
             {
                 success = false,
                 details = "invalid paramaters, please try again."
             });
+        }
         await using var client = new DiscordRestClient();
         await client.LoginAsync(TokenType.Bot, serverEntry.settings.mainBot.token);
         //login
         var guild = await client.GetGuildAsync(serverEntry.guildId);
         if (guild == null)
+        {
             return BadRequest(new Generic()
             {
                 success = false,
                 details = "guild is invalid."
             });
+        }
+
         var channel = await guild.GetTextChannelAsync(channelId);
         var discordColour = new Discord.Color();
         System.Drawing.Color color = new();
@@ -169,11 +180,13 @@ public class Message : ControllerBase
             Footer = new EmbedFooterBuilder
             {
                 Text = message.verifyMessage.footerText,
-                IconUrl = message.verifyMessage.footerIconUrl
             },
-            ImageUrl = message.verifyMessage.imageUrl,
             Description = message.verifyMessage.embedDescription,
         }.Build();
+        if (string.IsNullOrWhiteSpace(message.verifyMessage.footerIconUrl) is false)
+            embed.ToEmbedBuilder().Footer.IconUrl = message.verifyMessage.footerIconUrl;
+        if (string.IsNullOrWhiteSpace(message.verifyMessage.imageUrl) is false)
+            embed.ToEmbedBuilder().Footer.IconUrl = message.verifyMessage.imageUrl;
         await channel.SendMessageAsync(embed: embed, components: msg);
         return Ok(new Generic()
         {

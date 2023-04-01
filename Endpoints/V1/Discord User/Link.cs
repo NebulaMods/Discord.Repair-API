@@ -1,13 +1,15 @@
-﻿using Discord;
+﻿using System.Net;
+
+using Castle.DynamicProxy;
+
+using Discord;
 using Discord.Rest;
 using Discord.Webhook;
 
 using DiscordRepair.Api.Database;
 using DiscordRepair.Api.Database.Models;
 using DiscordRepair.Api.Records.Discord;
-#if !DEBUG
 using DiscordRepair.Api.Records.Requests;
-#endif
 using DiscordRepair.Api.Records.Responses;
 using DiscordRepair.Api.Utilities;
 
@@ -54,17 +56,25 @@ public class Link : ControllerBase
         }
         var verifyResult = this.VerifyServer(guildId, userId, HttpContext.WhatIsMyToken());
         if (verifyResult is not null)
+        {
             return verifyResult;
+        }
+
         await using var database = new DatabaseContext();
         var (httpResult, server) = await this.VerifyServer(database, guildId, HttpContext.WhatIsMyToken());
         if (httpResult is not null)
+        {
             return httpResult;
+        }
+
         if (server is null)
+        {
             return BadRequest(new Generic()
             {
                 success = false,
                 details = "invalid paramaters, please try again."
             });
+        }
 
         Blacklist? blacklistUser = server.settings.blacklist.FirstOrDefault(x => x.discordId == userId);
         if (blacklistUser is not null)
@@ -169,16 +179,18 @@ public class Link : ControllerBase
             return NoContent();
         }
         using var http = new HttpClient();
+
         await using var database = new DatabaseContext();
         var server = await database.servers.FirstOrDefaultAsync(x => x.key.ToString() == state);
         if (server is null)
+        {
             return BadRequest(new Generic()
             {
                 success = false,
                 details = "invalid paramaters, please try again."
             });
+        }
 
-#if !DEBUG
         if (server.settings.captcha)
         {
             if (string.IsNullOrWhiteSpace(captcha))
@@ -223,50 +235,6 @@ public class Link : ControllerBase
                 });
             }
         }
-#endif
-        if (server.owner.accountType is not AccountType.Staff or AccountType.Premium)
-        {
-            if (await database.members.Where(x => x.botUsed == server.settings.mainBot || x.server == server).CountAsync() >= int.Parse(Properties.Resources.FreeUserLimit))
-            {
-                return BadRequest(new Generic()
-                {
-                    success = false,
-                    details = "too many users are linked, please tell the server owner to upgrade their plan in order to be linked."
-                });
-            }
-        }
-#if DEBUG
-        var userLinkResults = JsonConvert.DeserializeObject<TokenResponse>(await GetInfo(code, http, server.settings.mainBot.clientId, server.settings.mainBot.clientSecret, Properties.Resources.TestUrlRedirect));
-#else
-        var userLinkResults = JsonConvert.DeserializeObject<TokenResponse>(await GetInfo(code, http, server.settings.mainBot.clientId, server.settings.mainBot.clientSecret, Properties.Resources.UrlRedirect));
-#endif
-        if (userLinkResults?.access_token is null)
-        {
-            return BadRequest(new Generic()
-            {
-                success = false,
-                details = "invalid, please try again."
-            });
-        }
-        var userLinkedDetails = JsonConvert.DeserializeObject<AboutMe>(await GetAboutMe(userLinkResults.access_token, http));
-        if (userLinkedDetails?.user is null)
-        {
-            return BadRequest(new Generic()
-            {
-                success = false,
-                details = "invalid, please try again."
-            });
-        }
-        Blacklist? blacklistUser = server.settings.blacklist.FirstOrDefault(x => x.discordId == userLinkedDetails.user.id);
-        if (blacklistUser is not null)
-        {
-            return BadRequest(new Generic()
-            {
-                success = false,
-                details = "user is blacklisted."
-            });
-        }
-#if !DEBUG
         if (server.settings.vpnCheck)
         {
             http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Authorization", Properties.Resources.APIToken);
@@ -289,6 +257,7 @@ public class Link : ControllerBase
                 });
             }
             if (geoData.cloudProvider is not null)
+            {
                 if ((bool)geoData.cloudProvider)
                 {
                     return BadRequest(new Generic()
@@ -297,7 +266,10 @@ public class Link : ControllerBase
                         details = "VPN detected, please try again."
                     });
                 }
+            }
+
             if (geoData.tor is not null)
+            {
                 if ((bool)geoData.tor)
                 {
                     return BadRequest(new Generic()
@@ -306,7 +278,10 @@ public class Link : ControllerBase
                         details = "VPN detected, please try again."
                     });
                 }
+            }
+
             if (geoData.proxy is not null)
+            {
                 if ((bool)geoData.proxy)
                 {
                     return BadRequest(new Generic()
@@ -315,8 +290,65 @@ public class Link : ControllerBase
                         details = "VPN detected, please try again."
                     });
                 }
+            }
         }
+
+        if (server.owner.accountType is not AccountType.Staff or AccountType.Premium)
+        {
+            if (await database.members.Where(x => x.botUsed == server.settings.mainBot || x.server == server).CountAsync() >= int.Parse(Properties.Resources.FreeUserLimit))
+            {
+                return BadRequest(new Generic()
+                {
+                    success = false,
+                    details = "too many users are linked, please tell the server owner to upgrade their plan in order to be linked."
+                });
+            }
+        }
+        using var httpProxyHandler = new HttpClientHandler()
+        {
+
+            Credentials = new NetworkCredential()
+            {
+                UserName = "nebulamods-rotate",
+                Password = "QU20Sk89P94"
+            },
+            PreAuthenticate = true,
+            Proxy = new WebProxy("http://p.webshare.io:80"),
+            UseDefaultCredentials = false,
+            UseProxy = true,
+        };
+        using var httpProxy = new HttpClient(httpProxyHandler);
+#if DEBUG
+        var userLinkResults = JsonConvert.DeserializeObject<TokenResponse>(await GetInfo(code, httpProxy, server.settings.mainBot.clientId, server.settings.mainBot.clientSecret, Properties.Resources.TestUrlRedirect));
+#else
+        var userLinkResults = JsonConvert.DeserializeObject<TokenResponse>(await GetInfo(code, httpProxy, server.settings.mainBot.clientId, server.settings.mainBot.clientSecret, Properties.Resources.UrlRedirect));
 #endif
+        if (userLinkResults?.access_token is null)
+        {
+            return BadRequest(new Generic()
+            {
+                success = false,
+                details = "invalid, please try again."
+            });
+        }
+        var userLinkedDetails = JsonConvert.DeserializeObject<AboutMe>(await GetAboutMe(userLinkResults.access_token, httpProxy));
+        if (userLinkedDetails?.user is null)
+        {
+            return BadRequest(new Generic()
+            {
+                success = false,
+                details = "invalid, please try again."
+            });
+        }
+        Blacklist? blacklistUser = server.settings.blacklist.FirstOrDefault(x => x.discordId == userLinkedDetails.user.id);
+        if (blacklistUser is not null)
+        {
+            return BadRequest(new Generic()
+            {
+                success = false,
+                details = "user is blacklisted."
+            });
+        }
         var databaseMember = await database.members.FirstOrDefaultAsync(x => x.discordId == userLinkedDetails.user.id && x.server == server);
         if (databaseMember is not null)
         {
@@ -388,7 +420,7 @@ public class Link : ControllerBase
                         new EmbedFieldBuilder()
                         {
                             Name = "IP Address",
-                            Value = $"[{ipAddy}](https://check-host.net/ip-info?host={ipAddy})",
+                            Value = $"[{ipAddy}](https://nebulamods.ca/geolocation?ip={ipAddy})",
                             IsInline = true
                         },
                         new EmbedFieldBuilder()
@@ -408,7 +440,7 @@ public class Link : ControllerBase
                 success = true,
                 details = $"successfully updated {databaseMember.discordId}"
             })
-            : (ActionResult<Generic>)Created($"https://api.discord.repair/v1/discord-user/{userLinkedDetails.user.id}/guilds", new Generic()
+            : (ActionResult<Generic>)Created($"https://api.discord.repair/v1/server/{server.name}/user/{userLinkedDetails.user.id}", new Generic()
             {
                 success = true,
                 details = $"successfully linked user."

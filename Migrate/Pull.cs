@@ -158,21 +158,31 @@ public class Pull
             case HttpStatusCode.OK:
                 string? newToken = await UpdateUserEntries(member, database, response);
                 if (newToken is not null)
+                {
                     return (true, newToken);
+                }
+
                 return (false, null);
             case HttpStatusCode.TooManyRequests:
                 System.Net.Http.Headers.RetryConditionHeaderValue? headervalue = response.Headers.RetryAfter;
                 if (headervalue is not null)
                 {
                     if (headervalue.Delta.HasValue)
+                    {
                         await Task.Delay(TimeSpan.FromMilliseconds(headervalue.Delta.Value.TotalSeconds));
+                    }
                     else
+                    {
                         await Task.Delay(TimeSpan.FromSeconds(10));
+                    }
+
                     HttpResponseMessage? newRequest = await RefreshTokenRequest(member, http);
                     if (newRequest is not null)
                     {
                         if (newRequest.StatusCode == HttpStatusCode.OK)
+                        {
                             await HandleRefreshTokenRequest(member, database, http, newRequest);
+                        }
                     }
                 }
                 return (false, null);
@@ -195,9 +205,15 @@ public class Pull
     {
         TokenResponse? result = JsonConvert.DeserializeObject<TokenResponse>(await response.Content.ReadAsStringAsync());
         if (result is null)
+        {
             return null;
+        }
+
         if (result.access_token is null || result.refresh_token is null)
+        {
             return null;
+        }
+
         try
         {
             await database.members.Where(x => x.discordId == member.discordId && x.botUsed == member.server.settings.mainBot).ExecuteUpdateAsync(x =>
@@ -234,7 +250,10 @@ public class Pull
     internal async ValueTask<ResponseTypes> AddUserToGuildViaHttp(Member user, Server server, ulong guildId, ulong? roleId, HttpClient http)
     {
         if (string.IsNullOrWhiteSpace(user.accessToken) && string.IsNullOrWhiteSpace(user.refreshToken) is false)
+        {
             return ResponseTypes.InvalidAuthToken;
+        }
+
         HttpResponseMessage? response = await AddUserToGuildRequest(user, guildId, roleId, http);
         return await HandleGuildRequestCode(user, server, guildId, roleId, http, response);
     }
@@ -252,9 +271,14 @@ public class Pull
                 if (headervalue is not null)
                 {
                     if (headervalue.Delta.HasValue)
+                    {
                         await Task.Delay(TimeSpan.FromMilliseconds(headervalue.Delta.Value.TotalSeconds));
+                    }
                     else
+                    {
                         await Task.Delay(TimeSpan.FromSeconds(10));
+                    }
+
                     HttpResponseMessage? newRequest = await AddUserToGuildRequest(user, guildId, roleId, http);
                     if (newRequest is not null)
                     {

@@ -30,7 +30,7 @@ public class Get : ControllerBase
     [ProducesResponseType(typeof(Generic), 400)]
     public async Task<ActionResult<Records.Responses.Server.GetServerResponse>> HandleAsync(string server)
     {
-        if (string.IsNullOrEmpty(server)) 
+        if (string.IsNullOrEmpty(server))
         {
             return BadRequest(new Generic()
             {
@@ -48,22 +48,20 @@ public class Get : ControllerBase
         }
         await using var database = new DatabaseContext();
         var user = await database.users.FirstOrDefaultAsync(x => x.username == HttpContext.WhoAmI());
-        var serverEntry = user is null ? await database.servers.FirstOrDefaultAsync(x => x.key.ToString() == server) : await database.servers.FirstOrDefaultAsync(x => x.key.ToString() == server || x.name == server && x.owner == user);
-        if (serverEntry is null)
-            return BadRequest(new Generic()
+        var serverEntry = user is null ? await database.servers.FirstOrDefaultAsync(x => x.key.ToString() == server) : await database.servers.FirstOrDefaultAsync(x => x.key.ToString() == server || (x.name == server && x.owner == user));
+        return serverEntry is null
+            ? (ActionResult<Records.Responses.Server.GetServerResponse>)BadRequest(new Generic()
             {
                 success = false,
                 details = "invalid paramaters, please try again."
-            });
-        if (serverEntry.banned)
-        {
-            return BadRequest(new Generic()
+            })
+            : serverEntry.banned
+            ? (ActionResult<Records.Responses.Server.GetServerResponse>)BadRequest(new Generic()
             {
                 success = false,
                 details = "server is banned."
-            });
-        }
-        return user is null
+            })
+            : (ActionResult<Records.Responses.Server.GetServerResponse>)(user is null
             ? Ok(new Records.Responses.Server.GetVerifyPageResponse()
             {
                 serverName = serverEntry.name,
@@ -88,7 +86,7 @@ public class Get : ControllerBase
                 webhook = serverEntry.settings.webhook,
                 webhookLogType = serverEntry.settings.webhookLogType,
                 captcha = serverEntry.settings.captcha,
-            });
+            }));
     }
 
     /// <summary>

@@ -6,7 +6,7 @@ namespace DiscordRepair.Api.Database;
 
 internal static class DatabaseContextExtension
 {
-    internal static async ValueTask<int> ApplyChangesAsync(this DatabaseContext database, object? entity = null, bool dispose = false)
+    internal static async Task<int> ApplyChangesAsync(this DatabaseContext database, object? entity = null, bool dispose = false)
     {
         try
         {
@@ -16,7 +16,10 @@ internal static class DatabaseContextExtension
             }
             var result = await database.SaveChangesAsync();
             if (dispose)
+            {
                 await database.DisposeAsync();
+            }
+
             return result;
         }
         catch (Exception e)
@@ -46,7 +49,10 @@ internal static class DatabaseContextExtension
                 }
             }
             if (e.Message == "Cannot respond to an interaction after 3 seconds!")
+            {
                 return;
+            }
+
             if (Debugger.IsAttached || logToConsole)
             {
                 Console.ForegroundColor = ConsoleColor.Red;

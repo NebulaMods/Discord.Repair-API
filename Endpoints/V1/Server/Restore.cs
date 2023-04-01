@@ -8,9 +8,9 @@ namespace DiscordRepair.Api.Endpoints.V1.Server;
 /// <summary>
 /// 
 /// </summary>
-[ApiController]
-[Route("/v1/server/")]
-[ApiExplorerSettings(GroupName = "Server Endpoints")]
+//[ApiController]
+//[Route("/v1/server/")]
+//[ApiExplorerSettings(GroupName = "Server Endpoints")]
 public class Restore : ControllerBase
 {
     private readonly MigrationMaster.Restore _restore;
@@ -29,12 +29,12 @@ public class Restore : ControllerBase
     /// </summary>
     /// <param name="server"></param>
     /// <returns></returns>
-    [HttpPost("{server}/restore")]
-    [Consumes("plain/text")]
-    [Produces("application/json")]
-    [ProducesResponseType(typeof(Generic), 200)]
-    [ProducesResponseType(typeof(Generic), 404)]
-    [ProducesResponseType(typeof(Generic), 400)]
+    //[HttpPost("{server}/restore")]
+    //[Consumes("plain/text")]
+    //[Produces("application/json")]
+    //[ProducesResponseType(typeof(Generic), 200)]
+    //[ProducesResponseType(typeof(Generic), 404)]
+    //[ProducesResponseType(typeof(Generic), 400)]
     public async Task<ActionResult> HandleAsync(string server)
     {
         if (string.IsNullOrWhiteSpace(server))

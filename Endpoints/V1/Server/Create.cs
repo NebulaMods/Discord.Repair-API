@@ -1,4 +1,5 @@
-﻿
+﻿using System.Web;
+
 using DiscordRepair.Api.Database;
 using DiscordRepair.Api.Records.Requests.Server;
 using DiscordRepair.Api.Records.Responses;
@@ -42,6 +43,7 @@ public class Create : ControllerBase
         await using var database = new DatabaseContext();
         var user = await database.users.FirstAsync(x => x.username == HttpContext.WhoAmI());
         if (user.accountType is not Database.Models.AccountType.Staff or Database.Models.AccountType.Premium)
+        {
             if (await database.servers.Where(x => x.owner == user).CountAsync() >= int.Parse(Properties.Resources.FreeServerLimit))
             {
                 return BadRequest(new Generic()
@@ -50,6 +52,8 @@ public class Create : ControllerBase
                     details = "please upgrade in order to create another server"
                 });
             }
+        }
+
         var server = await database.servers.FirstOrDefaultAsync(x => x.owner == user && x.name == serverRequest.name);
         if (server is not null)
         {
@@ -80,7 +84,7 @@ public class Create : ControllerBase
         {
             owner = user,
             guildId = serverRequest.guildId,
-            name = serverRequest.name,
+            name = serverRequest.name.Trim(),
             roleId = serverRequest.roleId,
             settings = new()
             {
@@ -93,7 +97,29 @@ public class Create : ControllerBase
                 captcha = serverRequest.captchaCheck
             }
         };
-        newServer.settings.vanityUrl = $"https://discord.repair/server/{newServer.key}";
+        if (string.IsNullOrWhiteSpace(serverRequest.vanityURL) is false)
+        {
+
+            var vanityServer = await database.servers.FirstOrDefaultAsync(x => x.settings.vanityUrl == (serverRequest.vanityURL.Contains("https://discord.repair/server/") ? HttpUtility.UrlEncode(serverRequest.vanityURL) : HttpUtility.UrlEncode($"https://discord.repair/server/{serverRequest.vanityURL}")));
+            if (vanityServer is null)
+            {
+                newServer.settings.vanityUrl = HttpUtility.UrlEncode(serverRequest.vanityURL.Contains("https://discord.repair/server/") ? serverRequest.vanityURL : $"https://discord.repair/server/{serverRequest.vanityURL}");
+            }
+            else
+            {
+                var vanityServer2 = await database.servers.FirstOrDefaultAsync(x => x.settings.vanityUrl == HttpUtility.UrlEncode($"https://discord.repair/server/{newServer.name}"));
+                newServer.settings.vanityUrl = vanityServer2 is null
+                    ? HttpUtility.UrlEncode($"https://discord.repair/server/{newServer.name}")
+                    : HttpUtility.UrlEncode($"https://discord.repair/server/{new Guid()}");
+            }
+        }
+        else
+        {
+            var vanityServer = await database.servers.FirstOrDefaultAsync(x => x.settings.vanityUrl == HttpUtility.UrlEncode($"https://discord.repair/server/{newServer.name}"));
+            newServer.settings.vanityUrl = vanityServer is null
+                ? HttpUtility.UrlEncode($"https://discord.repair/server/{newServer.name}")
+                : HttpUtility.UrlEncode($"https://discord.repair/server/{new Guid()}");
+        }
         await database.servers.AddAsync(newServer);
         await database.ApplyChangesAsync();
         return Created($"https://api.discord.repair/v1/server/{newServer.key}", new CreateServerResponse()

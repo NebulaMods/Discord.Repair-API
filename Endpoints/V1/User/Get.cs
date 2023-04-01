@@ -74,10 +74,10 @@ public class Get : ControllerBase
     }
 
     /// <summary>
-    /// Get a list of all users usernames.
+    /// Get a list of all users.
     /// </summary>
     /// <returns></returns>
-    /// <remarks>Get a list of all users usernames.</remarks>
+    /// <remarks>Get a list of users.</remarks>
     [HttpGet]
     [Consumes("plain/text")]
     [Produces("application/json")]
@@ -107,7 +107,7 @@ public class Get : ControllerBase
         }
         var users = await database.users.ToListAsync();
         List<GetAllUsersResponse> allUsers = new();
-        foreach(var user in users)
+        foreach (var user in users)
         {
             allUsers.Add(new GetAllUsersResponse
             {

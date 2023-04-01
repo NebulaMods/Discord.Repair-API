@@ -30,18 +30,21 @@ public class GetBlacklist : ControllerBase
     {
         var verifyResult = this.VerifyServer(server, HttpContext.WhatIsMyToken());
         if (verifyResult is not null)
+        {
             return verifyResult;
+        }
+
         await using var database = new DatabaseContext();
         var (httpResult, serverEntry) = await this.VerifyServer(database, server, HttpContext.WhatIsMyToken());
-        if (httpResult is not null)
-            return httpResult;
-        if (serverEntry is null)
-            return BadRequest(new Generic()
+        return httpResult is not null
+            ? (ActionResult<List<Database.Models.Blacklist>>)httpResult
+            : serverEntry is null
+            ? (ActionResult<List<Database.Models.Blacklist>>)BadRequest(new Generic()
             {
                 success = false,
                 details = "invalid paramaters, please try again."
-            });
-        return serverEntry.settings.blacklist.Any() is false
+            })
+            : serverEntry.settings.blacklist.Any() is false
             ? NotFound(new Records.Responses.Generic()
             {
                 success = false,

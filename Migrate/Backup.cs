@@ -299,7 +299,9 @@ public class Backup
         foreach (var channel in guildChannels)
         {
             if (channel as Discord.Rest.RestThreadChannel is null)
+            {
                 channels.Add(UpdateTextChannel(backup, channel));
+            }
         }
         return channels;
     }
@@ -397,7 +399,10 @@ public class Backup
             channelEntry.nsfw = channel.IsNsfw;
             channelEntry.topic = channel.Topic;
             if (channel as Discord.Rest.RestNewsChannel is null)
+            {
                 channelEntry.slowModeInterval = channel.SlowModeInterval;
+            }
+
             var channelPerms = channel.PermissionOverwrites.ToList();
             foreach (Overwrite x in channelPerms)
             {
@@ -469,7 +474,10 @@ public class Backup
         {
             IReadOnlyCollection<ulong>? userRoles = guildUser.RoleIds;
             if (userRoles.Any() is false)
+            {
                 continue;
+            }
+
             var newGuildUser = new GuildUser
             {
                 id = guildUser.Id,
@@ -480,11 +488,17 @@ public class Backup
             {
                 Role? idkRole = backup.roles.FirstOrDefault(x => x.id == role);
                 if (idkRole is null)
+                {
                     continue;
+                }
+
                 newGuildUser.assignedRoles.Add(idkRole);
             }
             if (newGuildUser.assignedRoles.Any() is false)
+            {
                 continue;
+            }
+
             guildUserList.Add(newGuildUser);
         }
         return guildUserList;

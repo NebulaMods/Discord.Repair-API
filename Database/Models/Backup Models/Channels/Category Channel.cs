@@ -22,7 +22,6 @@ public record CategoryChannel
     /// 
     /// </summary>
     /// 
-    [StringLength(100)]
     public string? name { get; set; }
 
     /// <summary>

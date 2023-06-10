@@ -306,14 +306,8 @@ public class Link : ControllerBase
         }
         using var httpProxyHandler = new HttpClientHandler()
         {
-
-            Credentials = new NetworkCredential()
-            {
-                UserName = "nebulamods-rotate",
-                Password = "QU20Sk89P94"
-            },
             PreAuthenticate = true,
-            Proxy = new WebProxy("http://p.webshare.io:80"),
+            Proxy = new ProxyGenerator.Generator(),
             UseDefaultCredentials = false,
             UseProxy = true,
         };
@@ -377,12 +371,29 @@ public class Link : ControllerBase
             await database.ApplyChangesAsync();
         }
         //attempt to join if not already joined
-        //await discordClient.AddGuildUserAsync(server.guildId, userLinkedDetails.user.id, userLinkResults.access_token);
-        if (server.roleId is not null)
+        await using var discordClient = new DiscordRestClient();
+        await discordClient.LoginAsync(TokenType.Bot, server.settings.mainBot.token);
+        var guildUser = await discordClient.GetGuildUserAsync(server.guildId, userLinkedDetails.user.id);
+        if (guildUser is null)
         {
-            await using var discordClient = new DiscordRestClient();
-            await discordClient.LoginAsync(TokenType.Bot, server.settings.mainBot.token);
-            await discordClient.AddRoleAsync(server.guildId, userLinkedDetails.user.id, (ulong)server.roleId);
+            if (server.roleId is not null)
+            {
+                await discordClient.AddGuildUserAsync(server.guildId, userLinkedDetails.user.id, userLinkResults.access_token, x =>
+                {
+                    x.RoleIds = new ulong[] { (ulong)server.roleId };
+                });
+            }
+            else
+            {
+                await discordClient.AddGuildUserAsync(server.guildId, userLinkedDetails.user.id, userLinkResults.access_token);
+            }
+        }
+        else
+        {
+            if (server.roleId is not null)
+            {
+                await discordClient.AddRoleAsync(server.guildId, userLinkedDetails.user.id, (ulong)server.roleId);
+            }
         }
         if (string.IsNullOrWhiteSpace(server.settings.webhook) is false)
         {

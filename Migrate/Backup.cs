@@ -1,4 +1,5 @@
 ﻿using Discord;
+using Discord.Rest;
 
 using DiscordRepair.Api.Database;
 using DiscordRepair.Api.Database.Models;
@@ -13,90 +14,37 @@ namespace DiscordRepair.Api.MigrationMaster;
 /// <summary>
 /// 
 /// </summary>
-public class Backup
+public static class Backup
 {
-    private readonly Configuration _configuration;
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="configuration"></param>
-    public Backup(Configuration configuration)
-    {
-        _configuration = configuration;
-    }
-
-    public async ValueTask<Database.Models.BackupModels.Backup> BackupGuildAsync(Server server, DatabaseContext database, Discord.Rest.RestGuild guild, Discord.Rest.RestInteractionContext context)
-    {
-        var backupEntry = new Database.Models.BackupModels.Backup
-        {
-            guildName = guild.Name,
-            afkTimeout = guild.AFKTimeout,
-            bannerUrl = guild.BannerUrl,
-            description = guild.Description,
-            discoverySplashUrl = guild.DiscoverySplashUrl,
-            iconUrl = guild.IconUrl is not null ? guild.IconUrl.Replace(".jpg", ".png") : guild.IconUrl,
-            splashUrl = guild.SplashUrl,
-            vanityUrl = string.IsNullOrWhiteSpace(guild.VanityURLCode) ? guild.VanityURLCode : $"https://discord.gg/{guild.VanityURLCode}",
-            isWidgetEnabled = guild.IsWidgetEnabled,
-            defaultMessageNotifications = (int)guild.DefaultMessageNotifications,
-            explicitContentFilterLevel = (int)guild.ExplicitContentFilter,
-            preferredLocale = guild.PreferredLocale,
-            isBoostProgressBarEnabled = guild.IsBoostProgressBarEnabled,
-            systemChannelMessageDeny = (int)guild.SystemChannelFlags,
-            verificationLevel = (int)guild.VerificationLevel,
-        };
-        User? user = await database.users.FirstAsync(x => x.username == server.owner.username);
-        user.backups.Add(backupEntry);
-        await database.ApplyChangesAsync(server);
-        backupEntry.roles = BackupRoles(backupEntry, guild);
-        await database.ApplyChangesAsync(server);
-        backupEntry.users = await BackupUsersAsync(backupEntry, guild);
-        backupEntry.catgeoryChannels = await BackupCategories(backupEntry, guild);
-        backupEntry.textChannels = await BackupTextChannels(backupEntry, guild);
-        backupEntry.voiceChannels = await BackupVoiceChannels(backupEntry, guild);
-        backupEntry.emojis = await BackupEmojisAsync(backupEntry, guild);
-
-        //
-        //if (guild.AFKChannel is not null)
-        //    backupEntry.afkChannel = backupEntry.voiceChannels.FirstOrDefault(x => x.id == guild.AFKChannel.Id);
-        //if (guild.RulesChannel is not null)
-        //    backupEntry.rulesChannel = backupEntry.textChannels.FirstOrDefault(x => x.id == guild.RulesChannel.Id);
-        //if (guild.DefaultChannel is not null)
-        //    backupEntry.defaultChannel = backupEntry.textChannels.FirstOrDefault(x => x.id == guild.DefaultChannel.Id);
-        //if (guild.SystemChannel is not null)
-        //    backupEntry.systemChannel = backupEntry.textChannels.FirstOrDefault(x => x.id == guild.SystemChannel.Id);
-        //if (guild.PublicUpdatesChannel is not null)
-        //    backupEntry.publicUpdatesChannel = backupEntry.textChannels.FirstOrDefault(x => x.id == guild.PublicUpdatesChannel.Id);
-        //if (guild.WidgetChannel is not null)
-        //    backupEntry.widgetChannel = backupEntry.textChannels.FirstOrDefault(x => x.id == guild.WidgetChannel.Id);
-        //messages
-        await database.ApplyChangesAsync(backupEntry);
-        return backupEntry;
-    }
-
     #region Backup Roles
 
-    private ICollection<Role> BackupRoles(Database.Models.BackupModels.Backup backup, IGuild guild)
+    internal static ICollection<Role> BackupRoles(this Database.Models.BackupModels.Backup backup, RestGuild guild)
     {
-        var roleList = new HashSet<Role>();
+        backup.roles ??= new HashSet<Role>();
         var guildRoles = guild.Roles.ToList();
-        foreach (IRole? role in guildRoles)
-        {
-            roleList.Add(UpdateRole(backup, role));
-        }
-        guildRoles.Clear();
-        return roleList;
+        if (guildRoles is not null)
+            foreach (IRole? role in guildRoles)
+            {
+                var updatedRole = UpdateRole(backup, role);
+                if (updatedRole is not null)
+                    backup.roles.Add(updatedRole);
+            }
+        return backup.roles;
     }
 
-    internal static Role UpdateRole(Database.Models.BackupModels.Backup backup, IRole role)
+    internal static Role? UpdateRole(Database.Models.BackupModels.Backup backup, IRole role)
     {
-        Role? roleEntry = backup.roles.FirstOrDefault(x => x.id == role.Id);
+        Role? roleEntry = null;
+        if (backup.roles is null)
+            return roleEntry;
+        roleEntry = backup.roles.FirstOrDefault(x => x.id == role.Id);
         GuildPermissions perm = role.Permissions;
 
         if (roleEntry is null)
         {
             roleEntry = new Role
             {
+                key = new(),
                 id = role.Id,
                 name = role.Name,
                 icon = role.Icon,
@@ -208,10 +156,212 @@ public class Backup
     #endregion
 
     #region Backup Channels
-    private Database.Models.BackupModels.Permissions.ChannelPermissions CreateChannelPermissionEntry(Overwrite x, ulong targetId)
+    internal static async Task<ICollection<CategoryChannel>> BackupCategoriesAsync(this Database.Models.BackupModels.Backup backup, Discord.Rest.RestGuild guild)
+    {
+        backup.catgeoryChannels ??= new HashSet<CategoryChannel>();
+        var guildChannels = await guild.GetCategoryChannelsAsync();
+        if (guildChannels is not null)
+            foreach (var channel in guildChannels)
+            {
+                var updatedChannel = UpdateCategoryChannel(backup, channel);
+                if (updatedChannel is not null)
+                    backup.catgeoryChannels.Add(updatedChannel);
+            }
+        return backup.catgeoryChannels;
+    }
+    internal static async Task<ICollection<TextChannel>> BackupTextChannelsAsync(this Database.Models.BackupModels.Backup backup, Discord.Rest.RestGuild guild)
+    {
+        backup.textChannels ??= new HashSet<TextChannel>();
+        var guildChannels = await guild.GetTextChannelsAsync();
+        if (guildChannels is not null)
+            foreach (var channel in guildChannels)
+            {
+                if (channel as Discord.Rest.RestThreadChannel is null)
+                {
+                    var updatedChannel = UpdateTextChannel(backup, channel);
+                    if (updatedChannel is not null)
+                        backup.textChannels.Add(updatedChannel);
+                }
+            }
+        return backup.textChannels;
+    }
+    internal static async Task<ICollection<VoiceChannel>> BackupVoiceChannelsAsync(this Database.Models.BackupModels.Backup backup, Discord.Rest.RestGuild guild)
+    {
+        backup.voiceChannels ??= new HashSet<VoiceChannel>();
+        var guildChannels = await guild.GetVoiceChannelsAsync();
+        if (guildChannels is not null)
+            foreach (var channel in guildChannels)
+            {
+                var updatedChannel = UpdateVoiceChannel(backup, channel);
+                if (updatedChannel is not null)
+                    backup.voiceChannels.Add(updatedChannel);
+            }
+        return backup.voiceChannels;
+    }
+
+    internal static CategoryChannel? UpdateCategoryChannel(this Database.Models.BackupModels.Backup backup, ICategoryChannel channel)
+    {
+        CategoryChannel? channelEntry = null;
+        if (backup.catgeoryChannels is null)
+            return channelEntry;
+        channelEntry = backup.catgeoryChannels.FirstOrDefault(x => x.id == channel.Id);
+        if (channelEntry is null)
+        {
+            var permissionList = new HashSet<Database.Models.BackupModels.Permissions.ChannelPermissions>();
+            var channelPerms2 = channel.PermissionOverwrites.ToList();
+            foreach (Overwrite permission in channelPerms2)
+            {
+                permissionList.Add(CreateChannelPermissionEntry(permission, permission.TargetId));
+            }
+            channelPerms2.Clear();
+            return new CategoryChannel
+            {
+                key = new(),
+                id = channel.Id,
+                name = channel.Name,
+                position = channel.Position,
+                permissions = permissionList,
+            };
+        }
+        channelEntry.name = channel.Name;
+        channelEntry.position = channel.Position;
+        var channelPerms = channel.PermissionOverwrites.ToList();
+        foreach (Overwrite x in channelPerms)
+        {
+            Database.Models.BackupModels.Permissions.ChannelPermissions? permission = channelEntry.permissions.FirstOrDefault(y => y.targetId == x.TargetId);
+            if (permission is not null)
+            {
+                UpdateChannelPermissionEntry(permission, x);
+                continue;
+            }
+            channelEntry.permissions.Add(CreateChannelPermissionEntry(x, x.TargetId));
+        }
+        channelPerms.Clear();
+        return channelEntry;
+    }
+    internal static TextChannel? UpdateTextChannel(this Database.Models.BackupModels.Backup backup, ITextChannel channel)
+    {
+        TextChannel? channelEntry = null;
+        if (backup.textChannels is null)
+            return channelEntry;
+        channelEntry = backup.textChannels.FirstOrDefault(x => x.id == channel.Id);
+        if (channelEntry is null)
+        {
+            var permissionList = new HashSet<Database.Models.BackupModels.Permissions.ChannelPermissions>();
+            var channelPerms1 = channel.PermissionOverwrites.ToList();
+            foreach (Overwrite x in channelPerms1)
+            {
+                permissionList.Add(CreateChannelPermissionEntry(x, x.TargetId));
+            }
+            channelPerms1.Clear();
+            return channel as Discord.Rest.RestNewsChannel is not null
+            ? new TextChannel
+            {
+                key = new(),
+                id = channel.Id,
+                name = channel.Name,
+                position = channel.Position,
+                category = channel.CategoryId is not null ? backup.catgeoryChannels?.FirstOrDefault(x => x.id == channel.CategoryId) : null,
+                archiveAfter = null,
+                nsfw = channel.IsNsfw,
+                slowModeInterval = 0,
+                topic = channel.Topic,
+                permissions = permissionList,
+            }
+            : new TextChannel
+            {
+                id = channel.Id,
+                name = channel.Name,
+                position = channel.Position,
+                category = channel.CategoryId is not null ? backup.catgeoryChannels?.FirstOrDefault(x => x.id == channel.CategoryId) : null,
+                archiveAfter = null,
+                nsfw = channel.IsNsfw,
+                slowModeInterval = channel.SlowModeInterval,
+                topic = channel.Topic,
+                permissions = permissionList,
+            };
+        }
+        else
+        {
+            channelEntry.name = channel.Name;
+            channelEntry.position = channel.Position;
+            channelEntry.category = channel.CategoryId is not null ? backup.catgeoryChannels?.FirstOrDefault(x => x.id == channel.CategoryId) : null;
+            channelEntry.archiveAfter = null;
+            channelEntry.nsfw = channel.IsNsfw;
+            channelEntry.topic = channel.Topic;
+            if (channel as Discord.Rest.RestNewsChannel is null)
+            {
+                channelEntry.slowModeInterval = channel.SlowModeInterval;
+            }
+
+            var channelPerms = channel.PermissionOverwrites.ToList();
+            foreach (Overwrite x in channelPerms)
+            {
+                Database.Models.BackupModels.Permissions.ChannelPermissions? permission = channelEntry.permissions.FirstOrDefault(y => y.targetId == x.TargetId);
+                if (permission is not null)
+                {
+                    UpdateChannelPermissionEntry(permission, x);
+                    continue;
+                }
+                channelEntry.permissions.Add(CreateChannelPermissionEntry(x, x.TargetId));
+            }
+            channelPerms.Clear();
+        }
+        return channelEntry;
+    }
+    internal static VoiceChannel? UpdateVoiceChannel(this Database.Models.BackupModels.Backup backup, IVoiceChannel channel)
+    {
+        VoiceChannel? channelEntry = null;
+        if (backup.voiceChannels is null)
+            return channelEntry;
+        channelEntry = backup.voiceChannels.FirstOrDefault(x => x.id == channel.Id);
+        if (channelEntry is null)
+        {
+            var permissionList = new HashSet<Database.Models.BackupModels.Permissions.ChannelPermissions>();
+            var channelPerms1 = channel.PermissionOverwrites.ToList();
+            foreach (Overwrite permission in channelPerms1)
+            {
+                permissionList.Add(CreateChannelPermissionEntry(permission, permission.TargetId));
+            }
+            channelPerms1.Clear();
+            return new VoiceChannel
+            {
+                key = new(),
+                id = channel.Id,
+                name = channel.Name,
+                position = channel.Position,
+                category = channel.CategoryId is not null ? backup.catgeoryChannels?.FirstOrDefault(x => x.id == channel.CategoryId) : null,
+                bitrate = channel.Bitrate,
+                userLimit = channel.UserLimit,
+                videoQuality = null,
+                region = null,
+                permissions = permissionList,
+            };
+        }
+        channelEntry.name = channel.Name;
+        channelEntry.position = channel.Position;
+        channelEntry.category = channel.CategoryId is not null ? backup.catgeoryChannels?.FirstOrDefault(x => x.id == channel.CategoryId) : null;
+        channelEntry.bitrate = channel.Bitrate;
+        channelEntry.userLimit = channel.UserLimit;
+        var channelPerms2 = channel.PermissionOverwrites.ToList();
+        foreach (Overwrite x in channelPerms2)
+        {
+            Database.Models.BackupModels.Permissions.ChannelPermissions? permission = channelEntry.permissions.FirstOrDefault(y => y.targetId == x.TargetId);
+            if (permission is not null)
+            {
+                UpdateChannelPermissionEntry(permission, x);
+                continue;
+            }
+            channelEntry.permissions.Add(CreateChannelPermissionEntry(x, x.TargetId));
+        }
+        channelPerms2.Clear();
+        return channelEntry;
+    }
+    private static Database.Models.BackupModels.Permissions.ChannelPermissions CreateChannelPermissionEntry(Overwrite x, ulong targetId)
     {
         return new Database.Models.BackupModels.Permissions.ChannelPermissions
         {
+            key = new(),
             targetId = targetId,
             permissionTarget = (int)x.TargetType,
             AttachFiles = (PermissionValue)x.Permissions.AttachFiles,
@@ -246,7 +396,7 @@ public class Backup
             ViewChannel = (PermissionValue)x.Permissions.ViewChannel,
         };
     }
-    private void UpdateChannelPermissionEntry(Database.Models.BackupModels.Permissions.ChannelPermissions permission, Overwrite x)
+    private static void UpdateChannelPermissionEntry(Database.Models.BackupModels.Permissions.ChannelPermissions permission, Overwrite x)
     {
         permission.targetId = x.TargetId;
         permission.permissionTarget = (int)x.TargetType;
@@ -281,243 +431,164 @@ public class Backup
         permission.UseExternalStickers = (PermissionValue)x.Permissions.UseExternalStickers;
         permission.ViewChannel = (PermissionValue)x.Permissions.ViewChannel;
     }
-
-    internal async Task<ICollection<CategoryChannel>> BackupCategories(Database.Models.BackupModels.Backup backup, Discord.Rest.RestGuild guild)
-    {
-        var channels = new HashSet<CategoryChannel>();
-        var guildChannels = await guild.GetCategoryChannelsAsync();
-        foreach (var channel in guildChannels)
-        {
-            channels.Add(UpdateCategoryChannel(backup, channel));
-        }
-        return channels;
-    }
-    internal async Task<ICollection<TextChannel>> BackupTextChannels(Database.Models.BackupModels.Backup backup, Discord.Rest.RestGuild guild)
-    {
-        var channels = new HashSet<TextChannel>();
-        var guildChannels = await guild.GetTextChannelsAsync();
-        foreach (var channel in guildChannels)
-        {
-            if (channel as Discord.Rest.RestThreadChannel is null)
-            {
-                channels.Add(UpdateTextChannel(backup, channel));
-            }
-        }
-        return channels;
-    }
-    internal async Task<ICollection<VoiceChannel>> BackupVoiceChannels(Database.Models.BackupModels.Backup backup, Discord.Rest.RestGuild guild)
-    {
-        var channels = new HashSet<VoiceChannel>();
-        var guildChannels = await guild.GetVoiceChannelsAsync();
-        foreach (var channel in guildChannels)
-        {
-            channels.Add(UpdateVoiceChannel(backup, channel));
-        }
-        return channels;
-    }
-
-    internal CategoryChannel UpdateCategoryChannel(Database.Models.BackupModels.Backup backup, ICategoryChannel channel)
-    {
-        CategoryChannel? channelEntry = backup.catgeoryChannels.FirstOrDefault(x => x.id == channel.Id);
-        if (channelEntry is null)
-        {
-            var permissionList = new HashSet<Database.Models.BackupModels.Permissions.ChannelPermissions>();
-            var channelPerms2 = channel.PermissionOverwrites.ToList();
-            foreach (Overwrite permission in channelPerms2)
-            {
-                permissionList.Add(CreateChannelPermissionEntry(permission, permission.TargetId));
-            }
-            channelPerms2.Clear();
-            return new CategoryChannel
-            {
-                id = channel.Id,
-                name = channel.Name,
-                position = channel.Position,
-                permissions = permissionList,
-            };
-        }
-        channelEntry.name = channel.Name;
-        channelEntry.position = channel.Position;
-        var channelPerms = channel.PermissionOverwrites.ToList();
-        foreach (Overwrite x in channelPerms)
-        {
-            Database.Models.BackupModels.Permissions.ChannelPermissions? permission = channelEntry.permissions.FirstOrDefault(y => y.targetId == x.TargetId);
-            if (permission is not null)
-            {
-                UpdateChannelPermissionEntry(permission, x);
-                continue;
-            }
-            channelEntry.permissions.Add(CreateChannelPermissionEntry(x, x.TargetId));
-        }
-        channelPerms.Clear();
-        return channelEntry;
-    }
-    internal TextChannel UpdateTextChannel(Database.Models.BackupModels.Backup backup, ITextChannel channel)
-    {
-        TextChannel? channelEntry = backup.textChannels.FirstOrDefault(x => x.id == channel.Id);
-        if (channelEntry is null)
-        {
-            var permissionList = new HashSet<Database.Models.BackupModels.Permissions.ChannelPermissions>();
-            var channelPerms1 = channel.PermissionOverwrites.ToList();
-            foreach (Overwrite x in channelPerms1)
-            {
-                permissionList.Add(CreateChannelPermissionEntry(x, x.TargetId));
-            }
-            channelPerms1.Clear();
-            return channel as Discord.Rest.RestNewsChannel is not null
-            ? new TextChannel
-            {
-                id = channel.Id,
-                name = channel.Name,
-                position = channel.Position,
-                category = channel.CategoryId is not null ? backup.catgeoryChannels.FirstOrDefault(x => x.id == channel.CategoryId) : null,
-                archiveAfter = null,
-                nsfw = channel.IsNsfw,
-                slowModeInterval = 0,
-                topic = channel.Topic,
-                permissions = permissionList,
-            }
-            : new TextChannel
-            {
-                id = channel.Id,
-                name = channel.Name,
-                position = channel.Position,
-                category = channel.CategoryId is not null ? backup.catgeoryChannels.FirstOrDefault(x => x.id == channel.CategoryId) : null,
-                archiveAfter = null,
-                nsfw = channel.IsNsfw,
-                slowModeInterval = channel.SlowModeInterval,
-                topic = channel.Topic,
-                permissions = permissionList,
-            };
-        }
-        else
-        {
-            channelEntry.name = channel.Name;
-            channelEntry.position = channel.Position;
-            channelEntry.category = channel.CategoryId is not null ? backup.catgeoryChannels.FirstOrDefault(x => x.id == channel.CategoryId) : null;
-            channelEntry.archiveAfter = null;
-            channelEntry.nsfw = channel.IsNsfw;
-            channelEntry.topic = channel.Topic;
-            if (channel as Discord.Rest.RestNewsChannel is null)
-            {
-                channelEntry.slowModeInterval = channel.SlowModeInterval;
-            }
-
-            var channelPerms = channel.PermissionOverwrites.ToList();
-            foreach (Overwrite x in channelPerms)
-            {
-                Database.Models.BackupModels.Permissions.ChannelPermissions? permission = channelEntry.permissions.FirstOrDefault(y => y.targetId == x.TargetId);
-                if (permission is not null)
-                {
-                    UpdateChannelPermissionEntry(permission, x);
-                    continue;
-                }
-                channelEntry.permissions.Add(CreateChannelPermissionEntry(x, x.TargetId));
-            }
-            channelPerms.Clear();
-        }
-        return channelEntry;
-    }
-    internal VoiceChannel UpdateVoiceChannel(Database.Models.BackupModels.Backup backup, IVoiceChannel channel)
-    {
-        VoiceChannel? channelEntry = backup.voiceChannels.FirstOrDefault(x => x.id == channel.Id);
-        if (channelEntry is null)
-        {
-            var permissionList = new HashSet<Database.Models.BackupModels.Permissions.ChannelPermissions>();
-            var channelPerms1 = channel.PermissionOverwrites.ToList();
-            foreach (Overwrite permission in channelPerms1)
-            {
-                permissionList.Add(CreateChannelPermissionEntry(permission, permission.TargetId));
-            }
-            channelPerms1.Clear();
-            return new VoiceChannel
-            {
-                id = channel.Id,
-                name = channel.Name,
-                position = channel.Position,
-                category = channel.CategoryId is not null ? backup.catgeoryChannels.FirstOrDefault(x => x.id == channel.CategoryId) : null,
-                bitrate = channel.Bitrate,
-                userLimit = channel.UserLimit,
-                videoQuality = null,
-                region = null,
-                permissions = permissionList,
-            };
-        }
-        channelEntry.name = channel.Name;
-        channelEntry.position = channel.Position;
-        channelEntry.category = channel.CategoryId is not null ? backup.catgeoryChannels.FirstOrDefault(x => x.id == channel.CategoryId) : null;
-        channelEntry.bitrate = channel.Bitrate;
-        channelEntry.userLimit = channel.UserLimit;
-        var channelPerms2 = channel.PermissionOverwrites.ToList();
-        foreach (Overwrite x in channelPerms2)
-        {
-            Database.Models.BackupModels.Permissions.ChannelPermissions? permission = channelEntry.permissions.FirstOrDefault(y => y.targetId == x.TargetId);
-            if (permission is not null)
-            {
-                UpdateChannelPermissionEntry(permission, x);
-                continue;
-            }
-            channelEntry.permissions.Add(CreateChannelPermissionEntry(x, x.TargetId));
-        }
-        channelPerms2.Clear();
-        return channelEntry;
-    }
-
     #endregion
 
-    internal async ValueTask<ICollection<GuildUser>> BackupUsersAsync(Database.Models.BackupModels.Backup backup, IGuild guild)
+    internal static async Task<ICollection<GuildUser>> BackupUsersAsync(this Database.Models.BackupModels.Backup backup, RestGuild guild)
     {
-        var guildUserList = new HashSet<GuildUser>();
-        await guild.DownloadUsersAsync();
-        IReadOnlyCollection<IGuildUser>? users = await guild.GetUsersAsync();
-        foreach (IGuildUser? guildUser in users)
-        {
-            IReadOnlyCollection<ulong>? userRoles = guildUser.RoleIds;
-            if (userRoles.Any() is false)
+        backup.users ??= new HashSet<GuildUser>();
+        var users = await guild.GetUsersAsync().FlattenAsync();
+        if (users is not null)
+            foreach (var guildUser in users)
             {
-                continue;
-            }
-
-            var newGuildUser = new GuildUser
-            {
-                id = guildUser.Id,
-                avatarUrl = guildUser.GetAvatarUrl(),
-                username = guildUser.Username,
-            };
-            foreach (ulong role in userRoles)
-            {
-                Role? idkRole = backup.roles.FirstOrDefault(x => x.id == role);
-                if (idkRole is null)
+                IReadOnlyCollection<ulong>? userRoles = guildUser.RoleIds;
+                if (userRoles.Any() is false)
                 {
                     continue;
                 }
 
-                newGuildUser.assignedRoles.Add(idkRole);
-            }
-            if (newGuildUser.assignedRoles.Any() is false)
-            {
-                continue;
-            }
+                var newGuildUser = new GuildUser
+                {
+                    key = new(),
+                    id = guildUser.Id,
+                    avatarUrl = guildUser.GetAvatarUrl(),
+                    username = guildUser.Username,
+                };
+                foreach (ulong role in userRoles)
+                {
+                    Role? idkRole = backup.roles?.FirstOrDefault(x => x.id == role);
+                    if (idkRole is null)
+                    {
+                        continue;
+                    }
 
-            guildUserList.Add(newGuildUser);
-        }
-        return guildUserList;
+                    newGuildUser.assignedRoles.Add(idkRole);
+                }
+                if (newGuildUser.assignedRoles.Any() is false)
+                {
+                    continue;
+                }
+
+                backup.users.Add(newGuildUser);
+            }
+        return backup.users;
     }
 
-    internal async ValueTask<ICollection<Database.Models.BackupModels.Emoji>> BackupEmojisAsync(Database.Models.BackupModels.Backup backup, IGuild guild)
+    internal static async Task<ICollection<Database.Models.BackupModels.Emoji>> BackupEmojisAsync(this Database.Models.BackupModels.Backup backup, RestGuild guild)
     {
-        var guildEmojiList = new HashSet<Database.Models.BackupModels.Emoji>();
-        IReadOnlyCollection<GuildEmote>? emojis = await guild.GetEmotesAsync();
-        foreach (GuildEmote? emoji in emojis)
-        {
-            var newEmoji = new Database.Models.BackupModels.Emoji
+        backup.emojis ??= new HashSet<Database.Models.BackupModels.Emoji>();
+        var emojis = await guild.GetEmotesAsync();
+        if (emojis is not null)
+            foreach (GuildEmote? emoji in emojis)
             {
-                name = emoji.Name,
-                url = emoji.Url,
-            };
-            backup.emojis.Add(newEmoji);
-            guildEmojiList.Add(newEmoji);
-        }
-        return guildEmojiList;
+                var newEmoji = new Database.Models.BackupModels.Emoji
+                {
+                    key = new(),
+                    name = emoji.Name,
+                    url = emoji.Url,
+                };
+                backup.emojis.Add(newEmoji);
+            }
+        return backup.emojis;
     }
+    internal static async Task<ICollection<Database.Models.BackupModels.Sticker>> BackupStickersAsync(this Database.Models.BackupModels.Backup backup, RestGuild guild)
+    {
+        backup.stickers ??= new HashSet<Database.Models.BackupModels.Sticker>();
+        var stickers = await guild.GetStickersAsync();
+        if (stickers is not null)
+            if (stickers.Any())
+                foreach (var sticker in stickers)
+                {
+                    if (sticker.Type == StickerType.Guild)
+                    {
+                        var newSticker = new Database.Models.BackupModels.Sticker
+                        {
+                            key = new(),
+                            name = sticker.Name,
+                            url = sticker.GetStickerUrl(),
+                            isAvailable = sticker.IsAvailable,
+                            description = sticker.Description,
+                            format = sticker.Format,
+                            packId = sticker.PackId,
+                            sortOrder = sticker.SortOrder,
+                            tags = sticker.Tags.ToArray()
+                        };
+                        backup.stickers.Add(newSticker);
+                    }
+                }
+        return backup.stickers;
+    }
+
+    internal static async Task<ICollection<Message>> BackupMessagesAsync(this Database.Models.BackupModels.Backup backup, RestGuild guild, int messageCount = 1000)
+    {
+        backup.messages ??= new HashSet<Message>();
+
+        var txtChannels = await guild.GetTextChannelsAsync();
+        if (txtChannels is not null)
+            foreach (var channel in txtChannels)
+            {
+                var messages = await channel.GetMessagesAsync(messageCount).FlattenAsync();
+                if (messages is not null)
+                    foreach (var message in messages)
+                    {
+                        switch (message.Type)
+                        {
+                            case MessageType.Default:
+                            case MessageType.Reply:
+                                var txtChannel = backup.textChannels?.FirstOrDefault(x => x.id == message.Channel.Id);
+                                if (txtChannel is null) continue;
+                                backup.messages.Add(new Message()
+                                {
+                                    content = message.Content,
+                                    authorId = message.Author.Id,
+                                    createdAt = message.CreatedAt,
+                                    channel = txtChannel,
+                                    flags = message.Flags,
+                                    isPinned = message.IsPinned,
+                                    isSuppressed = message.IsSuppressed,
+                                    isTTS = message.IsTTS,
+                                    source = message.Source,
+                                    threadChannelId = message.Thread?.Id,
+                                    type = message.Type,
+                                });
+                                break;
+                        }
+                    }
+            }
+
+        return backup.messages;
+    }
+
+    internal static async Task<Guild> BackupGuildAsync(this Database.Models.BackupModels.Backup backup, RestGuild guild)
+    {
+        backup.guild ??= new();
+
+        backup.guild = new Guild
+        {
+            key = new(),
+            guildName = guild.Name,
+            afkTimeout = guild.AFKTimeout,
+            bannerUrl = guild.BannerUrl,
+            description = guild.Description,
+            discoverySplashUrl = guild.DiscoverySplashUrl,
+            iconUrl = guild.IconUrl is not null ? guild.IconUrl.Replace(".jpg", ".png") : guild.IconUrl,
+            splashUrl = guild.SplashUrl,
+            vanityUrl = string.IsNullOrWhiteSpace(guild.VanityURLCode) ? guild.VanityURLCode : $"https://discord.gg/{guild.VanityURLCode}",
+            isWidgetEnabled = guild.IsWidgetEnabled,
+            defaultMessageNotifications = (int)guild.DefaultMessageNotifications,
+            explicitContentFilterLevel = (int)guild.ExplicitContentFilter,
+            preferredLocale = guild.PreferredLocale,
+            isBoostProgressBarEnabled = guild.IsBoostProgressBarEnabled,
+            systemChannelMessageDeny = (int)guild.SystemChannelFlags,
+            verificationLevel = (int)guild.VerificationLevel,
+            afkChannelId = guild.AFKChannelId,
+            defaultChannelId = (await guild.GetDefaultChannelAsync())?.Id,
+            publicUpdatesChannelId = guild.PublicUpdatesChannelId,
+            rulesChannelId = guild.RulesChannelId,
+            systemChannelId = guild.SystemChannelId,
+            widgetChannelId = guild.WidgetChannelId,
+        };
+        return backup.guild;
+    }
+
+
 }

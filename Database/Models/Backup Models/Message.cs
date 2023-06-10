@@ -1,4 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Immutable;
+using System.ComponentModel.DataAnnotations;
+
+using Discord.Rest;
+
+using Discord;
+using DiscordRepair.Api.Database.Models.BackupModels.Channel;
 
 namespace DiscordRepair.Api.Database.Models.BackupModels;
 
@@ -7,40 +13,36 @@ namespace DiscordRepair.Api.Database.Models.BackupModels;
 /// </summary>
 public class Message
 {
-    /// <summary>
-    /// 
-    /// </summary>
     [Key]
     public Guid key { get; init; } = new();
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public int position { get; set; }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// 
-    [StringLength(1000)]
     public string? content { get; set; }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// 
-    [StringLength(100)]
-    public string? username { get; set; }
+    public ulong authorId { get; set; }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public ulong userId { get; set; }
+    public virtual TextChannel channel { get; set; }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// 
-    [StringLength(100)]
-    public string? userPicture { get; set; }
+    public virtual MessageSource source { get; set; }
+
+    public DateTimeOffset createdAt { get; set; }
+
+    public bool isTTS {get; set; }
+
+    public bool isPinned {get; set; }
+
+    public bool isSuppressed {get; set; }
+
+    public ulong? threadChannelId { get; set; }
+
+    //public virtual ICollection<Attachment>? attachments {get; set;}
+
+    //public virtual ICollection<Embed>? embeds {  get; set; }
+
+    //public virtual MessageApplication application { get; private set; }
+
+    public virtual MessageFlags? flags { get; set; }
+
+    public virtual MessageType type { get; set; }
+
+    //public virtual ICollection<ActionRowComponent>? components { get; set; }
 }

@@ -17,13 +17,11 @@ public record Emoji
     /// 
     /// </summary>
     /// 
-    [StringLength(100)]
     public string? name { get; set; }
 
     /// <summary>
     /// 
     /// </summary>
     /// 
-    [StringLength(100)]
     public string? url { get; set; }
 }

@@ -22,14 +22,12 @@ public record GuildUser
     /// 
     /// </summary>
     /// 
-    [StringLength(100)]
     public string? username { get; set; }
 
     /// <summary>
     /// 
     /// </summary>
     /// 
-    [StringLength(100)]
     public string? avatarUrl { get; set; }
 
     /// <summary>

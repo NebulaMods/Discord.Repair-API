@@ -14,7 +14,7 @@ namespace DiscordRepair.Api.Endpoints.V1.Server.User;
 /// </summary>
 [ApiController]
 [Route("/v1/server/")]
-[ApiExplorerSettings(GroupName = "Server User Endpoints")]
+[ApiExplorerSettings(GroupName = "Server Endpoints")]
 public class Kick : ControllerBase
 {
     /// <summary>

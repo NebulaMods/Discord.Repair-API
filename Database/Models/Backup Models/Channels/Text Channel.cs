@@ -22,7 +22,6 @@ public record TextChannel
     /// 
     /// </summary>
     /// 
-    [StringLength(100)]
     public string? name { get; set; }
 
     /// <summary>
@@ -34,7 +33,6 @@ public record TextChannel
     /// 
     /// </summary>
     /// 
-    [StringLength(100)]
     public string? topic { get; set; }
 
     /// <summary>
@@ -78,10 +76,4 @@ public record TextChannel
     /// 
     /// </summary>
     public virtual ICollection<Permissions.ChannelPermissions> permissions { get; set; } = new HashSet<Permissions.ChannelPermissions>();
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public virtual ICollection<Message> messages { get; set; } = new HashSet<Message>();
-
 }

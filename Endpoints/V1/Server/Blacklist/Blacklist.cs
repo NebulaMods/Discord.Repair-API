@@ -9,14 +9,14 @@ using DiscordRepair.Api.Utilities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace DiscordRepair.Api.Endpoints.V1.Server.User;
+namespace DiscordRepair.Api.Endpoints.V1.Server.Blacklist;
 
 /// <summary>
 /// 
 /// </summary>
 [ApiController]
 [Route("/v1/server/")]
-[ApiExplorerSettings(GroupName = "Server User Endpoints")]
+[ApiExplorerSettings(GroupName = "Server Endpoints")]
 public class Blacklist : ControllerBase
 {
 
@@ -28,7 +28,7 @@ public class Blacklist : ControllerBase
     /// <param name="request"></param>
     /// <remarks>Blacklist a user from a server using their user ID and server.</remarks>
     /// <returns></returns>
-    [HttpPut("{server}/blacklist/{userId}")]
+    [HttpPut("{server}/user/{userId}/blacklist")]
     [Consumes("application/json", "plain/text")]
     [Produces("application/json")]
     [ProducesResponseType(typeof(Generic), 200)]

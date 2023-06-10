@@ -1,7 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-using DiscordRepair.Api.Database.Models.BackupModels.Channel;
-
 namespace DiscordRepair.Api.Database.Models.BackupModels;
 
 public record Guild
@@ -9,20 +7,17 @@ public record Guild
     [Key]
     public Guid key { get; init; } = new();
 
-    [StringLength(100)]
     public string? guildName { get; set; }
     /// <summary>
     /// 
     /// </summary>
     /// 
-    [StringLength(100)]
     public string? vanityUrl { get; set; }
 
     /// <summary>
     /// 
     /// </summary>
     /// 
-    [StringLength(100)]
     public string? preferredLocale { get; set; }
 
     /// <summary>
@@ -49,28 +44,24 @@ public record Guild
     /// 
     /// </summary>
     /// 
-    [StringLength(100)]
     public string? splashUrl { get; set; }
 
     /// <summary>
     /// 
     /// </summary>
     /// 
-    [StringLength(100)]
     public string? iconUrl { get; set; }
 
     /// <summary>
     /// 
     /// </summary>
     /// 
-    [StringLength(300)]
     public string? description { get; set; }
 
     /// <summary>
     /// 
     /// </summary>
     /// 
-    [StringLength(100)]
     public string? discoverySplashUrl { get; set; }
 
     /// <summary>
@@ -92,48 +83,41 @@ public record Guild
     /// 
     /// </summary>
     /// 
-    [StringLength(100)]
     public string? bannerUrl { get; set; }
 
     /// <summary>
     /// 
     /// </summary>
     /// 
-    [DataType(DataType.Custom)]
-    public virtual VoiceChannel? afkChannel { get; set; }
+    public ulong? afkChannelId { get; set; }
 
     /// <summary>
     /// 
     /// </summary>
     /// 
-    [DataType(DataType.Custom)]
-    public virtual TextChannel? defaultChannel { get; set; }
+    public ulong? defaultChannelId { get; set; }
 
     /// <summary>
     /// 
     /// </summary>
     /// 
-    [DataType(DataType.Custom)]
-    public virtual TextChannel? publicUpdatesChannel { get; set; }
+    public ulong? publicUpdatesChannelId { get; set; }
 
     /// <summary>
     /// 
     /// </summary>
     /// 
-    [DataType(DataType.Custom)]
-    public virtual TextChannel? rulesChannel { get; set; }
+    public ulong? rulesChannelId { get; set; }
 
     /// <summary>
     /// 
     /// </summary>
     /// 
-    [DataType(DataType.Custom)]
-    public virtual TextChannel? systemChannel { get; set; }
+    public ulong? systemChannelId { get; set; }
 
     /// <summary>
     /// 
     /// </summary>
     /// 
-    [DataType(DataType.Custom)]
-    public virtual TextChannel? widgetChannel { get; set; }
+    public ulong? widgetChannelId { get; set; }
 }

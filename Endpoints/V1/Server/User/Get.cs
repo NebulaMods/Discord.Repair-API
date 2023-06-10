@@ -14,7 +14,7 @@ namespace DiscordRepair.Api.Endpoints.V1.Server.User;
 /// </summary>
 [ApiController]
 [Route("/v1/server/")]
-[ApiExplorerSettings(GroupName = "Server User Endpoints")]
+[ApiExplorerSettings(GroupName = "Server Endpoints")]
 public class Get : ControllerBase
 {
     /// <summary>
@@ -24,7 +24,7 @@ public class Get : ControllerBase
     /// <param name="userId"></param>
     /// <remarks>Get information about a specific user from a server.</remarks>
     /// <returns></returns>
-    [HttpGet("{serverName}/user/{userId}")]
+    [HttpGet("{server}/user/{userId}")]
     [Consumes("plain/text")]
     [Produces("application/json")]
     [ProducesResponseType(typeof(GetGuildUserResponse), 200)]
@@ -79,18 +79,18 @@ public class Get : ControllerBase
     /// <summary>
     /// Get all members associated to the specified server.
     /// </summary>
-    /// <param name="serverName"></param>
+    /// <param name="server"></param>
     /// <remarks>Get all members associated to the specified server.</remarks>
     /// <returns></returns>
-    [HttpGet("{serverName}/user")]
+    [HttpGet("{server}/user")]
     [Consumes("plain/text")]
     [Produces("application/json")]
     [ProducesResponseType(typeof(List<GetAllGuildUsersResponse>), 200)]
     [ProducesResponseType(typeof(Generic), 404)]
     [ProducesResponseType(typeof(Generic), 400)]
-    public async Task<ActionResult<List<GetAllGuildUsersResponse>>> HandleAsync(string serverName)
+    public async Task<ActionResult<List<GetAllGuildUsersResponse>>> HandleAsync(string server)
     {
-        if (string.IsNullOrWhiteSpace(serverName))
+        if (string.IsNullOrWhiteSpace(server))
         {
             return BadRequest(new Generic()
             {
@@ -100,7 +100,7 @@ public class Get : ControllerBase
         }
         await using var database = new DatabaseContext();
         List<GetAllGuildUsersResponse> allMembers = new();
-        if (serverName == "all")
+        if (server == "all")
         {
             var user = await database.users.FirstAsync(x => x.apiToken == HttpContext.WhatIsMyToken());
             if (user.bots.Count is 0)
@@ -135,7 +135,7 @@ public class Get : ControllerBase
                 })
                 : (ActionResult<List<GetAllGuildUsersResponse>>)Ok(allMembers);
         }
-        if (serverName.Length > 64)
+        if (server.Length > 64)
         {
             return BadRequest(new Generic()
             {
@@ -143,8 +143,8 @@ public class Get : ControllerBase
                 details = "invalid paramaters, please try again."
             });
         }
-        var server = await database.servers.FirstOrDefaultAsync(x => (x.owner.apiToken == HttpContext.WhatIsMyToken() && x.key.ToString() == serverName) || x.name == serverName);
-        if (serverName is null)
+        var serverEntry = await database.servers.FirstOrDefaultAsync(x => (x.owner.apiToken == HttpContext.WhatIsMyToken() && x.key.ToString() == server) || x.name == server);
+        if (serverEntry is null)
         {
             BadRequest(new Generic()
             {
@@ -160,7 +160,7 @@ public class Get : ControllerBase
                 details = "no members linked."
             });
         }
-        var allServerMembers = await database.members.Where(x => x.server.name == serverName).ToListAsync();
+        var allServerMembers = await database.members.Where(x => x.server.name == serverEntry.name).ToListAsync();
         if (allServerMembers.Count is 0)
         {
             return BadRequest(new Generic()

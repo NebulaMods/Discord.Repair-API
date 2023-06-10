@@ -6,14 +6,14 @@ using DiscordRepair.Api.Utilities;
 
 using Microsoft.AspNetCore.Mvc;
 
-namespace DiscordRepair.Api.Endpoints.V1.Server.User;
+namespace DiscordRepair.Api.Endpoints.V1.Server.Blacklist;
 
 /// <summary>
 /// 
 /// </summary>
 [ApiController]
 [Route("/v1/server/")]
-[ApiExplorerSettings(GroupName = "Server User Endpoints")]
+[ApiExplorerSettings(GroupName = "Server Endpoints")]
 public class UnBlacklist : ControllerBase
 {
     /// <summary>
@@ -23,7 +23,7 @@ public class UnBlacklist : ControllerBase
     /// <param name="userId"></param>
     /// <remarks>Unblacklist a user from a server.</remarks>
     /// <returns></returns>
-    [HttpDelete("{server}/blacklist/{userId}")]
+    [HttpDelete("{server}/user/{userId}/blacklist")]
     [Consumes("plain/text")]
     [Produces("application/json")]
     [ProducesResponseType(typeof(Generic), 200)]

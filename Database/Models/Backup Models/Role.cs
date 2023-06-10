@@ -22,14 +22,12 @@ public record Role
     /// 
     /// </summary>
     /// 
-    [StringLength(100)]
     public string? name { get; set; }
 
     /// <summary>
     /// 
     /// </summary>
     /// 
-    [StringLength(100)]
     public string? icon { get; set; }
 
     /// <summary>
@@ -67,5 +65,5 @@ public record Role
     /// </summary>
     /// 
     [DataType(DataType.Custom)]
-    public virtual Permissions.RolePermissions? permissions { get; set; }
+    public virtual Permissions.RolePermissions permissions { get; set; }
 }

@@ -17,7 +17,7 @@ namespace DiscordRepair.Api.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.0")
+                .HasAnnotation("ProductVersion", "7.0.4")
                 .HasAnnotation("Proxies:ChangeTracking", false)
                 .HasAnnotation("Proxies:CheckEquality", false)
                 .HasAnnotation("Proxies:LazyLoading", true)
@@ -34,100 +34,28 @@ namespace DiscordRepair.Api.Migrations
                     b.Property<Guid?>("Userkey")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("afkChannelkey")
-                        .HasColumnType("uuid");
-
-                    b.Property<int?>("afkTimeout")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("bannerUrl")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
                     b.Property<DateTime>("creationDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid?>("defaultChannelkey")
+                    b.Property<decimal>("guildId")
+                        .HasColumnType("numeric(20,0)");
+
+                    b.Property<Guid?>("guildkey")
                         .HasColumnType("uuid");
-
-                    b.Property<int>("defaultMessageNotifications")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("description")
-                        .HasMaxLength(300)
-                        .HasColumnType("character varying(300)");
-
-                    b.Property<string>("discoverySplashUrl")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<int>("explicitContentFilterLevel")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("guildName")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("iconUrl")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<bool?>("isBoostProgressBarEnabled")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool?>("isWidgetEnabled")
-                        .HasColumnType("boolean");
 
                     b.Property<string>("name")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<string>("preferredLocale")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<Guid?>("publicUpdatesChannelkey")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("rulesChannelkey")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("splashUrl")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<int>("systemChannelMessageDeny")
+                    b.Property<int>("type")
                         .HasColumnType("integer");
-
-                    b.Property<Guid?>("systemChannelkey")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("vanityUrl")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<int>("verificationLevel")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid?>("widgetChannelkey")
-                        .HasColumnType("uuid");
 
                     b.HasKey("key");
 
                     b.HasIndex("Userkey");
 
-                    b.HasIndex("afkChannelkey");
-
-                    b.HasIndex("defaultChannelkey");
-
-                    b.HasIndex("publicUpdatesChannelkey");
-
-                    b.HasIndex("rulesChannelkey");
-
-                    b.HasIndex("systemChannelkey");
-
-                    b.HasIndex("widgetChannelkey");
+                    b.HasIndex("guildkey");
 
                     b.ToTable("Backup");
                 });
@@ -145,8 +73,7 @@ namespace DiscordRepair.Api.Migrations
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("name")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasColumnType("text");
 
                     b.Property<int>("position")
                         .HasColumnType("integer");
@@ -183,8 +110,7 @@ namespace DiscordRepair.Api.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<string>("name")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasColumnType("text");
 
                     b.Property<bool>("nsfw")
                         .HasColumnType("boolean");
@@ -199,8 +125,7 @@ namespace DiscordRepair.Api.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<string>("topic")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasColumnType("text");
 
                     b.HasKey("key");
 
@@ -230,15 +155,13 @@ namespace DiscordRepair.Api.Migrations
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("name")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasColumnType("text");
 
                     b.Property<int>("position")
                         .HasColumnType("integer");
 
                     b.Property<string>("region")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                        .HasColumnType("text");
 
                     b.Property<bool>("synced")
                         .HasColumnType("boolean");
@@ -247,8 +170,7 @@ namespace DiscordRepair.Api.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("videoQuality")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                        .HasColumnType("text");
 
                     b.HasKey("key");
 
@@ -269,18 +191,90 @@ namespace DiscordRepair.Api.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("name")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasColumnType("text");
 
                     b.Property<string>("url")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasColumnType("text");
 
                     b.HasKey("key");
 
                     b.HasIndex("Backupkey");
 
                     b.ToTable("Emoji");
+                });
+
+            modelBuilder.Entity("DiscordRepair.Api.Database.Models.BackupModels.Guild", b =>
+                {
+                    b.Property<Guid>("key")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal?>("afkChannelId")
+                        .HasColumnType("numeric(20,0)");
+
+                    b.Property<int?>("afkTimeout")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("bannerUrl")
+                        .HasColumnType("text");
+
+                    b.Property<decimal?>("defaultChannelId")
+                        .HasColumnType("numeric(20,0)");
+
+                    b.Property<int>("defaultMessageNotifications")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("description")
+                        .HasColumnType("text");
+
+                    b.Property<string>("discoverySplashUrl")
+                        .HasColumnType("text");
+
+                    b.Property<int>("explicitContentFilterLevel")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("guildName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("iconUrl")
+                        .HasColumnType("text");
+
+                    b.Property<bool?>("isBoostProgressBarEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool?>("isWidgetEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("preferredLocale")
+                        .HasColumnType("text");
+
+                    b.Property<decimal?>("publicUpdatesChannelId")
+                        .HasColumnType("numeric(20,0)");
+
+                    b.Property<decimal?>("rulesChannelId")
+                        .HasColumnType("numeric(20,0)");
+
+                    b.Property<string>("splashUrl")
+                        .HasColumnType("text");
+
+                    b.Property<decimal?>("systemChannelId")
+                        .HasColumnType("numeric(20,0)");
+
+                    b.Property<int>("systemChannelMessageDeny")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("vanityUrl")
+                        .HasColumnType("text");
+
+                    b.Property<int>("verificationLevel")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal?>("widgetChannelId")
+                        .HasColumnType("numeric(20,0)");
+
+                    b.HasKey("key");
+
+                    b.ToTable("Guild");
                 });
 
             modelBuilder.Entity("DiscordRepair.Api.Database.Models.BackupModels.GuildUser", b =>
@@ -293,15 +287,13 @@ namespace DiscordRepair.Api.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("avatarUrl")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasColumnType("text");
 
                     b.Property<decimal>("id")
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("username")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasColumnType("text");
 
                     b.HasKey("key");
 
@@ -316,30 +308,47 @@ namespace DiscordRepair.Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("TextChannelkey")
+                    b.Property<Guid?>("Backupkey")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("authorId")
+                        .HasColumnType("numeric(20,0)");
+
+                    b.Property<Guid>("channelkey")
                         .HasColumnType("uuid");
 
                     b.Property<string>("content")
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
+                        .HasColumnType("text");
 
-                    b.Property<int>("position")
+                    b.Property<DateTimeOffset>("createdAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("flags")
                         .HasColumnType("integer");
 
-                    b.Property<decimal>("userId")
+                    b.Property<bool>("isPinned")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("isSuppressed")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("isTTS")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("source")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal?>("threadChannelId")
                         .HasColumnType("numeric(20,0)");
 
-                    b.Property<string>("userPicture")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("username")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                    b.Property<int>("type")
+                        .HasColumnType("integer");
 
                     b.HasKey("key");
 
-                    b.HasIndex("TextChannelkey");
+                    b.HasIndex("Backupkey");
+
+                    b.HasIndex("channelkey");
 
                     b.ToTable("Message");
                 });
@@ -628,8 +637,7 @@ namespace DiscordRepair.Api.Migrations
                         .HasColumnType("bigint");
 
                     b.Property<string>("icon")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasColumnType("text");
 
                     b.Property<decimal>("id")
                         .HasColumnType("numeric(20,0)");
@@ -647,10 +655,9 @@ namespace DiscordRepair.Api.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<string>("name")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasColumnType("text");
 
-                    b.Property<Guid?>("permissionskey")
+                    b.Property<Guid>("permissionskey")
                         .HasColumnType("uuid");
 
                     b.Property<int>("position")
@@ -675,6 +682,33 @@ namespace DiscordRepair.Api.Migrations
 
                     b.Property<Guid?>("Backupkey")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("format")
+                        .HasColumnType("integer");
+
+                    b.Property<bool?>("isAvailable")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("packId")
+                        .HasColumnType("numeric(20,0)");
+
+                    b.Property<int?>("sortOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<string[]>("tags")
+                        .IsRequired()
+                        .HasColumnType("text[]");
+
+                    b.Property<string>("url")
+                        .HasColumnType("text");
 
                     b.HasKey("key");
 
@@ -784,49 +818,6 @@ namespace DiscordRepair.Api.Migrations
                     b.ToTable("errors");
                 });
 
-            modelBuilder.Entity("DiscordRepair.Api.Database.Models.LogModels.Statistics", b =>
-                {
-                    b.Property<Guid>("key")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("MigratedBykey")
-                        .HasColumnType("uuid");
-
-                    b.Property<bool>("active")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTime?>("endDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<decimal>("guildId")
-                        .HasColumnType("numeric(20,0)");
-
-                    b.Property<Guid?>("guildStatskey")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("memberStatskey")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("serverkey")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("startDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("key");
-
-                    b.HasIndex("MigratedBykey");
-
-                    b.HasIndex("guildStatskey");
-
-                    b.HasIndex("memberStatskey");
-
-                    b.HasIndex("serverkey");
-
-                    b.ToTable("statistics");
-                });
-
             modelBuilder.Entity("DiscordRepair.Api.Database.Models.Member", b =>
                 {
                     b.Property<Guid>("key")
@@ -834,6 +825,7 @@ namespace DiscordRepair.Api.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("accessToken")
+                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
@@ -873,6 +865,65 @@ namespace DiscordRepair.Api.Migrations
                     b.HasIndex("serverkey");
 
                     b.ToTable("members");
+                });
+
+            modelBuilder.Entity("DiscordRepair.Api.Database.Models.Migration", b =>
+                {
+                    b.Property<Guid>("key")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("alreadyMigratedMemberAmount")
+                        .HasColumnType("numeric(20,0)");
+
+                    b.Property<Guid?>("botkey")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("completionTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("extraDetails")
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("failedMemberAmount")
+                        .HasColumnType("numeric(20,0)");
+
+                    b.Property<decimal>("invalidTokenAmount")
+                        .HasColumnType("numeric(20,0)");
+
+                    b.Property<decimal?>("newGuildId")
+                        .HasColumnType("numeric(20,0)");
+
+                    b.Property<decimal?>("newRoleId")
+                        .HasColumnType("numeric(20,0)");
+
+                    b.Property<Guid?>("serverkey")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("startTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("status")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("successfulMemberAmount")
+                        .HasColumnType("numeric(20,0)");
+
+                    b.Property<long>("totalMemberAmount")
+                        .HasColumnType("bigint");
+
+                    b.Property<Guid?>("userkey")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("key");
+
+                    b.HasIndex("botkey");
+
+                    b.HasIndex("serverkey");
+
+                    b.HasIndex("userkey");
+
+                    b.ToTable("migrations");
                 });
 
             modelBuilder.Entity("DiscordRepair.Api.Database.Models.Server", b =>
@@ -959,67 +1010,6 @@ namespace DiscordRepair.Api.Migrations
                     b.HasIndex("verifyEmbedSettingskey");
 
                     b.ToTable("ServerSettings");
-                });
-
-            modelBuilder.Entity("DiscordRepair.Api.Database.Models.Statistics.GuildMigration", b =>
-                {
-                    b.Property<Guid>("key")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("startTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<TimeSpan>("totalTime")
-                        .HasColumnType("interval");
-
-                    b.HasKey("key");
-
-                    b.ToTable("GuildMigration");
-                });
-
-            modelBuilder.Entity("DiscordRepair.Api.Database.Models.Statistics.MemberMigration", b =>
-                {
-                    b.Property<Guid>("key")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("alreadyHereCount")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("bannedCount")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("blacklistedCount")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("estimatedCompletionTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("failedCount")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("invalidTokenCount")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("startTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("successCount")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("tooManyGuildsCount")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("totalCount")
-                        .HasColumnType("integer");
-
-                    b.Property<TimeSpan>("totalTime")
-                        .HasColumnType("interval");
-
-                    b.HasKey("key");
-
-                    b.ToTable("MemberMigration");
                 });
 
             modelBuilder.Entity("DiscordRepair.Api.Database.Models.SuccessVerifyEmbedSettings", b =>
@@ -1116,41 +1106,11 @@ namespace DiscordRepair.Api.Migrations
                         .WithMany("backups")
                         .HasForeignKey("Userkey");
 
-                    b.HasOne("DiscordRepair.Api.Database.Models.BackupModels.Channel.VoiceChannel", "afkChannel")
+                    b.HasOne("DiscordRepair.Api.Database.Models.BackupModels.Guild", "guild")
                         .WithMany()
-                        .HasForeignKey("afkChannelkey");
+                        .HasForeignKey("guildkey");
 
-                    b.HasOne("DiscordRepair.Api.Database.Models.BackupModels.Channel.TextChannel", "defaultChannel")
-                        .WithMany()
-                        .HasForeignKey("defaultChannelkey");
-
-                    b.HasOne("DiscordRepair.Api.Database.Models.BackupModels.Channel.TextChannel", "publicUpdatesChannel")
-                        .WithMany()
-                        .HasForeignKey("publicUpdatesChannelkey");
-
-                    b.HasOne("DiscordRepair.Api.Database.Models.BackupModels.Channel.TextChannel", "rulesChannel")
-                        .WithMany()
-                        .HasForeignKey("rulesChannelkey");
-
-                    b.HasOne("DiscordRepair.Api.Database.Models.BackupModels.Channel.TextChannel", "systemChannel")
-                        .WithMany()
-                        .HasForeignKey("systemChannelkey");
-
-                    b.HasOne("DiscordRepair.Api.Database.Models.BackupModels.Channel.TextChannel", "widgetChannel")
-                        .WithMany()
-                        .HasForeignKey("widgetChannelkey");
-
-                    b.Navigation("afkChannel");
-
-                    b.Navigation("defaultChannel");
-
-                    b.Navigation("publicUpdatesChannel");
-
-                    b.Navigation("rulesChannel");
-
-                    b.Navigation("systemChannel");
-
-                    b.Navigation("widgetChannel");
+                    b.Navigation("guild");
                 });
 
             modelBuilder.Entity("DiscordRepair.Api.Database.Models.BackupModels.Channel.CategoryChannel", b =>
@@ -1202,9 +1162,17 @@ namespace DiscordRepair.Api.Migrations
 
             modelBuilder.Entity("DiscordRepair.Api.Database.Models.BackupModels.Message", b =>
                 {
-                    b.HasOne("DiscordRepair.Api.Database.Models.BackupModels.Channel.TextChannel", null)
+                    b.HasOne("DiscordRepair.Api.Database.Models.BackupModels.Backup", null)
                         .WithMany("messages")
-                        .HasForeignKey("TextChannelkey");
+                        .HasForeignKey("Backupkey");
+
+                    b.HasOne("DiscordRepair.Api.Database.Models.BackupModels.Channel.TextChannel", "channel")
+                        .WithMany()
+                        .HasForeignKey("channelkey")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("channel");
                 });
 
             modelBuilder.Entity("DiscordRepair.Api.Database.Models.BackupModels.Permissions.ChannelPermissions", b =>
@@ -1234,7 +1202,9 @@ namespace DiscordRepair.Api.Migrations
 
                     b.HasOne("DiscordRepair.Api.Database.Models.BackupModels.Permissions.RolePermissions", "permissions")
                         .WithMany()
-                        .HasForeignKey("permissionskey");
+                        .HasForeignKey("permissionskey")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("permissions");
                 });
@@ -1264,33 +1234,6 @@ namespace DiscordRepair.Api.Migrations
                         .HasForeignKey("Userkey");
                 });
 
-            modelBuilder.Entity("DiscordRepair.Api.Database.Models.LogModels.Statistics", b =>
-                {
-                    b.HasOne("DiscordRepair.Api.Database.Models.User", "MigratedBy")
-                        .WithMany()
-                        .HasForeignKey("MigratedBykey");
-
-                    b.HasOne("DiscordRepair.Api.Database.Models.Statistics.GuildMigration", "guildStats")
-                        .WithMany()
-                        .HasForeignKey("guildStatskey");
-
-                    b.HasOne("DiscordRepair.Api.Database.Models.Statistics.MemberMigration", "memberStats")
-                        .WithMany()
-                        .HasForeignKey("memberStatskey");
-
-                    b.HasOne("DiscordRepair.Api.Database.Models.Server", "server")
-                        .WithMany()
-                        .HasForeignKey("serverkey");
-
-                    b.Navigation("MigratedBy");
-
-                    b.Navigation("guildStats");
-
-                    b.Navigation("memberStats");
-
-                    b.Navigation("server");
-                });
-
             modelBuilder.Entity("DiscordRepair.Api.Database.Models.Member", b =>
                 {
                     b.HasOne("DiscordRepair.Api.Database.Models.CustomBot", "botUsed")
@@ -1306,6 +1249,27 @@ namespace DiscordRepair.Api.Migrations
                     b.Navigation("botUsed");
 
                     b.Navigation("server");
+                });
+
+            modelBuilder.Entity("DiscordRepair.Api.Database.Models.Migration", b =>
+                {
+                    b.HasOne("DiscordRepair.Api.Database.Models.CustomBot", "bot")
+                        .WithMany()
+                        .HasForeignKey("botkey");
+
+                    b.HasOne("DiscordRepair.Api.Database.Models.Server", "server")
+                        .WithMany()
+                        .HasForeignKey("serverkey");
+
+                    b.HasOne("DiscordRepair.Api.Database.Models.User", "user")
+                        .WithMany()
+                        .HasForeignKey("userkey");
+
+                    b.Navigation("bot");
+
+                    b.Navigation("server");
+
+                    b.Navigation("user");
                 });
 
             modelBuilder.Entity("DiscordRepair.Api.Database.Models.Server", b =>
@@ -1350,6 +1314,8 @@ namespace DiscordRepair.Api.Migrations
 
                     b.Navigation("emojis");
 
+                    b.Navigation("messages");
+
                     b.Navigation("roles");
 
                     b.Navigation("stickers");
@@ -1368,8 +1334,6 @@ namespace DiscordRepair.Api.Migrations
 
             modelBuilder.Entity("DiscordRepair.Api.Database.Models.BackupModels.Channel.TextChannel", b =>
                 {
-                    b.Navigation("messages");
-
                     b.Navigation("permissions");
                 });
 

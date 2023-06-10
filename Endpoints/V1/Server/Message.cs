@@ -184,9 +184,15 @@ public class Message : ControllerBase
             Description = message.verifyMessage.embedDescription,
         }.Build();
         if (string.IsNullOrWhiteSpace(message.verifyMessage.footerIconUrl) is false)
+        {
             embed.ToEmbedBuilder().Footer.IconUrl = message.verifyMessage.footerIconUrl;
+        }
+
         if (string.IsNullOrWhiteSpace(message.verifyMessage.imageUrl) is false)
+        {
             embed.ToEmbedBuilder().Footer.IconUrl = message.verifyMessage.imageUrl;
+        }
+
         await channel.SendMessageAsync(embed: embed, components: msg);
         return Ok(new Generic()
         {

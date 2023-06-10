@@ -1,14 +1,8 @@
-﻿using System.Net;
-using System.Reflection;
-
-using Discord;
+﻿using Discord;
 using Discord.Net;
 
-using DiscordRepair.Api.Database;
 using DiscordRepair.Api.Database.Models;
 using DiscordRepair.Api.MigrationMaster.Models;
-
-using Microsoft.EntityFrameworkCore;
 
 using Newtonsoft.Json;
 
@@ -24,317 +18,317 @@ public class Pull
     {
         _configuration = configuration;
     }
-    public async ValueTask<HttpClient> CreateHttpClientAsync(string botToken, string userAgent = "Discord.Repair")
-    {
-        var httpClient = new HttpClient();
-        httpClient.DefaultRequestHeaders.Remove("User-Agent");
-        httpClient.DefaultRequestHeaders.Remove("X-RateLimit-Precision");
-        httpClient.DefaultRequestHeaders.Remove("Authorization");
-        httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bot", botToken);
-        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("X-RateLimit-Precision", "millisecond");
-        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", $"{userAgent} (public release, {Assembly.GetExecutingAssembly().ImageRuntimeVersion})");
-        return httpClient;
-    }
+    //public async ValueTask<HttpClient> CreateHttpClientAsync(string botToken, string userAgent = "Discord.Repair")
+    //{
+    //    var httpClient = new HttpClient();
+    //    httpClient.DefaultRequestHeaders.Remove("User-Agent");
+    //    httpClient.DefaultRequestHeaders.Remove("X-RateLimit-Precision");
+    //    httpClient.DefaultRequestHeaders.Remove("Authorization");
+    //    httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bot", botToken);
+    //    httpClient.DefaultRequestHeaders.TryAddWithoutValidation("X-RateLimit-Precision", "millisecond");
+    //    httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", $"{userAgent} (public release, {Assembly.GetExecutingAssembly().ImageRuntimeVersion})");
+    //    return httpClient;
+    //}
 
-    internal async ValueTask<bool> JoinUsersToGuild(DatabaseContext database, Server server, ulong guildId, ulong? roleId, HttpClient http, Database.Models.Statistics.MemberMigration statisitics)
-    {
-        await using Discord.Rest.DiscordRestClient client = new(new Discord.Rest.DiscordRestConfig()
-        {
-            LogLevel = LogSeverity.Debug,
-            UseSystemClock = true,
-            UseInteractionSnowflakeDate = true,
-            DefaultRetryMode = RetryMode.RetryTimeouts,
-            //RestClientProvider = DefaultRestClientProvider.Create(useProxy: true),
-        });
-        await client.LoginAsync(TokenType.Bot, server.settings.mainBot.token);
+    //internal async ValueTask<bool> JoinUsersToGuild(DatabaseContext database, Server server, ulong guildId, ulong? roleId, HttpClient http, Database.Models.Statistics.MemberMigration statisitics)
+    //{
+    //    await using Discord.Rest.DiscordRestClient client = new(new Discord.Rest.DiscordRestConfig()
+    //    {
+    //        LogLevel = LogSeverity.Debug,
+    //        UseSystemClock = true,
+    //        UseInteractionSnowflakeDate = true,
+    //        DefaultRetryMode = RetryMode.RetryTimeouts,
+    //        //RestClientProvider = DefaultRestClientProvider.Create(useProxy: true),
+    //    });
+    //    await client.LoginAsync(TokenType.Bot, server.settings.mainBot.token);
 
-        Discord.Rest.RestGuild? guildSocket = await client.GetGuildAsync(guildId);
+    //    Discord.Rest.RestGuild? guildSocket = await client.GetGuildAsync(guildId);
 
-        Task<IEnumerable<Discord.Rest.RestGuildUser>>? task1 = guildSocket.GetUsersAsync().FlattenAsync();
-        //download banlist & create a task
-        Task<IEnumerable<Discord.Rest.RestBan>>? task2 = guildSocket.GetBansAsync().FlattenAsync();
-        //grab users from database with specific guild id
-        List<Member>? databaseMembers = await database.members.Where(x => x.server == server && x.accessToken != "broken").ToListAsync();
-        //grab the users in the guild, need better way of doing this async
-        IEnumerable<Discord.Rest.RestGuildUser>? guildMembers = await task1;
-        //asign var to task
-        IEnumerable<Discord.Rest.RestBan>? bannedMembers = await task2;
-        //start migrating each member in the list
-        foreach (Member? member in databaseMembers)
-        {
-            //check if blacklist contains any members
-            if (server.settings.blacklist.Any())
-            {
-                if (server.settings.blacklist.FirstOrDefault(x => x.discordId == member.discordId) is not null)
-                {
-                    statisitics.bannedCount++;
-                    continue;
-                }
-            }
-            //check if the member is already in the guild
-            if (guildMembers.FirstOrDefault(x => x.Id == member.discordId) is not null)
-            {
-                statisitics.alreadyHereCount++;
-                continue;
-            }
-            //check banlist contains any members
-            if (bannedMembers.FirstOrDefault(x => x.User.Id == member.discordId) is not null)
-            {
-                statisitics.bannedCount++;
-                continue;
-            }
-            //try to join the user to the guild
-            ResponseTypes? addUserRequest = roleId is not null
-                ? await AddUserFunction(member, server, guildId, (ulong)roleId, database, http)
-                : await AddUserFunction(member, server, guildId, server.roleId, database, http);
-            switch (addUserRequest)
-            {
-                case ResponseTypes.Success:
-                    statisitics.successCount++;
-                    break;
-                case ResponseTypes.MissingPermissions:
-                    return false;
-                case ResponseTypes.Banned:
-                    statisitics.bannedCount++;
-                    break;
-                case ResponseTypes.TooManyGuilds:
-                    statisitics.tooManyGuildsCount++;
-                    break;
-                case ResponseTypes.InvalidAuthToken:
-                    statisitics.invalidTokenCount++;
-                    break;
-                default:
-                    statisitics.failedCount++;
-                    break;
-            }
-            //sleep for 0.5 sec in betwen each attempt
-            await Task.Delay(TimeSpan.FromMilliseconds(30));
-        }
-        statisitics.totalTime = DateTime.Now - statisitics.startTime;
-        await database.ApplyChangesAsync(statisitics);
-        //clear resources
-        databaseMembers.Clear();
-        return true;
-    }
-    internal async ValueTask<ResponseTypes> AddUserFunction(Member member, Server server, ulong guildId, ulong? roleId, DatabaseContext database, HttpClient http)
-    {
-        //var handler = new HttpClientHandler()
-        //{
-        //    Proxy = new ProxyGenerator(_provider),
-        //    PreAuthenticate = true,
-        //    UseDefaultCredentials = false,
-        //    UseProxy = true
-        //};
-        ResponseTypes addUserRequest = await AddUserToGuildViaHttp(member, server, guildId, roleId, http);
-        switch (addUserRequest)
-        {
-            case ResponseTypes.InvalidAuthToken:
-                (bool, string?) refreshTokenRequest = await RefreshUserToken(member, database, http);
-                if (refreshTokenRequest.Item1)
-                {
-                    member.accessToken = refreshTokenRequest.Item2;
-                    //
-                    return await AddUserToGuildViaHttp(member, server, guildId, roleId, http);
-                    //goto case ResponseTypes.GenericErrorRetryAttempt;
-                }
-                return addUserRequest;
-            default:
-                return addUserRequest;
-        }
-    }
+    //    Task<IEnumerable<Discord.Rest.RestGuildUser>>? task1 = guildSocket.GetUsersAsync().FlattenAsync();
+    //    //download banlist & create a task
+    //    Task<IEnumerable<Discord.Rest.RestBan>>? task2 = guildSocket.GetBansAsync().FlattenAsync();
+    //    //grab users from database with specific guild id
+    //    List<Member>? databaseMembers = await database.members.Where(x => x.server == server && x.accessToken != "broken").ToListAsync();
+    //    //grab the users in the guild, need better way of doing this async
+    //    IEnumerable<Discord.Rest.RestGuildUser>? guildMembers = await task1;
+    //    //asign var to task
+    //    IEnumerable<Discord.Rest.RestBan>? bannedMembers = await task2;
+    //    //start migrating each member in the list
+    //    foreach (Member? member in databaseMembers)
+    //    {
+    //        //check if blacklist contains any members
+    //        if (server.settings.blacklist.Any())
+    //        {
+    //            if (server.settings.blacklist.FirstOrDefault(x => x.discordId == member.discordId) is not null)
+    //            {
+    //                statisitics.bannedCount++;
+    //                continue;
+    //            }
+    //        }
+    //        //check if the member is already in the guild
+    //        if (guildMembers.FirstOrDefault(x => x.Id == member.discordId) is not null)
+    //        {
+    //            statisitics.alreadyHereCount++;
+    //            continue;
+    //        }
+    //        //check banlist contains any members
+    //        if (bannedMembers.FirstOrDefault(x => x.User.Id == member.discordId) is not null)
+    //        {
+    //            statisitics.bannedCount++;
+    //            continue;
+    //        }
+    //        //try to join the user to the guild
+    //        ResponseTypes? addUserRequest = roleId is not null
+    //            ? await AddUserFunction(member, server, guildId, (ulong)roleId, database, http)
+    //            : await AddUserFunction(member, server, guildId, server.roleId, database, http);
+    //        switch (addUserRequest)
+    //        {
+    //            case ResponseTypes.Success:
+    //                statisitics.successCount++;
+    //                break;
+    //            case ResponseTypes.MissingPermissions:
+    //                return false;
+    //            case ResponseTypes.Banned:
+    //                statisitics.bannedCount++;
+    //                break;
+    //            case ResponseTypes.TooManyGuilds:
+    //                statisitics.tooManyGuildsCount++;
+    //                break;
+    //            case ResponseTypes.InvalidAuthToken:
+    //                statisitics.invalidTokenCount++;
+    //                break;
+    //            default:
+    //                statisitics.failedCount++;
+    //                break;
+    //        }
+    //        //sleep for 0.5 sec in betwen each attempt
+    //        await Task.Delay(TimeSpan.FromMilliseconds(30));
+    //    }
+    //    statisitics.totalTime = DateTime.Now - statisitics.startTime;
+    //    await database.ApplyChangesAsync(statisitics);
+    //    //clear resources
+    //    databaseMembers.Clear();
+    //    return true;
+    //}
+    //internal async ValueTask<ResponseTypes> AddUserFunction(Member member, Server server, ulong guildId, ulong? roleId, DatabaseContext database, HttpClient http)
+    //{
+    //    //var handler = new HttpClientHandler()
+    //    //{
+    //    //    Proxy = new ProxyGenerator(_provider),
+    //    //    PreAuthenticate = true,
+    //    //    UseDefaultCredentials = false,
+    //    //    UseProxy = true
+    //    //};
+    //    ResponseTypes addUserRequest = await AddUserToGuildViaHttp(member, server, guildId, roleId, http);
+    //    switch (addUserRequest)
+    //    {
+    //        case ResponseTypes.InvalidAuthToken:
+    //            (bool, string?) refreshTokenRequest = await RefreshUserToken(member, database, http);
+    //            if (refreshTokenRequest.Item1)
+    //            {
+    //                member.accessToken = refreshTokenRequest.Item2;
+    //                //
+    //                return await AddUserToGuildViaHttp(member, server, guildId, roleId, http);
+    //                //goto case ResponseTypes.GenericErrorRetryAttempt;
+    //            }
+    //            return addUserRequest;
+    //        default:
+    //            return addUserRequest;
+    //    }
+    //}
 
-    internal async ValueTask<(bool, string?)> RefreshUserToken(Member member, DatabaseContext database, HttpClient http)
-    {
-        HttpResponseMessage? response = await RefreshTokenRequest(member, http);
-        return response is null
-            ? (false, null)
-            : await HandleRefreshTokenRequest(member, database, http, response);
-    }
+    //internal async ValueTask<(bool, string?)> RefreshUserToken(Member member, DatabaseContext database, HttpClient http)
+    //{
+    //    HttpResponseMessage? response = await RefreshTokenRequest(member, http);
+    //    return response is null
+    //        ? (false, null)
+    //        : await HandleRefreshTokenRequest(member, database, http, response);
+    //}
 
-    private async ValueTask<(bool, string?)> HandleRefreshTokenRequest(Member member, DatabaseContext database, HttpClient http, HttpResponseMessage response)
-    {
-        switch (response.StatusCode)
-        {
-            case HttpStatusCode.OK:
-                string? newToken = await UpdateUserEntries(member, database, response);
-                if (newToken is not null)
-                {
-                    return (true, newToken);
-                }
+    //private async ValueTask<(bool, string?)> HandleRefreshTokenRequest(Member member, DatabaseContext database, HttpClient http, HttpResponseMessage response)
+    //{
+    //    switch (response.StatusCode)
+    //    {
+    //        case HttpStatusCode.OK:
+    //            string? newToken = await UpdateUserEntries(member, database, response);
+    //            if (newToken is not null)
+    //            {
+    //                return (true, newToken);
+    //            }
 
-                return (false, null);
-            case HttpStatusCode.TooManyRequests:
-                System.Net.Http.Headers.RetryConditionHeaderValue? headervalue = response.Headers.RetryAfter;
-                if (headervalue is not null)
-                {
-                    if (headervalue.Delta.HasValue)
-                    {
-                        await Task.Delay(TimeSpan.FromMilliseconds(headervalue.Delta.Value.TotalSeconds));
-                    }
-                    else
-                    {
-                        await Task.Delay(TimeSpan.FromSeconds(10));
-                    }
+    //            return (false, null);
+    //        case HttpStatusCode.TooManyRequests:
+    //            System.Net.Http.Headers.RetryConditionHeaderValue? headervalue = response.Headers.RetryAfter;
+    //            if (headervalue is not null)
+    //            {
+    //                if (headervalue.Delta.HasValue)
+    //                {
+    //                    await Task.Delay(TimeSpan.FromMilliseconds(headervalue.Delta.Value.TotalSeconds));
+    //                }
+    //                else
+    //                {
+    //                    await Task.Delay(TimeSpan.FromSeconds(10));
+    //                }
 
-                    HttpResponseMessage? newRequest = await RefreshTokenRequest(member, http);
-                    if (newRequest is not null)
-                    {
-                        if (newRequest.StatusCode == HttpStatusCode.OK)
-                        {
-                            await HandleRefreshTokenRequest(member, database, http, newRequest);
-                        }
-                    }
-                }
-                return (false, null);
-            case HttpStatusCode.BadRequest:
-                string? discordResponse = await response.Content.ReadAsStringAsync();
-                if (discordResponse.Contains("\"error\": \"invalid_grant\""))
-                {
-                    await database.members.Where(x => x.discordId == member.discordId).ExecuteUpdateAsync(x => x.SetProperty(x => x.accessToken, x => "broken"));
-                }
-                return (false, null);
-            default:
-                Console.WriteLine(response.StatusCode);
-                Console.WriteLine(response.RequestMessage?.Content?.ReadAsStringAsync());
-                Console.WriteLine(await response.Content.ReadAsStringAsync());
-                return (false, null);
-        }
-    }
+    //                HttpResponseMessage? newRequest = await RefreshTokenRequest(member, http);
+    //                if (newRequest is not null)
+    //                {
+    //                    if (newRequest.StatusCode == HttpStatusCode.OK)
+    //                    {
+    //                        await HandleRefreshTokenRequest(member, database, http, newRequest);
+    //                    }
+    //                }
+    //            }
+    //            return (false, null);
+    //        case HttpStatusCode.BadRequest:
+    //            string? discordResponse = await response.Content.ReadAsStringAsync();
+    //            if (discordResponse.Contains("\"error\": \"invalid_grant\""))
+    //            {
+    //                await database.members.Where(x => x.discordId == member.discordId).ExecuteUpdateAsync(x => x.SetProperty(x => x.accessToken, x => "broken"));
+    //            }
+    //            return (false, null);
+    //        default:
+    //            Console.WriteLine(response.StatusCode);
+    //            Console.WriteLine(response.RequestMessage?.Content?.ReadAsStringAsync());
+    //            Console.WriteLine(await response.Content.ReadAsStringAsync());
+    //            return (false, null);
+    //    }
+    //}
 
-    private static async ValueTask<string?> UpdateUserEntries(Member member, DatabaseContext database, HttpResponseMessage response)
-    {
-        TokenResponse? result = JsonConvert.DeserializeObject<TokenResponse>(await response.Content.ReadAsStringAsync());
-        if (result is null)
-        {
-            return null;
-        }
+    //private static async ValueTask<string?> UpdateUserEntries(Member member, DatabaseContext database, HttpResponseMessage response)
+    //{
+    //    TokenResponse? result = JsonConvert.DeserializeObject<TokenResponse>(await response.Content.ReadAsStringAsync());
+    //    if (result is null)
+    //    {
+    //        return null;
+    //    }
 
-        if (result.access_token is null || result.refresh_token is null)
-        {
-            return null;
-        }
+    //    if (result.access_token is null || result.refresh_token is null)
+    //    {
+    //        return null;
+    //    }
 
-        try
-        {
-            await database.members.Where(x => x.discordId == member.discordId && x.botUsed == member.server.settings.mainBot).ExecuteUpdateAsync(x =>
-            x.SetProperty(x => x.accessToken, x => result.access_token)
-            .SetProperty(x => x.refreshToken, x => result.refresh_token));
-        }
-        catch (Exception e)
-        {
-            await e.LogErrorAsync($"user info backed up incase of corrupt saving: {member.discordId} | {member.accessToken} | {member.refreshToken} |NEW|REFRESH|MAYBE| {result.refresh_token}", true);
-            throw;
-        }
-        return result.access_token;
-    }
+    //    try
+    //    {
+    //        await database.members.Where(x => x.discordId == member.discordId && x.botUsed == member.server.settings.mainBot).ExecuteUpdateAsync(x =>
+    //        x.SetProperty(x => x.accessToken, x => result.access_token)
+    //        .SetProperty(x => x.refreshToken, x => result.refresh_token));
+    //    }
+    //    catch (Exception e)
+    //    {
+    //        await e.LogErrorAsync($"user info backed up incase of corrupt saving: {member.discordId} | {member.accessToken} | {member.refreshToken} |NEW|REFRESH|MAYBE| {result.refresh_token}", true);
+    //        throw;
+    //    }
+    //    return result.access_token;
+    //}
 
-    private async ValueTask<HttpResponseMessage?> RefreshTokenRequest(Member member, HttpClient http)
-    {
-        if (string.IsNullOrWhiteSpace(member.refreshToken))
-        {
-            return null;
-        }
-        var content = new FormUrlEncodedContent(new Dictionary<string, string>
-        {
-            ["client_id"] = member.server.settings.mainBot.clientId,
-            ["client_secret"] = member.server.settings.mainBot.clientSecret,
-            ["grant_type"] = "refresh_token",
-            ["refresh_token"] = member.refreshToken,
-        });
-        content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/x-www-form-urlencoded");
-        return await http.PostAsync("https://discordapp.com/api/oauth2/token", content);
-    }
+    //private async ValueTask<HttpResponseMessage?> RefreshTokenRequest(Member member, HttpClient http)
+    //{
+    //    if (string.IsNullOrWhiteSpace(member.refreshToken))
+    //    {
+    //        return null;
+    //    }
+    //    var content = new FormUrlEncodedContent(new Dictionary<string, string>
+    //    {
+    //        ["client_id"] = member.server.settings.mainBot.clientId,
+    //        ["client_secret"] = member.server.settings.mainBot.clientSecret,
+    //        ["grant_type"] = "refresh_token",
+    //        ["refresh_token"] = member.refreshToken,
+    //    });
+    //    content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/x-www-form-urlencoded");
+    //    return await http.PostAsync("https://discordapp.com/api/oauth2/token", content);
+    //}
 
 
 
-    internal async ValueTask<ResponseTypes> AddUserToGuildViaHttp(Member user, Server server, ulong guildId, ulong? roleId, HttpClient http)
-    {
-        if (string.IsNullOrWhiteSpace(user.accessToken) && string.IsNullOrWhiteSpace(user.refreshToken) is false)
-        {
-            return ResponseTypes.InvalidAuthToken;
-        }
+    //internal async ValueTask<ResponseTypes> AddUserToGuildViaHttp(Member user, Server server, ulong guildId, ulong? roleId, HttpClient http)
+    //{
+    //    if (string.IsNullOrWhiteSpace(user.accessToken) && string.IsNullOrWhiteSpace(user.refreshToken) is false)
+    //    {
+    //        return ResponseTypes.InvalidAuthToken;
+    //    }
 
-        HttpResponseMessage? response = await AddUserToGuildRequest(user, guildId, roleId, http);
-        return await HandleGuildRequestCode(user, server, guildId, roleId, http, response);
-    }
+    //    HttpResponseMessage? response = await AddUserToGuildRequest(user, guildId, roleId, http);
+    //    return await HandleGuildRequestCode(user, server, guildId, roleId, http, response);
+    //}
 
-    private async ValueTask<ResponseTypes> HandleGuildRequestCode(Member user, Server server, ulong guildId, ulong? roleId, HttpClient http, HttpResponseMessage response)
-    {
-        switch (response.StatusCode)
-        {
-            case HttpStatusCode.Created:
-            case HttpStatusCode.NoContent:
-            case HttpStatusCode.OK:
-                return ResponseTypes.Success;
-            case HttpStatusCode.TooManyRequests:
-                System.Net.Http.Headers.RetryConditionHeaderValue? headervalue = response.Headers.RetryAfter;
-                if (headervalue is not null)
-                {
-                    if (headervalue.Delta.HasValue)
-                    {
-                        await Task.Delay(TimeSpan.FromMilliseconds(headervalue.Delta.Value.TotalSeconds));
-                    }
-                    else
-                    {
-                        await Task.Delay(TimeSpan.FromSeconds(10));
-                    }
+    //private async ValueTask<ResponseTypes> HandleGuildRequestCode(Member user, Server server, ulong guildId, ulong? roleId, HttpClient http, HttpResponseMessage response)
+    //{
+    //    switch (response.StatusCode)
+    //    {
+    //        case HttpStatusCode.Created:
+    //        case HttpStatusCode.NoContent:
+    //        case HttpStatusCode.OK:
+    //            return ResponseTypes.Success;
+    //        case HttpStatusCode.TooManyRequests:
+    //            System.Net.Http.Headers.RetryConditionHeaderValue? headervalue = response.Headers.RetryAfter;
+    //            if (headervalue is not null)
+    //            {
+    //                if (headervalue.Delta.HasValue)
+    //                {
+    //                    await Task.Delay(TimeSpan.FromMilliseconds(headervalue.Delta.Value.TotalSeconds));
+    //                }
+    //                else
+    //                {
+    //                    await Task.Delay(TimeSpan.FromSeconds(10));
+    //                }
 
-                    HttpResponseMessage? newRequest = await AddUserToGuildRequest(user, guildId, roleId, http);
-                    if (newRequest is not null)
-                    {
-                        return newRequest.IsSuccessStatusCode is false
-                            ? ResponseTypes.GenericError
-                            : await HandleGuildRequestCode(user, server, guildId, roleId, http, newRequest);
-                    }
-                }
-                return ResponseTypes.TooManyRequests;
-            default:
-                ErrorResponse? discordResponse;
-                try { discordResponse = JsonConvert.DeserializeObject<ErrorResponse>(await response.Content.ReadAsStringAsync()); }
-                catch (Exception e)
-                {
-                    await e.LogErrorAsync(await response.Content.ReadAsStringAsync());
-                    return ResponseTypes.NewJsonError;
-                }
-                if (discordResponse is not null)
-                {
-                    switch (discordResponse.code)
-                    {
-                        case 50013:
-                            return ResponseTypes.MissingPermissions;
-                        case 40007:
-                            return ResponseTypes.Banned;
-                        case 50025:
-                            return ResponseTypes.InvalidAuthToken;
-                        case 50027:
-                            return ResponseTypes.GenericError;
-                        case 30001:
-                            return ResponseTypes.TooManyGuilds;
-                        default:
-                            Console.WriteLine(discordResponse.message + discordResponse.code);
-                            return ResponseTypes.GenericError;
-                    }
-                }
-                return ResponseTypes.GenericError;
-        }
-    }
+    //                HttpResponseMessage? newRequest = await AddUserToGuildRequest(user, guildId, roleId, http);
+    //                if (newRequest is not null)
+    //                {
+    //                    return newRequest.IsSuccessStatusCode is false
+    //                        ? ResponseTypes.GenericError
+    //                        : await HandleGuildRequestCode(user, server, guildId, roleId, http, newRequest);
+    //                }
+    //            }
+    //            return ResponseTypes.TooManyRequests;
+    //        default:
+    //            ErrorResponse? discordResponse;
+    //            try { discordResponse = JsonConvert.DeserializeObject<ErrorResponse>(await response.Content.ReadAsStringAsync()); }
+    //            catch (Exception e)
+    //            {
+    //                await e.LogErrorAsync(await response.Content.ReadAsStringAsync());
+    //                return ResponseTypes.NewJsonError;
+    //            }
+    //            if (discordResponse is not null)
+    //            {
+    //                switch (discordResponse.code)
+    //                {
+    //                    case 50013:
+    //                        return ResponseTypes.MissingPermissions;
+    //                    case 40007:
+    //                        return ResponseTypes.Banned;
+    //                    case 50025:
+    //                        return ResponseTypes.InvalidAuthToken;
+    //                    case 50027:
+    //                        return ResponseTypes.GenericError;
+    //                    case 30001:
+    //                        return ResponseTypes.TooManyGuilds;
+    //                    default:
+    //                        Console.WriteLine(discordResponse.message + discordResponse.code);
+    //                        return ResponseTypes.GenericError;
+    //                }
+    //            }
+    //            return ResponseTypes.GenericError;
+    //    }
+    //}
 
-    private static async ValueTask<HttpResponseMessage> AddUserToGuildRequest(Member user, ulong guildId, ulong? roleId, HttpClient http)
-    {
+    //private static async ValueTask<HttpResponseMessage> AddUserToGuildRequest(Member user, ulong guildId, ulong? roleId, HttpClient http)
+    //{
 
-        var content = new StringContent(JsonConvert.SerializeObject(new test()
-        {
-            access_token = user.accessToken,
-            roles = roleId is not null ? new ulong[] { (ulong)roleId } : null,
-        }));
-        content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
-        return await http.PutAsync($"https://discord.com/api/guilds/{guildId}/members/{user.discordId}", content);
-    }
-    private record test
-    {
-        public string? access_token { get; set; }
-        public ulong[]? roles { get; set; }
-    }
+    //    var content = new StringContent(JsonConvert.SerializeObject(new test()
+    //    {
+    //        access_token = user.accessToken,
+    //        roles = roleId is not null ? new ulong[] { (ulong)roleId } : null,
+    //    }));
+    //    content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+    //    return await http.PutAsync($"https://discord.com/api/guilds/{guildId}/members/{user.discordId}", content);
+    //}
+    //private record test
+    //{
+    //    public string? access_token { get; set; }
+    //    public ulong[]? roles { get; set; }
+    //}
     #region Useless
     internal static async ValueTask<(bool, DiscordErrorCode?)> AddUserToGuildViaBot(IInteractionContext context, Member databaseMember, Server databaseServer)
     {

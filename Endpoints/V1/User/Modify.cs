@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 namespace DiscordRepair.Api.Endpoints.V1.User;
 
 /// <summary>
-/// 
+/// Controller for modifying user properties.
 /// </summary>
 [ApiController]
 [Route("/v1/user/")]
@@ -31,8 +31,11 @@ public class Modify : ControllerBase
     public async Task<ActionResult> HandlesAsync(string user, ModifyUserRequest modifyRequest)
     {
         // Get the current user making the request
-        var currentUser = await GetCurrentUserAsync();
-
+        var currentUser = await HttpContext.GetCurrentUserAsync();
+        if (currentUser is null)
+        {
+            return Unauthorized(new Generic { success = false, details = "You don't have access to this resource, please try again." }); ;
+        }
         // Get the user to modify
         (Database.Models.User? user, ActionResult? httpResult) userToUpdate = await GetUserToUpdateAsync(user, currentUser);
 
@@ -67,16 +70,6 @@ public class Modify : ControllerBase
     }
 
     /// <summary>
-    /// Gets the current user making the request.
-    /// </summary>
-    /// <returns>The current user.</returns>
-    private async Task<Database.Models.User> GetCurrentUserAsync()
-    {
-        var username = HttpContext.WhoAmI();
-        return await new DatabaseContext().users.FirstOrDefaultAsync(x => x.username == username);
-    }
-
-    /// <summary>
     /// Gets the user to modify.
     /// </summary>
     /// <param name="user">The user to modify.</param>
@@ -84,18 +77,19 @@ public class Modify : ControllerBase
     /// <returns>The user to modify or an error message.</returns>
     private async Task<(Database.Models.User? user, ActionResult? httpResult)> GetUserToUpdateAsync(string user, Database.Models.User currentUser)
     {
+        // Check if the "user" parameter is null, whitespace or matches some predefined values
         return string.IsNullOrWhiteSpace(user) || user.Equals("@me", StringComparison.OrdinalIgnoreCase)
             || user.Equals("me", StringComparison.OrdinalIgnoreCase)
             || user.Equals(currentUser.username, StringComparison.OrdinalIgnoreCase)
             || user.Equals(currentUser.email)
-            ? ((Database.Models.User?, ActionResult?))(currentUser, null)
+            ? ((Database.Models.User?, ActionResult?))(currentUser, null) // If it does, return the "currentUser" object and null "ActionResult" object
             : currentUser.accountType != AccountType.Staff
-                ? (null, Unauthorized(new Generic()
+                ? (null, Unauthorized(new Generic() // If the "currentUser" is not a staff, return a null "Database.Models.User" object and an "Unauthorized" "ActionResult" object
                 {
                     success = false,
                     details = "User doesn't have access to this resource."
                 }))
-                : (await new DatabaseContext().users.FirstOrDefaultAsync(x => x.username == user || x.email == user), null);
+                : (await new DatabaseContext().users.FirstOrDefaultAsync(x => x.username == user || x.email == user), null); // If the "currentUser" is a staff, return the "Database.Models.User" object obtained from the database and a null "ActionResult" object
     }
 
     /// <summary>
@@ -116,10 +110,10 @@ public class Modify : ControllerBase
         }
 
         // If the provided email is not null or whitespace and it's different than the user's current email, update the user's email.
-        if (!string.IsNullOrWhiteSpace(modifyRequest.email) && userToUpdate.email != modifyRequest.email)
+        if (!string.IsNullOrWhiteSpace(modifyRequest.email) && userToUpdate.email.Equals(modifyRequest.email, StringComparison.OrdinalIgnoreCase) is false)
         {
             // Check if the new email is already taken by another user in the database.
-            if (await new DatabaseContext().users.AnyAsync(x => x.email == modifyRequest.email))
+            if (await new DatabaseContext().users.AnyAsync(x => x.email.Equals(modifyRequest.email, StringComparison.OrdinalIgnoreCase)))
             {
                 throw new Exception("Email is already taken.");
             }
@@ -136,10 +130,10 @@ public class Modify : ControllerBase
         }
 
         // If the provided username is not null or whitespace and it's different than the user's current username, update the user's username.
-        if (!string.IsNullOrWhiteSpace(modifyRequest.username) && userToUpdate.username != modifyRequest.username)
+        if (!string.IsNullOrWhiteSpace(modifyRequest.username) && userToUpdate.username.Equals(modifyRequest.username, StringComparison.OrdinalIgnoreCase) is false)
         {
             // Check if the new username is already taken by another user in the database.
-            if (await new DatabaseContext().users.AnyAsync(x => x.username == modifyRequest.username))
+            if (await new DatabaseContext().users.AnyAsync(x => x.username.Equals(modifyRequest.username, StringComparison.OrdinalIgnoreCase)))
             {
                 throw new Exception("Username is already taken.");
             }
@@ -187,92 +181,91 @@ public class Modify : ControllerBase
         await using var database = new DatabaseContext();
         await database.ApplyChangesAsync();
     }
-
-
-    //public async Task<ActionResult> HandlesAsync(string user, ModifyUserRequest modifyRequest)
-    //{
-    //    var username = HttpContext.WhoAmI();
-    //    await using var database = new DatabaseContext();
-    //    var userEntry = await database.users.FirstOrDefaultAsync(x => x.username == username);
-    //    if (userEntry is null)
-    //    {
-    //        return BadRequest(new Generic()
-    //        {
-    //            success = false,
-    //            details = "user doesn't exist, please try again."
-    //        });
-    //    }
-    //    if (string.IsNullOrWhiteSpace(user) || user is "@me" or "me" || user == username)
-    //    {
-    //        user = username;
-    //    }
-    //    else
-    //    {
-    //        if (userEntry.accountType is not Database.Models.AccountType.Staff)
-    //        {
-    //            return Unauthorized(new Generic()
-    //            {
-    //                success = false,
-    //                details = "user doesn't have access to this resource."
-    //            });
-    //        }
-    //    }
-    //    var userToUpdate = await database.users.FirstOrDefaultAsync(x => x.username == user || x.email == user);
-    //    if (userToUpdate is null)
-    //    {
-    //        return BadRequest(new Generic()
-    //        {
-    //            success = false,
-    //            details = "user doesn't exist, please try again."
-    //        });
-    //    }
-    //    bool changeToken = false;
-
-    //    if (string.IsNullOrWhiteSpace(modifyRequest.pfp) is false)
-    //        userEntry.pfp = modifyRequest.pfp;
-    //    if (string.IsNullOrWhiteSpace(modifyRequest.email) is false)
-    //    {
-    //        if (await database.users.FirstOrDefaultAsync(x => x.email == modifyRequest.email) is null)
-    //        {
-    //            userEntry.email = modifyRequest.email;
-    //            changeToken = true;
-    //        }
-    //    }
-    //    if (string.IsNullOrWhiteSpace(modifyRequest.password) is false)
-    //    {
-    //        userEntry.password = await Miscallenous.HashPassword(modifyRequest.password);
-    //        changeToken = true;
-    //    }
-    //    if (string.IsNullOrWhiteSpace(modifyRequest.username) is false)
-    //    {
-    //        if (await database.users.FirstOrDefaultAsync(x => x.username == modifyRequest.username) is null)
-    //            userEntry.username = modifyRequest.username;
-    //    }
-    //    userEntry.discordId = modifyRequest.discordId;
-    //    if (userEntry.accountType is AccountType.Staff)
-    //    {
-    //        userEntry.expiry = modifyRequest.expiry;
-    //        if (modifyRequest.banned is not null)
-    //            userEntry.banned = (bool)modifyRequest.banned;
-    //        if (modifyRequest.accountType is not null)
-    //            userEntry.accountType = (AccountType)modifyRequest.accountType;
-    //        userEntry.lastIP = modifyRequest.lastIP;
-    //    }
-    //    if (changeToken)
-    //    {
-    //        userEntry.apiToken = Miscallenous.GenerateApiToken();
-    //        await database.ApplyChangesAsync(userEntry);
-    //        return Ok(new Generic()
-    //        {
-    //            success = true,
-    //            details = userEntry.apiToken
-    //        });
-    //    }
-    //    await database.ApplyChangesAsync(userEntry);
-    //    return Ok(new Generic()
-    //    {
-    //        success = true,
-    //        details = $"successfully updated {user}"
-    //    });
-    //}
 }
+//public async Task<ActionResult> HandlesAsync(string user, ModifyUserRequest modifyRequest)
+//{
+//    var username = HttpContext.WhoAmI();
+//    await using var database = new DatabaseContext();
+//    var userEntry = await database.users.FirstOrDefaultAsync(x => x.username.Equals(username, StringComparison.OrdinalIgnoreCase));
+//    if (userEntry is null)
+//    {
+//        return BadRequest(new Generic()
+//        {
+//            success = false,
+//            details = "user doesn't exist, please try again."
+//        });
+//    }
+//    if (string.IsNullOrWhiteSpace(user) || user is "@me" or "me" || user == username)
+//    {
+//        user = username;
+//    }
+//    else
+//    {
+//        if (userEntry.accountType is not Database.Models.AccountType.Staff)
+//        {
+//            return Unauthorized(new Generic()
+//            {
+//                success = false,
+//                details = "user doesn't have access to this resource."
+//            });
+//        }
+//    }
+//    var userToUpdate = await database.users.FirstOrDefaultAsync(x => x.username == user || x.email == user);
+//    if (userToUpdate is null)
+//    {
+//        return BadRequest(new Generic()
+//        {
+//            success = false,
+//            details = "user doesn't exist, please try again."
+//        });
+//    }
+//    bool changeToken = false;
+
+//    if (string.IsNullOrWhiteSpace(modifyRequest.pfp) is false)
+//        userEntry.pfp = modifyRequest.pfp;
+//    if (string.IsNullOrWhiteSpace(modifyRequest.email) is false)
+//    {
+//        if (await database.users.FirstOrDefaultAsync(x => x.email == modifyRequest.email) is null)
+//        {
+//            userEntry.email = modifyRequest.email;
+//            changeToken = true;
+//        }
+//    }
+//    if (string.IsNullOrWhiteSpace(modifyRequest.password) is false)
+//    {
+//        userEntry.password = await Miscallenous.HashPassword(modifyRequest.password);
+//        changeToken = true;
+//    }
+//    if (string.IsNullOrWhiteSpace(modifyRequest.username) is false)
+//    {
+//        if (await database.users.FirstOrDefaultAsync(x => x.username == modifyRequest.username) is null)
+//            userEntry.username = modifyRequest.username;
+//    }
+//    userEntry.discordId = modifyRequest.discordId;
+//    if (userEntry.accountType is AccountType.Staff)
+//    {
+//        userEntry.expiry = modifyRequest.expiry;
+//        if (modifyRequest.banned is not null)
+//            userEntry.banned = (bool)modifyRequest.banned;
+//        if (modifyRequest.accountType is not null)
+//            userEntry.accountType = (AccountType)modifyRequest.accountType;
+//        userEntry.lastIP = modifyRequest.lastIP;
+//    }
+//    if (changeToken)
+//    {
+//        userEntry.apiToken = Miscallenous.GenerateApiToken();
+//        await database.ApplyChangesAsync(userEntry);
+//        return Ok(new Generic()
+//        {
+//            success = true,
+//            details = userEntry.apiToken
+//        });
+//    }
+//    await database.ApplyChangesAsync(userEntry);
+//    return Ok(new Generic()
+//    {
+//        success = true,
+//        details = $"successfully updated {user}"
+//    });
+//}
+

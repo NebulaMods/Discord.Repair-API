@@ -22,7 +22,6 @@ public record VoiceChannel
     /// 
     /// </summary>
     /// 
-    [StringLength(100)]
     public string? name { get; set; }
 
     /// <summary>
@@ -39,14 +38,12 @@ public record VoiceChannel
     /// 
     /// </summary>
     /// 
-    [StringLength(50)]
     public string? region { get; set; }
 
     /// <summary>
     /// 
     /// </summary>
     /// 
-    [StringLength(50)]
     public string? videoQuality { get; set; }
 
     /// <summary>

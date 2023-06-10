@@ -1,6 +1,4 @@
-﻿using System.Collections.Concurrent;
-
-namespace DiscordRepair.Api.MigrationMaster;
+﻿namespace DiscordRepair.Api.MigrationMaster;
 
 /// <summary>
 /// 
@@ -12,7 +10,7 @@ public class Configuration
     /// </summary>
     public Configuration()
     {
-        _runningMigrations = new();
+        //_runningMigrations = new();
         _clientSecret = "";
         _clientId = "";
         _token = "";
@@ -20,5 +18,5 @@ public class Configuration
     public readonly string _token;
     public readonly string _clientId;
     public readonly string _clientSecret;
-    public ConcurrentDictionary<Database.Models.LogModels.Statistics, Task> _runningMigrations;
+    //public ConcurrentDictionary<Database.Models.LogModels.Statistics, Task> _runningMigrations;
 }

@@ -61,7 +61,7 @@ namespace DiscordRepair.Api.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to eRk6Uf6XmTlDqdaYAd3q+df/f4nErdka8jcmCDJWVQZxrPaE3/CMdNQDuksmRlOPPZVAkU+430/sHA0IsXbwQ8FRPLJjCfCUlVD2boetxEDFVtdbB1vV4SegxX9yb6EKV8rU/zktIhNOjGSdTrCD3w0xYOA8rnPQdh25UNiQ94QXISJHUJMuyaVzd9/iDt9mJw5+9M18CjDvHUgnx7zszOSRNBOMooShpHzYTS7iYyYUu/sgQUEtvozLZiIAFMD7Pi0sZ/8U1Nt/NrW/WftcFw==.
+        ///   Looks up a localized string similar to .
         /// </summary>
         internal static string APIToken {
             get {
@@ -70,7 +70,7 @@ namespace DiscordRepair.Api.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to BuzMnvYTHaE/Q2s7bpOeY8DDkzt7Jlq5Etn8ItIkCGJbgOiCtofT2TIl0wvOOzkVhmmsY6rAlVCUkMHnkorx2Q==.
+        ///   Looks up a localized string similar to .
         /// </summary>
         internal static string Argon2Salt {
             get {
@@ -106,7 +106,7 @@ namespace DiscordRepair.Api.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 0x5265636983aD665417634717B30a062940eb1400.
+        ///   Looks up a localized string similar to .
         /// </summary>
         internal static string HCaptchaKey {
             get {
@@ -115,7 +115,7 @@ namespace DiscordRepair.Api.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to sNCa7dyszVdWqW9W4nKfNge9VvTd3gn2.
+        ///   Looks up a localized string similar to .
         /// </summary>
         internal static string MySQLPass {
             get {
@@ -133,7 +133,7 @@ namespace DiscordRepair.Api.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 6LclXFYhAAAAAHYYxC0hV9Lv8rqN07QIO0dZId9z.
+        ///   Looks up a localized string similar to .
         /// </summary>
         internal static string ReCaptchaKey {
             get {
@@ -142,7 +142,7 @@ namespace DiscordRepair.Api.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to testpass420.
+        ///   Looks up a localized string similar to .
         /// </summary>
         internal static string TestMySQLPass {
             get {
